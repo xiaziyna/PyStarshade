@@ -31,7 +31,7 @@ def zoom_fft_1d(Z_pad, N_x, N_out, x):
     h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit)**2)
     h = np.roll(h, (N_chirp//2) + 1)
 
-    zoom_fft = (b * (np.fft.ifft( np.fft.fft(b * trunc_x) * np.fft.fft(h) ) ))
+    zoom_fft = b * (np.fft.ifft( np.fft.fft(b * trunc_x) * np.fft.fft(h) ) )
     zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + 1]
     return zoom_fft*out_fac
 
