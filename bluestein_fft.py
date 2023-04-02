@@ -82,7 +82,8 @@ edge = x_half - (N_x//2)
 x[edge : edge + N_x ] = np.ones(N_x)
 x[edge + (N_x//3)] = 2*1j
 x[edge + (N_x//2)+1] = 0
-#test_x = np.roll(x, N_out + (N_X//2) - (N_x//2) - 1)
 
-zoo = zoom_fft_1d(Z_pad, N_x, N_out, x)
+#zoom and real produce the same output
+zoom = zoom_fft_1d(Z_pad, N_x, N_out, x)
 real = np.fft.fftshift(np.fft.fft(x))[(len(x)//2) - (N_out//2): (len(x)//2) + (N_out//2) + 1]
+
