@@ -1,5 +1,5 @@
 import numpy as np
-from bluestein import zoom_fft_2d_mod
+from bluestein_fft import zoom_fft_2d_mod
 
 def zoom_fresnel_single_fft(field, d_x, z, wavelength, ZP, N_in, N_out):
     """
