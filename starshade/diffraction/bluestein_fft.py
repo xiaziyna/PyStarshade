@@ -37,11 +37,13 @@ def zoom_fft_2d(Z_pad, N_x, N_out, x):
     """
     Compute a zoomed 2D FFT using the Bluestein algorithm.
     The input x is centered. 
+    
     Args:
     Z_pad: Zero-padding factor.
     N_x: Length of the (non-zero) input signal.
     N_out: Length of the output signal.
     x: Centered Input signal (complex numpy array).
+    
     Returns:
     Zoomed FFT of the input signal over N_out samples of frequency spacing 1 / (dx * N_chirp).
     """
