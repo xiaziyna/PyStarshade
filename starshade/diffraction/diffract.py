@@ -113,6 +113,6 @@ def zoom_fraunhofer(field, d_x, z, wl, ZP, N_in, N_out):
     Ny, Nx = field.shape    
     max_freq = 1 / d_x
     output_field = zoom_fft_2d(field, N_in, N_out, ZP)
-    out_xy = grid_points(N_out, N_out, dx = max_freq*wl_z / (ZP*N_in + 1) )
+    out_xy = grid_points(N_out, N_out, dx = max_freq*wl*z / (ZP*N_in + 1) )
 
     return output_field, out_xy
