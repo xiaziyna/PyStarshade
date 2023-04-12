@@ -95,7 +95,7 @@ def grid_points(Nx, Ny, dx = 1):
 
 def grey_pupil_func(x, y, dx = 1, r = 3.):
     """
-    Grey-pixel pupil function using upsampling method
+    Grey-pixel anti-aliased pupil function using upsampling method
     
     Args:
     (x, y) : Cartesian coordinates
