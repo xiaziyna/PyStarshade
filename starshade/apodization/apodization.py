@@ -15,8 +15,13 @@ def t_MH(r, theta):
     Binary mask over polar coordinates (r, theta)
     """
     a=b=12.5
+    R = 32
     n=6.
-    return np.abs((r<a)-1)*(1.-np.exp(-((r-a)/b)**n))
+    
+    mask_within_a = 1 * (r <= a)
+    mask_between_a_and_R = (r > a) * np.exp(-((r - a) / b) ** n) * (r < R)
+
+    return 1 - (mask_within_a + mask_between_a_and_R)
 
 def cart_to_pol(x,y):
     """
