@@ -34,7 +34,7 @@ def bluestein_pad(arr, N_in, N_out):
     Returns:
         The (centered) padded 2D array with zeros.
     """
-    zp_arr = np.zeros((N_in + N_out - 1, N_in + N_out - 1))
+    zp_arr = np.zeros((N_in + N_out - 1, N_in + N_out - 1), dtype=np.complex128)
     half_zp_N = (N_in + N_out - 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
