@@ -1,7 +1,5 @@
 # PyStarshade
 
-[![Build Status](https://travis-ci.com/ajkemball/PyStarshade.svg?branch=master)](https://travis-ci.com/ajkemball/PyStarshade)
-[![Coverage Status](https://coveralls.io/repos/github/ajkemball/PyStarshade/badge.svg?branch=master)](https://coveralls.io/github/ajkemball/PyStarshade?branch=master)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Overview
