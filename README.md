@@ -14,15 +14,14 @@ You can install PyStarshade using pip:
 
 ```bash
 pip install pystarshade
+```
 
-## Installation
+## Dependencies
 
 Scipy, Numpy
 
-## Usage
+## Quickstart
 # Basic Example
-
-# Advanced Example
 
 # Your advanced usage example here
 
