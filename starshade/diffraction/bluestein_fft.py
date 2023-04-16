@@ -20,7 +20,8 @@ def zoom_fft_2d_mod(x, N_x, N_out, Z_pad):
     bit_chirp = N_chirp % 2
     bit_out = N_out % 2
 
-    trunc_x = x[(x.shape[0]//2) - (N_chirp//2) : (x.shape[0]//2) + (N_chirp//2) + bit_x, (x.shape[1]//2) - (N_chirp//2) : (x.shape[1]//2) + (N_chirp//2) + bit_x]
+    trunc_x = x[(x.shape[0]//2) - (N_chirp//2) : (x.shape[0]//2) + (N_chirp//2) + bit_x, 
+                (x.shape[1]//2) - (N_chirp//2) : (x.shape[1]//2) + (N_chirp//2) + bit_x]
 
     b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
     h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit_chirp)**2)
@@ -28,7 +29,8 @@ def zoom_fft_2d_mod(x, N_x, N_out, Z_pad):
     ft_h = np.fft.fft(h)
 
     zoom_fft = np.outer(b, b) * (np.fft.ifft2( np.fft.fft2(np.outer(b, b) * trunc_x) * np.outer(ft_h, ft_h) ) )
-    zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
+    zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, 
+                        (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
     return zoom_fft
 
 def zoom_fft_2d(x, N_x, N_out, Z_pad):
