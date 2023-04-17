@@ -19,6 +19,7 @@ pip install pystarshade
 Scipy, Numpy
 
 ## Quickstart
+See simulate_field.py
 
 Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3).
 <p align="center">
