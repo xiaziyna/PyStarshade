@@ -4,7 +4,9 @@
 
 ## Overview
 
-PyStarshade is a Python library for computing end-to-end Starshade simulations with Fresnel diffraction. This library is compatible with Python 3.6 and later versions. Developed by Jamila Taaki (UIUC).
+Developed by Jamila Taaki (UIUC).
+
+PyStarshade is a Python library for computing end-to-end Starshade simulations with Fresnel diffraction. This library is compatible with Python 3.6 and later versions. 
 
 ## Installation
 
