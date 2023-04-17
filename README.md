@@ -6,7 +6,12 @@
 
 Developed by Jamila Taaki (UIUC).
 
-PyStarshade is a Python library for computing end-to-end Starshade simulations with Fresnel diffraction. This library is compatible with Python 3.6 and later versions. 
+PyStarshade is a Python library for computing end-to-end Starshade simulations with Fresnel diffraction methods. This library efficiently calculates output fields using Bluestein FFTs.
+
+What is a Bluestein FFT?
+A Bluestein FFT computes M equispaced samples of a DTFT over any arbitrary frequency region between [0, 1/dx] of a compact input signal consisting of N non-zero samples of size dx. The complexity of this method in 1D is O((N+M)log(N+M)). This method is beneficial when large zero-padding factors would be required to perform this calculation with a direct FFT. 
+
+This library is compatible with Python 3.6 and later versions. 
 
 ## Installation
 
