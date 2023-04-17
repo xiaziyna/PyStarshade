@@ -20,9 +20,10 @@ Scipy, Numpy
 
 ## Quickstart
 
-Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-2, 10e-7).
-![Star planet brightness ratio range (10e-2, 10e-7)](images/contrast_.gif)
-
+Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3).
+<p align="center">
+  <img src="images/contrast_.gif" alt="Star planet brightness ratio range (10e-8, 10e-3)">
+</p>
 ## License
 
 [PyStarshade] is released under the [GNU General Public License v3.0](LICENSE).
