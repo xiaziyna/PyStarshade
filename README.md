@@ -21,7 +21,7 @@ Scipy, Numpy
 ## Quickstart
 
 Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-2, 10e-7).
-![Star planet brightness ratio range (10e-2, 10e-7)](images/contrast_sweep.gif)
+![Star planet brightness ratio range (10e-2, 10e-7)](images/contrast_.gif)
 
 ## License
 
