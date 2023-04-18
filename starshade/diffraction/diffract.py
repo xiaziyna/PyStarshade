@@ -14,7 +14,7 @@ def plane_wave(A, r, k):
     Returns:
         Complex amplitude of the plane wave at position r.
     """
-    return A*np.exp(1j* np.inner(k, r).T)
+    return A*np.exp(1j* np.inner(k, r))
 
 def zoom_fresnel_single_fft(field, d_x, z, wl, ZP, N_in, N_out):
     """
