@@ -23,9 +23,10 @@ def N_in_2d(arr):
 
 def bluestein_pad(arr, N_in, N_out):
     """
-    Pad a 2D array to size (N_in + N_out - 1) for computing a Bluestein FFT
-    with N_in non-zero elements and N_out FFT samples needed keeping the original array centered.
-    
+    Pad a 2D array to size (N_in + N_out - 1, N_in + N_out - 1) for computing a Bluestein FFT
+    with N_in non-zero elements and N_out FFT samples needed. 
+    The original array will be centered in the padded output.
+
     Args:
         arr: The 2D input array to be padded.
         N_in: The number of non-zero elements of the input arr
@@ -36,6 +37,27 @@ def bluestein_pad(arr, N_in, N_out):
     """
     zp_arr = np.zeros((N_in + N_out - 1, N_in + N_out - 1), dtype=np.complex128)
     half_zp_N = (N_in + N_out - 1) // 2
+    half_arr_N = np.shape(arr)[0] // 2
+    bit_arr = np.shape(arr)[0] % 2
+    zp_arr[half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
+           half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr] = arr
+    return zp_arr
+
+def zero_pad(arr, N_in, ZP):
+    """
+    Zero-pad arr to the size (N_in * ZP + 1, N_in * ZP + 1).
+    The original array will be centered in the padded output.
+
+    Args:
+    arr : 2D input field.
+    N_in : Number of non-zero input samples.
+    ZP : Zero-padding factor.
+
+    Returns:
+        The (centered) padded 2D array with zeros.
+    """
+    zp_arr = np.zeros((N_in * ZP + 1, N_in * ZP + 1), dtype=np.complex128)
+    half_zp_N = (N_in * ZP + 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
     zp_arr[half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
