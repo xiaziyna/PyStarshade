@@ -37,7 +37,7 @@ def zoom_fresnel_single_fft(field, d_x, z, wl, ZP, N_in, N_out):
     """
 
     wl_z = wl * z
-    max_freq =  (1/d_x) 
+    max_freq =  1 / d_x
     k = 2 * np.pi / wl
     Ny, Nx = field.shape    
     in_xy = grid_points(Nx, Ny, dx = d_x)
