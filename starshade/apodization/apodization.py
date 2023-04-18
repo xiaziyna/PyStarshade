@@ -81,22 +81,6 @@ def pupil_func(x, y, r = 3.):
     """
     return np.hypot(x, y) <= r
 
-def grid_points(Nx, Ny, dx = 1):
-    """
-    Generate a grid of points with specified dimensions and sampling interval.
-
-    Args:
-    Nx : Number of points in the x-dimension
-    Ny : Number of points in the y-dimension
-    dx : Sampling interval
-
-    Returns:
-        list: Two 2D arrays, one for the x-coordinates and one for the y-coordinates.
-    """
-    x = np.arange(-(Nx // 2), (Nx // 2) + 1)[np.newaxis, :] * dx
-    y = np.arange(-(Ny // 2), (Ny // 2) + 1)[:, np.newaxis] * dx
-    return [x, y]
-
 
 def grey_pupil_func(x, y, dx = 1, r = 3.):
     """
