@@ -1,21 +1,6 @@
 import numpy as np
 from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
-
-def grid_points(Nx, Ny, dx = 1):
-    """
-    Generate a grid of points with specified dimensions and sampling interval.
-
-    Args:
-    Nx : Number of points in the x-dimension
-    Ny : Number of points in the y-dimension
-    dx : Sampling interval
-
-    Returns:
-        list: Two 2D arrays, one for the x-coordinates and one for the y-coordinates.
-    """
-    x = np.arange(-(Nx // 2), (Nx // 2) + 1)[np.newaxis, :] * dx
-    y = np.arange(-(Ny // 2), (Ny // 2) + 1)[:, np.newaxis] * dx
-    return [x, y]
+import util
 
 def zoom_fresnel_single_fft(field, d_x, z, wl, ZP, N_in, N_out):
     """
