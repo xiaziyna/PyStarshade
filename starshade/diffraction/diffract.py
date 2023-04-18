@@ -2,6 +2,20 @@ import numpy as np
 from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
 import util
 
+def plane_wave(A, r, k):
+    """
+    Calculate the complex amplitude of a plane wave.
+
+    Args:
+        A: Amplitude of the plane wave.
+        r: 3D position vector (x, y, z) in Cartesian coordinates.
+        k: Wave vector (kx, ky, kz) in Cartesian coordinates.
+
+    Returns:
+        Complex amplitude of the plane wave at position r.
+    """
+    return A*np.exp(1j* np.inner(k, r).T)
+
 def zoom_fresnel_single_fft(field, d_x, z, wl, ZP, N_in, N_out):
     """
     Single FFT fresnel diffraction using Bluestein FFT
