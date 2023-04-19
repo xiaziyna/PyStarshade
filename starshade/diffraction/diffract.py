@@ -163,7 +163,7 @@ class Fraunhofer:
         """
 
         Ny, Nx = field.shape    
-        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP)
+        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP) * (self.d_x**2) 
         out_xy = grid_points(N_out, N_out, dx = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1) )
 
         return output_field, out_xy
