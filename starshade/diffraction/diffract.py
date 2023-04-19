@@ -113,47 +113,57 @@ class FresnelDouble(Fresnel):
         return output_field, out_xy
 
 
-def fraunhofer(field, dx, wl, z):
-    """
-    Fraunhofer diffraction at points within [ (N_x)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x ]
-    using the Bluestein FFT.
+class Fraunhofer:
+    def __init__(self, d_x, d_f, N_in, z, wavelength):
+        self.d_x = d_x
+        self.d_f = d_f
+        self.N_in = N_in
+        self.z = z
+        self.wavelength = wavelength
+        self.wl_z = self.wavelength * self.z
+        self.max_freq = 1 / self.d_x
+        self.ZP = self.calc_zero_padding()
 
-    Args:
-    field : 2D input field to be propagated.
-    d_x : Sampling interval of the input field [m]
-    z : Propagation distance [m]
-    wavelength : Wavelength of light [m]
+    def calc_zero_padding(self):
+        """
+        Calculate approximate zero-padding factor (ZP * N_in) to achieve a specified frequency spacing
+        (d_f) for a given spatial sampling (d_x) using the Fraunhofer prop.
 
-    Returns:
-        tuple: The propagated output field and the output grid points
-    """
-    output_field = np.fft.fftshift(np.fft.fft2(field))
-    Ny, Nx = field.shape    
-    out_xy = grid_points(Nx, Ny, dx = wl*z/dx)
+        Args:
+            d_x : Spatial sampling.
+            d_f : Desired frequency spacing.
+            N_in : Number of non-zero input samples.
+            wavelength : Wavelength of the light.
+            z: Propagation distance in m.
 
-    return output_field, out_xy
+        Returns:
+            float: Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
+        """
+        ZP = ((self.max_freq * self.wl_z / self.d_f) - 1) / self.N_in
+        ZP = np.ceil(ZP)
+        ZP += ZP % 2
+        return ZP
 
-def zoom_fraunhofer(field, d_x, z, wl, ZP, N_in, N_out):
-    """
-    Fraunhofer diffraction at points within [ (N_out/ZP*N_in)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x ]
-    using the Bluestein FFT.
+    def zoom_fraunhofer(self, field, N_out):
+        """
+        Fraunhofer diffraction at points within [ (N_out/ZP*N_in)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x ]
+        using the Bluestein FFT.
 
-    Args:
-    field : 2D input field to be propagated. Field should be at least the size of (N_in + N_out - 1)
-    d_x : Sampling interval of the input field [m]
-    z : Propagation distance [m]
-    wavelength : Wavelength of light [m]
-    ZP : Zero-padding factor
-    N_in :  Number of non-zero input samples in each dimension
-    N_out : Number of output samples in each dimension
+        Args:
+            field : 2D input field to be propagated. Field should be at least the size of (N_in + N_out - 1)
+            d_x : Sampling interval of the input field [m]
+            z : Propagation distance [m]
+            wavelength : Wavelength of light [m]
+            ZP : Zero-padding factor
+            N_in :  Number of non-zero input samples in each dimension
+            N_out : Number of output samples in each dimension
 
-    Returns:
-        tuple: The propagated output field and the output grid points
-    """
+        Returns:
+            tuple: The propagated output field and the output grid points
+        """
 
-    Ny, Nx = field.shape    
-    max_freq = 1 / d_x
-    output_field = zoom_fft_2d(field, N_in, N_out, ZP)
-    out_xy = grid_points(N_out, N_out, dx = max_freq*wl*z / (ZP*N_in + 1) )
+        Ny, Nx = field.shape    
+        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP)
+        out_xy = grid_points(N_out, N_out, dx = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1) )
 
-    return output_field, out_xy
+        return output_field, out_xy
