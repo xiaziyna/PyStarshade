@@ -161,9 +161,10 @@ class Fraunhofer:
         Returns:
             tuple: The propagated output field and the output grid points
         """
-
+        k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape    
-        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP) * (self.d_x**2) 
+        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP) * (self.d_x**2)
         out_xy = grid_points(N_out, N_out, dx = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1) )
+        out_fac = np.exp(1j * k * self.z)* np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wavelength * self.z)
 
-        return output_field, out_xy
+        return out_fac*output_field, out_xy
