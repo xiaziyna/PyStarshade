@@ -1,5 +1,10 @@
 import numpy as np
 
+#=== useful constants====
+pc_to_meter = 3.08567782e16
+au_to_meter = 149597870700.
+#========================
+
 def grid_points(Nx, Ny, dx = 1):
     """
     Generate a grid of points with specified dimensions and sampling interval.
