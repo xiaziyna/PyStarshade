@@ -4,7 +4,7 @@ import numpy as np
 class Field:
     """
     This class returns analytic far-field diffraction for sources, or can be used to generate source fields
-    Inlcudes : Point source (off-axis), planar fields, Gaussian sources
+    Includes : Point source (off-axis), planar fields, Gaussian sources
     
     Attributes:
         d_x (float): Spatial sampling of the field
