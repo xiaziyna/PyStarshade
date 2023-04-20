@@ -14,6 +14,13 @@ This means that end-to-end simulation can be performed with arbitrary high-resol
 
 This library is compatible with Python 3.6 and later versions. 
 
+
+## Example
+Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3). Planet at a 0.2 au separation and 10 pc distance from Earth. 
+<p align="center">
+  <img src="images/contrast_.gif" alt="Star planet brightness ratio range (10e-8, 10e-3)">
+</p>
+
 ## Installation
 
 You can install PyStarshade using pip:
@@ -30,12 +37,6 @@ Scipy, Numpy
 See simulate_field.py
 Nominal parameters: 
 
-
-
-Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3). Planet at a 0.2 au separation and 10 pc distance from Earth. 
-<p align="center">
-  <img src="images/contrast_.gif" alt="Star planet brightness ratio range (10e-8, 10e-3)">
-</p>
 
 
 ## License
