@@ -37,6 +37,28 @@ Scipy, Numpy
 See simulate_field.py
 Nominal parameters: 
 
+## Organization
+
+Pystarshade
+├── images
+│   └── contrast_.gif
+├── README.md
+├── setup.py
+└── starshade
+    ├── apodization
+    │   ├── apodization.py
+    │   ├── __init__.py
+    │   └── sample.py
+    ├── diffraction
+    │   ├── bluestein_fft.py
+    │   ├── diffract.py
+    │   ├── field.py
+    │   ├── __init__.py
+    │   └── util.py
+    ├── example_star_exo.py
+    ├── __init__.py
+    ├── simulate_field.py
+    └── version.py
 
 
 ## License
