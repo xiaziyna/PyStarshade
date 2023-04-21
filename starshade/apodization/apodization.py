@@ -97,19 +97,19 @@ def pupil_func(x, y, r = 3.):
     return np.hypot(x, y) <= r
 
 
-def grey_pupil_func(x, y, dx = 1, r = 3.):
+def grey_pupil_func(Nx, dx = 1, r = 3.):
     """
-    Grey-pixel anti-aliased pupil function using upsampling.
+    Grey-pixel pupil function using upsampling method
     
     Args:
-    (x, y) : Cartesian coordinates
-    r : radius of the pupil
+    Nx : Number of points
+    dx : Sample size
+    r : Radius of the pupil
 
     Returns:
     Grey-pixel pupil mask
  
     """
-    Nx = len(y)
     up_fac = 4
     upsample = np.meshgrid(np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1), np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1))
     bool_mask = pupil_func(upsample[0], upsample[1], (up_fac * r / dx)).astype(float)
