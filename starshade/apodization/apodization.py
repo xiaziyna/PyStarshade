@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage import convolve
+from diffraction.util import grid_points
 
 def eval_hypergauss(N, dx):
     """
