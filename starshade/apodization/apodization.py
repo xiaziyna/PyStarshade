@@ -12,7 +12,7 @@ def eval_hypergauss(N, dx):
     Returns:
         A 2D array representing the evaluated truncated Hypergaussian apodization profile on the grid.
     """
-    grid_xy = grid_points(N_X, N_X, dx=dx)
+    grid_xy = grid_points(N, N, dx=dx)
     (r_, th) = cart_to_pol(grid_xy[0], grid_xy[1])
     return hypergauss(r_, th)
 
