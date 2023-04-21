@@ -16,6 +16,10 @@ def plane_wave(A, r, k):
     """
     return A*np.exp(1j* np.inner(k, r))
 
+import numpy as np
+from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
+from util import *
+
 class Fresnel:
     def __init__(self, d_x, N_in, z, wavelength):
         self.d_x = d_x
@@ -67,17 +71,18 @@ class FresnelSingle(Fresnel):
             N_out : Number of output samples in each dimension
 
         Returns:
-            tuple: The propagated output field and the output grid points
+            tuple: The propagated output field and the output grid sampling
         """
         k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape    
         in_xy = grid_points(Nx, Ny, dx = self.d_x)
 
-        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, self.ZP) * (self.d_x**2) 
-        out_xy = grid_points(N_out, N_out, dx = (self.max_freq*self.wl_z / (self.ZP*self.N_in + 1)) )
+        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, self.ZP) * (self.d_x**2)
+        df = (self.max_freq*self.wl_z / (self.ZP*self.N_in + 1))
+        out_xy = grid_points(N_out, N_out, dx = df )
 
         quad_out_fac = np.exp(1j * k * self.z) * np.exp(1j * k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z) 
-        return quad_out_fac * output_field, out_xy
+        return quad_out_fac * output_field, df
 
 class FresnelDouble(Fresnel):
     """
@@ -101,19 +106,18 @@ class FresnelDouble(Fresnel):
             wl : Wavelength of light [m]
 
         Returns:
-            tuple: The propagated output field and the output grid points
+            tuple: The propagated output field and the output grid sampling
         """
         k = 2 * np.pi / self.wavelength
-        Ny, Nx = field.shape    
-        freq_xy = grid_points(Nx, Ny, dx = self.max_freq / Nx)
-        spectral_field = np.fft.fft2(field) * np.exp(1j * self.z * k) * np.exp(-1j * np.pi * self.wl_z * np.fft.fftshift(freq_xy[0]**2 + freq_xy[1]**2)) 
+        Ny, Nx = field.shape
+        df = self.max_freq / Nx
+        freq_xy = grid_points(Nx, Ny, dx = df)
+        spectral_field = np.fft.fft2(field) * np.exp(1j * self.z * k) * np.exp(-1j * np.pi * self.wl_z * np.fft.fftshift(freq_xy[0]**2 + freq_xy[1]**2) ) 
         output_field = np.fft.ifft2(spectral_field)
-        out_xy = grid_points(Nx, Ny, dx= self.d_x)
 
-        return output_field, out_xy
+        return output_field, df
 
-
-class Fraunhofer:
+  class Fraunhofer:
     def __init__(self, d_x, d_f, N_in, z, wavelength):
         self.d_x = d_x
         self.d_f = d_f
@@ -159,12 +163,13 @@ class Fraunhofer:
             N_out : Number of output samples in each dimension
 
         Returns:
-            tuple: The propagated output field and the output grid points
+            tuple: The propagated output field and the output grid sampling
         """
         k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape    
         output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP) * (self.d_x**2)
-        out_xy = grid_points(N_out, N_out, dx = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1) )
-        out_fac = np.exp(1j * k * self.z)* np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wavelength * self.z)
+        df = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1)
+        out_xy = grid_points(N_out, N_out, dx = df )
+        out_fac = np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wl_z)
 
-        return out_fac*output_field, out_xy
+        return out_fac*output_field, df
