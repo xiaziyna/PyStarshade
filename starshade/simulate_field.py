@@ -49,7 +49,7 @@ def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_le
         k_list.append(ps.wave_numbers())
         field_incident_ss += ps.plane_wave(k_list[i], 0)
 
-    ss_complement = 1-eval_hypergauss(N_X, dx) #complement of starshade aperture
+    ss_complement = 1-eval_hypergauss(N_X, dx) # Complement of starshade aperture
 
     field_after_ss = field_incident_ss * ss_complement 
 
