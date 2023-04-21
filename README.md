@@ -40,7 +40,6 @@ Nominal parameters:
 ## Organization
 
 <pre>
-```markdown
 Pystarshade
 ├── images
 │   └── contrast_.gif
@@ -61,7 +60,6 @@ Pystarshade
     ├── __init__.py
     ├── simulate_field.py
     └── version.py
-```
 </pre>
 
 ## License
