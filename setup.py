@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 setup(
     name="pystarshade",
     version="0.1.0",
-    description="A package for simulating starshade observations",
+    description="A python package for end-to-end starshade simulation",
     author="Jamila Taaki",
     author_email="xiaziyna@gmail.com",
-    url="https://github.com/yourusername/pystarshade",
+    url="https://github.com/xiaziyna/PyStarshade",
     packages=find_packages(),
     install_requires=[
         "numpy",
