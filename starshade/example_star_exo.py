@@ -1,7 +1,6 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-from simulate_field import *
 np.set_printoptions(suppress=True)
 
 wl = 633e-9
