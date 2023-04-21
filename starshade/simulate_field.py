@@ -1,8 +1,7 @@
 import numpy as np
 from apodization import *
 from util import *
-from fresnel import *
-from fraunhofer import *
+from diffraction import *
 from field import *
 
 def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, N_x = 6001, N_t = 1001, N_pix = 1001,
