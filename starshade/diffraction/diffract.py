@@ -1,6 +1,6 @@
 import numpy as np
-from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
-from util import *
+from diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
+from diffraction.util import *
 
 class Fresnel:
     def __init__(self, d_x, N_in, z, wavelength):
@@ -14,7 +14,7 @@ class Fresnel:
 class FresnelSingle(Fresnel):
     def __init__(self, d_x, d_f, N_in, z, wavelength):
         super().__init__(d_x, N_in, z, wavelength)
-        self.d_f = d_f        
+        self.d_f = d_f
         self.ZP = self.calc_zero_padding()
 
     def calc_zero_padding(self):
@@ -56,7 +56,7 @@ class FresnelSingle(Fresnel):
             tuple: The propagated output field and the output grid sampling
         """
         k = 2 * np.pi / self.wavelength
-        Ny, Nx = field.shape    
+        Ny, Nx = field.shape
         in_xy = grid_points(Nx, Ny, dx = self.d_x)
 
         output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, self.ZP) * (self.d_x**2)
@@ -99,7 +99,7 @@ class FresnelDouble(Fresnel):
 
         return output_field, df
 
-  class Fraunhofer:
+class Fraunhofer:
     def __init__(self, d_x, d_f, N_in, z, wavelength):
         self.d_x = d_x
         self.d_f = d_f

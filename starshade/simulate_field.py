@@ -1,6 +1,8 @@
 import numpy as np
-from apodization import apodization
-from diffraction import util, field, diffract
+from apodization.apodization import *
+from diffraction.util import *
+from diffraction.field import *
+from diffraction.diffract import *
 
 def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, N_x = 6001, N_t = 1001, N_pix = 1001,
                         dx = 0.01, dt = 0.0116, dp=1.9e-7):
@@ -36,19 +38,19 @@ def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_le
 
     N_X = N_x + N_t - 1 # The number of input samples required to perform Fresnel propagation with a Bluestein FFT
 
-    no_sources = len(mag_list)
+    no_sources = len(mag_s)
     k_list = []
     pointsource_list = []
     field_incident_ss = np.zeros((N_X, N_X), dtype='complex128')
     for i in range(no_sources):
-        ps = PointSource(dx, N_X, 633e-9, *loc_list[i], mag_list[i])
+        ps = PointSource(dx, N_X, 633e-9, *loc_s[i], mag_s[i])
         pointsource_list.append(ps)
         k_list.append(ps.wave_numbers())
         field_incident_ss += ps.plane_wave(k_list[i], 0)
 
     ss_complement = 1-eval_hypergauss(N_X, dx) # Complement of starshade aperture
 
-    field_after_ss = field_incident_ss * ss_complement 
+    field_after_ss = field_incident_ss * ss_complement
 
     fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, 633e-9)
     test_new, dt = fresnel.zoom_fresnel_single_fft(field_after_ss, N_t)

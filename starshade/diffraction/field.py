@@ -1,4 +1,4 @@
-from util import *
+from diffraction.util import *
 import numpy as np
 
 class Field:
