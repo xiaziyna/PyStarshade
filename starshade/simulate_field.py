@@ -1,8 +1,6 @@
 import numpy as np
-from apodization import *
-from util import *
-from diffraction import *
-from field import *
+from apodization import apodization
+from diffraction import util, field, diffract
 
 def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, N_x = 6001, N_t = 1001, N_pix = 1001,
                         dx = 0.01, dt = 0.0116, dp=1.9e-7):
