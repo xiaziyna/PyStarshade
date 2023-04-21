@@ -7,12 +7,12 @@ np.set_printoptions(suppress=True)
 wl = 633e-9
 focal_length_lens = 30
 radius_lens = 2.4 
-dist_xo_ss = 10*pc_to_meter
-dist_ss_t = 63942090. #distance for hypergaussian mask
+dist_xo_ss = 10*pc_to_meter 
+dist_ss_t = 63942090. # Distance for hypergaussian mask
 
-print ('Farfield: wl*d_1: ', (dist_xo_ss*wl)) #wl*z
-print ('Nearfield: wl*d_2: ', (dist_ss_t*wl)) #wl*z
-print ('Fresnel number for HyperGaussian ~ diam^2 / wl*z: ', ((25)**2)/(dist_ss_t*wl)) #wl*z
+print ('Farfield: wl*d_1: ', (dist_xo_ss*wl)) 
+print ('Nearfield: wl*d_2: ', (dist_ss_t*wl)) 
+print ('Fresnel number for HyperGaussian ~ diam^2 / wl*z: ', ((25)**2)/(dist_ss_t*wl))
 
 # For this example, we place an exoplanet at 1.8 AU from the on-axis host star, with a brightness contrast ratio of 10e-7
 # List of point sources: their magnitudes and locations in the source field
