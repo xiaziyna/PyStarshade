@@ -1,8 +1,23 @@
 import numpy as np
 from scipy.ndimage import convolve
 
+def eval_hypergauss(N, dx):
+    """
+    Evaluate truncated Hypergaussian on grid 
+
+    Args:
+        N : Size of the grid in both dimensions (N x N).
+        dx : Pixel size of the grid.
+
+    Returns:
+        A 2D array representing the evaluated truncated Hypergaussian apodization profile on the grid.
+    """
+    grid_xy = grid_points(N_X, N_X, dx=dx)
+    (r_, th) = cart_to_pol(grid_xy[0], grid_xy[1])
+    return hypergauss(r_, th)
+
 #hypergaussian apodization profile
-def t_MH(r, theta):
+def hypergauss(r, theta):
     """
     Truncated HyperGaussian Apodization: returns mask over polar grid (r, theta)
 
