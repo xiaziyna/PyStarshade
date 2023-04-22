@@ -16,7 +16,7 @@ This library is compatible with Python 3.6 and later versions.
 
 
 ## Example
-Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3). Planet at a 0.2 au separation and 10 pc distance from Earth. 
+Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios between (10e-8, 10e-3). Planet at a 2 AU separation and 10 pc distance from Earth. 
 <p align="center">
   <img src="images/contrast_.gif" alt="Star planet brightness ratio range (10e-8, 10e-3)">
 </p>
