@@ -34,7 +34,8 @@ pip install pystarshade
 Scipy, Numpy
 
 ## Quickstart
-See simulate_field.py
+import pystarshade
+
 Nominal parameters: 
 
 ## Organization
