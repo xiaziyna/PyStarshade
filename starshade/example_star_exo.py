@@ -16,6 +16,7 @@ print ('Nearfield: wl*d_2: ', (dist_ss_t*wl))
 print ('Fresnel number for HyperGaussian ~ diam^2 / wl*z: ', ((25)**2)/(dist_ss_t*wl))
 
 # For this example, we place an exoplanet at 1.8 AU from the on-axis host star, with a brightness contrast ratio of 10e-7
+# The starshade is a truncated HyperGaussia
 # List of point sources: their magnitudes and locations in the source field
 
 mag_list = np.array([1, 10e-7])
