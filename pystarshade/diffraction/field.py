@@ -21,13 +21,6 @@ class Field:
         self.wavelength = wavelength
         self.z = z
 
-class PointSource(Field):
-    def __init__(self, d_x, N, wavelength, x, y, z, A):
-        super().__init__(d_x, N, wavelength, z)
-        self.x = x        
-        self.y = y
-        self.A = A
-
     def update(self, d_x=None, N=None):
         """
         Update the values of d_x, N, and z.
@@ -35,13 +28,79 @@ class PointSource(Field):
         Args:
             d_x (float, optional): New value for d_x.
             N (int, optional): New value for N.
-            z (float, optional): New value for z.
         """
         if d_x is not None:
             self.d_x = d_x
-
         if N is not None:
             self.N = N
+
+class GaussianSource(Field):
+    """
+    A class to calculate the far-field of a Gaussian source.
+
+    Attributes:
+        d_x (float): Spatial sampling of the output field.
+        N (int): Number of samples of the output field.
+        wavelength (float): Wavelength of light.
+        x (float): The x-coordinate of the Gaussian source origin in the source field.
+        y (float): The y-coordinate of the Gaussian source origin in the source field.
+        z (float): Far-field distance.
+        A (float): The amplitude of the Gaussian source.
+        sigma (float): The standard deviation of the Gaussian source.
+
+
+    Inherits from:
+        Field
+
+    Note: source field is given by A * np.exp(-(x/sigma)**2)
+    """
+
+    def __init__(self, d_x, N, wavelength, x, y, z, A, sigma):
+        super().__init__(d_x, N, wavelength, z)
+        self.x = x        
+        self.y = y
+        self.A = A
+        self.sigma = sigma
+        self.wl_z = self.wavelength * self.z
+
+
+    def far_field_gaussian_params(self):
+        """
+        Calculates the far-field amplitude (A) and inverse standard deviation (1/sigma).
+
+        Returns:
+            far_A (float): The far-field amplitude.
+            far_inv_sigma (float): The inverse standard deviation of the far-field Gaussian.
+
+        Notes: See https://www.pas.rochester.edu/~dmw/ast203/Lectures/Lect_14.pdf
+        """
+        far_A = self.A * np.pi * self.sigma**2 / self.wl_z
+        far_inv_sigma = np.pi * self.sigma / self.wl_z
+        return far_A, far_inv_sigma
+
+    def far_field_gaussian(self, far_A, far_inv_sigma, z1):
+        """
+        Calculates the far-field Gaussian with parameters (far_A, 1/far_inv_sigma) on a Cartesian grid. 
+
+        Args:
+            far_A (float): The far-field amplitude.
+            far_inv_sigma (float): The inverse standard deviation of the far-field Gaussian.
+            z1 (float): Distance (Note: for computational purposes treat origin as starshade plane).
+
+        Returns:
+            numpy.ndarray: A 2D array representing the far-field Gaussian evaluated on a Cartesian grid.
+        """
+        vals = np.linspace(-(self.N//2),(self.N//2),self.N)*self.d_x
+        xx, yy = np.meshgrid(vals, vals)
+
+        return far_A * np.exp( - ( xx**2 + yy**2 ) * far_inv_sigma**2) * np.exp( 1j * 2 * np.pi * z1 / self.wavelength)
+
+class PointSource(Field):
+    def __init__(self, d_x, N, wavelength, x, y, z, A):
+        super().__init__(d_x, N, wavelength, z)
+        self.x = x        
+        self.y = y
+        self.A = A
 
     def wave_numbers(self):
         """
