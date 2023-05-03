@@ -33,8 +33,6 @@ class FresnelSingle(Fresnel):
             float: Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
         """
         ZP = ((self.max_freq * self.wl_z / self.d_f) - 1) / self.N_in
-        ZP = np.ceil(ZP)
-        ZP += ZP % 2
         return ZP
 
     def zoom_fresnel_single_fft(self, field, N_out):
