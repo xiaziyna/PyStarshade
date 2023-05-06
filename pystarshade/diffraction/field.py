@@ -1,5 +1,43 @@
 from diffraction.util import *
+from diffraction.bluestein_fft import zoom_fft_2d_mod
 import numpy as np
+
+class SourceField:
+    """
+    This class returns far-field diffraction for an N_s x N_s source-field, calculated via a Bluestein FFT
+    
+    Attributes:
+        d_s (float): Source field sampling
+        N_s (int): Number of samples of the field
+        wavelength (float): Wavelength of light
+        z (float): Far-field distance
+    Note: Uses planar wave description of far-field
+    """
+    def __init__(self, d_s, N_s, wavelength, z, source_field):
+        self.d_s = d_s
+        self.N_s = N_s
+        self.wavelength = wavelength
+        self.z = z
+        self.source_field = source_field
+
+    def farfield(self, d_x, N_x, z1):
+        """
+        Calculate the far-field diffraction of source field at local distance z1 over (N_x, N_x) grid with sampling dx
+        Note: z1 is defined as a local distance, the origin is set in the far-field.
+
+        Arg:
+            d_x (float): Output spatial sampling 
+            N_x (int): Number of output samples
+            z1 (float): Propagtion distance (Note: for computational purposes treat origin as starshade plane)
+
+        Returns:
+            numpy.ndarray: A 2D array representing the computed field over the grid.
+        """ 
+        ZP = (((1/self.d_s) * self.wavelength * self.z / d_x) - 1) / self.N_s
+        source_field_pad = bluestein_pad(self.source_field, self.N_s, N_x)
+        out_field = zoom_fft_2d_mod(source_field_pad, self.N_s, N_x, ZP)
+        out_fac = np.exp ( 1j * 2*np.pi * z1 / self.wavelength) 
+        return out_fac*out_field
 
 class Field:
     """
