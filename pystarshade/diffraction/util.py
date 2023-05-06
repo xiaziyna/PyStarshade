@@ -5,6 +5,22 @@ pc_to_meter = 3.08567782e16
 au_to_meter = 149597870700.
 #========================
 
+def trunc_2d(x, N_out):
+    """
+    Truncate a 2D array to a smaller square size centered around the original array's center.
+
+    Args:
+        x (numpy.ndarray): The input 2D array to be truncated.
+        N_out (int): The size of the output square array (N_out x N_out).
+
+    Returns:
+        numpy.ndarray: The truncated square 2D array of size (N_out x N_out).
+    """
+    bit = N_out % 2
+    trunc_x = x[(x.shape[0]//2) - (N_out//2) : (x.shape[0]//2) + (N_out//2) + bit, (x.shape[1]//2) - (N_out//2) : (x.shape[1]//2) + (N_out//2) + bit]
+    return trunc_x
+
+
 def grid_points(Nx, Ny, dx = 1):
     """
     Generate a grid of points with specified dimensions and sampling interval.

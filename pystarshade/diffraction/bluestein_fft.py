@@ -1,4 +1,5 @@
 import numpy as np
+from diffraction.util import trunc_2d
 
 def zoom_fft_2d_mod(x, N_x, N_out, Z_pad):
     """
@@ -20,8 +21,7 @@ def zoom_fft_2d_mod(x, N_x, N_out, Z_pad):
     bit_chirp = N_chirp % 2
     bit_out = N_out % 2
 
-    trunc_x = x[(x.shape[0]//2) - (N_chirp//2) : (x.shape[0]//2) + (N_chirp//2) + bit_x, 
-                (x.shape[1]//2) - (N_chirp//2) : (x.shape[1]//2) + (N_chirp//2) + bit_x]
+    trunc_x = trunc_2d(x, N_chirp)
 
     b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
     h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit_chirp)**2)
