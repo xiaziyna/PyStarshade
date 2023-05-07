@@ -42,25 +42,29 @@ Nominal parameters:
 
 <pre>
 Pystarshade
+├── examples
+│   ├── haystacks_model.py
+│   └── star_exo.py
 ├── images
-│   └── contrast_.gif
+│   └── contrast_.gif
+├── __init__.py
+├── pystarshade
+│   ├── apodization
+│   │   ├── apodization.py
+│   │   ├── __init__.py
+│   │   └── sample.py
+│   ├── diffraction
+│   │   ├── bluestein_fft.py
+│   │   ├── diffract.py
+│   │   ├── field.py
+│   │   ├── __init__.py
+│   │   └── util.py
+│   ├── __init__.py
+│   ├── simulate_field.py
+│   └── version.py
 ├── README.md
-├── setup.py
-└── starshade
-    ├── apodization
-    │   ├── apodization.py
-    │   ├── __init__.py
-    │   └── sample.py
-    ├── diffraction
-    │   ├── bluestein_fft.py
-    │   ├── diffract.py
-    │   ├── field.py
-    │   ├── __init__.py
-    │   └── util.py
-    ├── example_star_exo.py
-    ├── __init__.py
-    ├── simulate_field.py
-    └── version.py
+└── setup.py
+
 </pre>
 
 ## License
