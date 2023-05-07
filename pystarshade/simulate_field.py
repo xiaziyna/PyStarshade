@@ -1,5 +1,5 @@
 import numpy as np
-from apodization.apodization import *
+from apodization.apodize import *
 from diffraction.util import *
 from diffraction.field import *
 from diffraction.diffract import *

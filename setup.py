@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pystarshade",
-    version="0.1.4",
+    version="0.1.5",
     description="A python package for end-to-end starshade simulation",
     author="Jamila Taaki",
     author_email="xiaziyna@gmail.com",
