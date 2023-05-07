@@ -34,9 +34,7 @@ pip install pystarshade
 Scipy, Numpy
 
 ## Quickstart
-import pystarshade
-
-Nominal parameters: 
+See examples folder
 
 ## Organization
 
