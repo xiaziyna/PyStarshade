@@ -47,12 +47,10 @@ Pystarshade
 │   └── star_exo.py
 ├── images
 │   └── contrast_.gif
-├── __init__.py
 ├── pystarshade
 │   ├── apodization
-│   │   ├── apodization.py
-│   │   ├── __init__.py
-│   │   └── sample.py
+│   │   ├── apodize.py
+│   │   └── __init__.py
 │   ├── diffraction
 │   │   ├── bluestein_fft.py
 │   │   ├── diffract.py
