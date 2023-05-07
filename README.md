@@ -36,7 +36,7 @@ Scipy, Numpy
 ## Quickstart
 Detailed documentation for all PyStarshade utilities can be found within the code's docstrings.
 
-# Use
+### Use
 The simplest way to use PyStarshade is by calling the function 'source_field_to_ccd', this function
 takes as input a 2D source-field of size (N_s, N_s) and spatial sampling ds and returns the 2D output
 field incident on a CCD of size (N_pix, N_pix) and pixel size dp. 
@@ -49,13 +49,13 @@ source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, 
                     ds = 0.3*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7)
 ```
 
-# Input data
+### Input data
 
 PyStarshade can take as input any pixelized source-field such as Haystacks model, or analytic descriptions of sources
 (so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
 use 'pystarshade.simulate_field.point_source_to_ccd'. 
 
-# Parameters
+### Parameters
     Args:
         source_field (float): N_s * N_s source field
         wl (float): Wavelength of light.
@@ -73,7 +73,7 @@ use 'pystarshade.simulate_field.point_source_to_ccd'.
         dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
 
 
-# Worked examples
+### Worked examples
 
 See examples folder for different simulation examples.
 
