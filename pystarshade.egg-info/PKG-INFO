@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: pystarshade
+Version: 0.1.7
+Summary: A python package for end-to-end starshade simulation
+Home-page: https://github.com/xiaziyna/PyStarshade
+Author: Jamila Taaki
+Author-email: xiaziyna@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+
+UNKNOWN
+
