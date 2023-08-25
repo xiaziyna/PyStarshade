@@ -114,5 +114,5 @@ def grey_pupil_func(Nx, dx = 1, r = 3.):
     up_fac = 4
     upsample = np.meshgrid(np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1), np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1))
     bool_mask = pupil_func(upsample[0], upsample[1], (up_fac * r / dx)).astype(float)
-    grey_mask = convolve(bool_mask, np.ones((up_fac, up_fac)) )[(up_fac//2)::up_fac, (up_fac//2)::up_fac].astype(np.float32)
+    grey_mask = (up_fac**-2)*convolve(bool_mask, np.ones((up_fac, up_fac)) )[::up_fac, ::up_fac].astype(np.float32)
     return grey_mask
