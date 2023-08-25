@@ -100,7 +100,7 @@ def pupil_func(x, y, r = 3.):
 
 def grey_pupil_func(Nx, dx = 1, r = 3.):
     """
-    Grey-pixel pupil function using upsampling method
+    Grey-pixel pupil function for spatial anti-aliasing using upsampling method
     
     Args:
     Nx : Number of points
@@ -112,7 +112,15 @@ def grey_pupil_func(Nx, dx = 1, r = 3.):
  
     """
     up_fac = 4
-    upsample = np.meshgrid(np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1), np.arange(-(up_fac * Nx / 2), (up_fac * Nx / 2) + 1))
-    bool_mask = pupil_func(upsample[0], upsample[1], (up_fac * r / dx)).astype(float)
-    grey_mask = (up_fac**-2)*convolve(bool_mask, np.ones((up_fac, up_fac)) )[::up_fac, ::up_fac].astype(np.float32)
-    return grey_mask
+    bool_var = Nx % 2
+    x_ = y_ = np.arange((up_fac * Nx / 2) + bool_var)
+    xv, yv = np.meshgrid(x_, y_)
+    bool_mask = (np.hypot(xv, yv) <= (up_fac * r / dx)).astype(float)
+    grey_mask = (up_fac**-2)*convolve(bool_mask, np.ones((up_fac, up_fac)))[::up_fac, ::up_fac].astype(np.float32)
+    full_mask = np.zeros((Nx, Nx))
+    full_mask[:Nx//2, Nx//2 + bool_var:] = np.flipud(grey_mask[bool_var:, bool_var:])
+    full_mask[Nx//2:, Nx//2:] = grey_mask
+    full_mask[Nx//2 + bool_var:, :Nx//2] = np.fliplr(grey_mask[bool_var:, bool_var:])
+    full_mask[:Nx//2 + bool_var, :Nx//2 + bool_var] = np.fliplr(np.flipud(grey_mask))
+
+    return full_mask
