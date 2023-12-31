@@ -32,7 +32,7 @@ Nx = Ny = int(((r1 + .2)*up_sample)/0.1)
 len_grid = (Nx+1)**2
 starshade_locus = path.Path(np.stack((x_vals_ss, y_vals_ss), axis=-1))
 
-def test_(semaphore, i, j, l_x, l_y, mask):
+def eval_chunk(semaphore, i, j, l_x, l_y, mask):
     with semaphore:
         x_=np.arange(i*l_mask_chunk, i*l_mask_chunk + l_x)*dx
         y_=np.arange(j*l_mask_chunk, j*l_mask_chunk + l_y)*dy
@@ -59,7 +59,7 @@ for i in range(num_processes_dim):
         if j == num_processes_dim - 1: l_y += l_mask_ghost
         l_mem = l_x * l_y
         mask_.append(mp.RawArray(ctypes.c_bool, l_mem))
-        p = mp.Process(target=test_,args=(semaphore, i, j, l_x, l_y, mask_[i*num_processes_dim + j]))
+        p = mp.Process(target=eval_chunk, args=(semaphore, i, j, l_x, l_y, mask_[i*num_processes_dim + j]))
         processes.append(p)
 
 for p in processes:
