@@ -57,7 +57,7 @@ class FresnelSingle(Fresnel):
         Ny, Nx = field.shape
         in_xy = grid_points(Nx, Ny, dx = self.d_x)
 
-        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, self.ZP) * (self.d_x**2)
+        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, Z_pad=self.ZP) * (self.d_x**2)
         df = (self.max_freq*self.wl_z / (self.ZP*self.N_in + 1))
         out_xy = grid_points(N_out, N_out, dx = df )
 
@@ -147,7 +147,7 @@ class Fraunhofer:
         """
         k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape    
-        output_field = zoom_fft_2d(field, self.N_in, N_out, self.ZP) * (self.d_x**2)
+        output_field = zoom_fft_2d(field, self.N_in, N_out, Z_pad = self.ZP) * (self.d_x**2)
         df = self.max_freq*self.wl_z / (self.ZP*self.N_in + 1)
         out_xy = grid_points(N_out, N_out, dx = df )
         out_fac = np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wl_z)
