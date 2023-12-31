@@ -111,8 +111,8 @@ def test_chunked_bluestein_fft_verbose(N_x, N_X, N_out, Z_pad, N_chirp, x):
         x3 = np.pad(x3, ((0,1),(0,1)), 'constant')
         x4 = np.pad(x4, ((0,1),(0,0)), 'constant')
 
-    sec_N_x = N_x//2 + 1 #this is the (max) size of non-zero portion of segment, same for all 4
-    sec_N_x += 1 - sec_N_x%2 # want this to be an odd number as it makes it easier ot calculate shifts and center
+    sec_N_x = N_x//2 + 1 #this is the (max) size of non-zero portion of segment, same for all 4 chunks
+    sec_N_x += 1 - sec_N_x%2 # want this to be an odd number as it makes it easier to calculate shifts and center
 
     # Pad each truncated segment (centered)
     x_1_cent = bluestein_pad(x1, sec_N_x, N_out)
@@ -175,7 +175,6 @@ def test_chunked_bluestein_fft_verbose(N_x, N_X, N_out, Z_pad, N_chirp, x):
     real_ft_x_4 = np.fft.fftshift(np.fft.fft2(x_test))[N_X//2 - N_out//2: N_X//2 + N_out//2 + 1, N_X//2 - N_out//2: N_X//2 + N_out//2 + 1]
     chunk_ft_x_4 = zoom_ft_x_4*np.outer(out_fac_1, out_fac_2)
 
-    # Test function to encapsulate above code
     test_chunked_bs = wrap_chunk_fft(x, N_x, N_out, N_X, mod=0)
     assert np.allclose(real_ft_x_1, chunk_ft_x_1)
     assert np.allclose(real_ft_x_2, chunk_ft_x_2)
