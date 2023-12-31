@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-from diffraction.util import pc_to_meter, au_to_meter
-from simulate_field import source_field_to_ccd
+from pystarshade.diffraction.util import pc_to_meter, au_to_meter
+from pystarshade.simulate_field import source_field_to_ccd
 from astropy.io import fits
 
 # In this example we use a source-field from the Haystacks project
