@@ -81,6 +81,7 @@ def test_chunked_bluestein_fft(N_x, N_X, N_out, Z_pad, N_chirp, x):
 @pytest.mark.parametrize("N_x, N_X, N_out, Z_pad, N_chirp, x", test_data)
 def test_chunked_bluestein_fft_verbose(N_x, N_X, N_out, Z_pad, N_chirp, x):
     # Chunking the input into 4 smaller segments
+    # This verbose test is for debugging
     # len_seg = [[0, 0], [0, -1], [-1, -1], [-1, 0]]
     x_trunc = trunc_2d(x, N_x)
     in_N_X, in_N_Y = np.shape(x) # input shape
