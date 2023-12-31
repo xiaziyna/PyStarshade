@@ -76,8 +76,10 @@ def bluestein_pad(arr, N_in, N_out):
     half_zp_N = (N_in + N_out - 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
-    zp_arr[half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
-           half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr] = arr
+    zp_arr[half_zp_N - N_in//2 : half_zp_N + N_in//2 + bit_arr, \
+           half_zp_N - N_in//2 : half_zp_N + N_in//2 + bit_arr] \
+            = arr[half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr, \
+            half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr]
     return zp_arr
 
 def zero_pad(arr, N_in, ZP):
