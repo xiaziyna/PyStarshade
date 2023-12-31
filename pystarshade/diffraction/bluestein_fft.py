@@ -4,8 +4,11 @@ from .util import bluestein_pad, trunc_2d
 
 def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
     """
-    MODIFIED VERSION: computes the Bluestein FFT on fftshift(x) (without explicitly shifting x).
     Compute a zoomed 2D FFT using the Bluestein algorithm. 
+
+    MODIFIED VERSION: computes the Bluestein FFT equivalent to
+    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
+    where x_pad is x zero-padded to length N_X
     The input x is centered. 
     
     Args
