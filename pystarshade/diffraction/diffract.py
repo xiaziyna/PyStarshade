@@ -1,5 +1,5 @@
 import numpy as np
-from .bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d
+from .bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, wrap_chunk_fft
 from .util import *
 
 class Fresnel:
@@ -16,7 +16,26 @@ class FresnelSingle(Fresnel):
         super().__init__(d_x, N_in, z, wavelength)
         self.d_f = d_f
         self.ZP = self.calc_zero_padding()
+        self.N_X = self.calc_phantom_length()
 
+    def calc_phantom_length(self):
+        """
+        Calculate the equivalent zero-padded signal length N_X to achieve a specified output 
+        frequency (d_f) for spatial sampling (d_x) using the single FT method
+
+        Args: 
+            d_x : Spatial sampling.
+            d_f : Desired frequency sampling.
+            N_in : Number of non-zero input samples.
+            wavelength : Wavelength of the light.
+            z: Propagation distance in m.
+
+        Returns:
+            float : N_X = Z_pad * N_in + 1 - phantom padded length of input signal
+	    """
+        N_X = self.max_freq * self.wl_z / self.d_f
+        return N_X
+        
     def calc_zero_padding(self):
         """
         Calculate the zero-padding factor (ZP * N_in) to achieve a specified frequency spacing
@@ -51,17 +70,44 @@ class FresnelSingle(Fresnel):
             N_out : Number of output samples in each dimension
 
         Returns:
-            tuple: The propagated output field and the output grid sampling
+            output_field, df : The propagated output field and the output grid sampling
         """
         k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape
         in_xy = grid_points(Nx, Ny, dx = self.d_x)
 
-        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, Z_pad=self.ZP) * (self.d_x**2)
+        output_field = zoom_fft_2d_mod(field * np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2)), self.N_in, N_out, N_X=self.N_X) * (self.d_x**2)
         df = (self.max_freq*self.wl_z / (self.ZP*self.N_in + 1))
         out_xy = grid_points(N_out, N_out, dx = df )
 
         quad_out_fac = np.exp(1j * k * self.z) * np.exp(1j * k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z) 
+        return quad_out_fac * output_field, df
+        
+    def chunk_zoom_fresnel_single_fft(self, field, N_out):
+        """
+        Single FFT Fresnel diffraction calculated using a four-way chunked
+        Bluestein FFT (caps peak memory usage).
+
+        Args:
+            field : 2D input field to be propagated. Field should be at least the size of (N_in + N_out - 1)
+            d_x : Sampling interval of the input field [m]
+            z : Propagation distance [m]
+            wavelength : Wavelength of light [m]
+            ZP : Zero-padding factor
+            N_in :  Number of non-zero input samples in each dimension
+            N_out : Number of output samples in each dimension
+            
+        Returns
+            output_field, df : The propagated output field and the output grid sampling
+        """
+        k = 2 * np.pi / self.wavelength
+        Ny, Nx = field.shape
+        in_xy = grid_points(Nx, Ny, dx = self.d_x)
+        field *= np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2))
+        output_field = wrap_chunk_fft(field, self.N_in, self.N_out, self.N_X, mod=1) * (self.d_x**2)
+        df = self.max_freq*self.wl_z / self.N_X
+        out_xy = grid_points(N_out, N_out, dx = df )
+        quad_out_fac = np.exp(1j * k * self.z) * np.exp(1j * k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z)
         return quad_out_fac * output_field, df
 
 class FresnelDouble(Fresnel):
