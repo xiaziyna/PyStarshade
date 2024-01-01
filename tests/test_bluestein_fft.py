@@ -1,10 +1,12 @@
+"""
+Bluestein FFT unit tests on centered data
+"""
 import pytest
 import random
 import numpy as np
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d, N_in_2d
 from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, wrap_chunk_fft
 
-# Centered data
 def gen_param():
     N_x = random.randrange(3, 200, 2)
     N_out = random.randrange(3, 200, 2)
