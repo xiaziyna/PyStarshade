@@ -1,3 +1,11 @@
+"""
+Generate starshade mask on specified grid from WFIRST starshade locus. Can replace this with any other locus.
+Boundary generated with Bezier curves with matplotlib.path (this code may be improved/need to check accuracy)
+This version uses multiprocessing with tiling (for especially large grids)
+dx, dy: Output sampling
+Nx, Ny: Number of samples
+"""
+
 import pickle
 import numpy as np
 from matplotlib import path
@@ -5,16 +13,6 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import ctypes
 import scipy.io
-
-"""
-
-Generate starshade mask on specified grid from WFIRST starshade locus. Can replace this with any other locus.
-Boundary generated with Bezier curves with matplotlib.path (this code may be improved/need to check accuracy)
-This version uses multiprocessing with tiling (for especially large grids)
-dx, dy: Output sampling
-Nx, Ny: Number of samples
-
-"""
 
 mat = scipy.io.loadmat('NI2.mat') # Wfirst mask, find this in the SISTERS codebase
 r1 = mat['occulterDiameter'][0][0]/2      # upper apodization radius in meters
