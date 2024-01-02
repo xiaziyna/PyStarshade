@@ -5,10 +5,10 @@ are adapted/taken from DIFFRAQ (Harness) see solution_util.py of DIFFRAQ
 """
 
 import numpy as np
-from apodization import *
-from util import *
-from class_parallel_fresnel import *
-from class_field import *
+from from pystarshade.apodization.apodize import *
+from from pystarshade.diffraction.util import *
+from from pystarshade.diffraction.diffract import *
+from from pystarshade.diffraction.field import *
 from scipy.ndimage import convolve
 from scipy.special import jn
 import pytest
@@ -118,7 +118,7 @@ def pystar_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = 8001, N_t = 257, \
     k_vals = ps.wave_numbers()
     field_incident_ss = ps.plane_wave(k_vals, 0)
 
-    ss_complement = opt_grey_pupil_func(N_x, dx, R_ss)
+    ss_complement = grey_pupil_func(N_x, dx, R_ss)
     field_after_ss = field_incident_ss * ss_complement 
 
     fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl)
