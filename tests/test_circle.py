@@ -6,7 +6,6 @@ are adapted/taken from DIFFRAQ (Harness) see solution_util.py of DIFFRAQ
 
 import numpy as np
 import pytest
-import sys
 from from pystarshade.apodization.apodize import *
 from from pystarshade.diffraction.util import *
 from from pystarshade.diffraction.diffract import *
