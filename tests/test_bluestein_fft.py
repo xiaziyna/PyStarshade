@@ -1,5 +1,7 @@
 """
 Bluestein FFT unit tests on centered data
+test_bluestein_fft tests the equivalence of bluestein FFT vs numpy FFT
+test_chunked_bluestein_fft tests (chunked out of memory) bluestein FFT
 """
 import pytest
 import random
