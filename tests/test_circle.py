@@ -5,14 +5,14 @@ are adapted/taken from DIFFRAQ (Harness) see solution_util.py of DIFFRAQ
 """
 
 import numpy as np
+import pytest
+import sys
 from from pystarshade.apodization.apodize import *
 from from pystarshade.diffraction.util import *
 from from pystarshade.diffraction.diffract import *
 from from pystarshade.diffraction.field import *
 from scipy.ndimage import convolve
 from scipy.special import jn
-import pytest
-import sys
 
 np.set_printoptions(suppress=True)
 
