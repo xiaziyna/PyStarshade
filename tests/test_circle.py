@@ -12,8 +12,9 @@ from from pystarshade.diffraction.field import *
 from scipy.ndimage import convolve
 from scipy.special import jn
 import pytest
-np.set_printoptions(suppress=True)
 import sys
+
+np.set_printoptions(suppress=True)
 
 wl = 633e-9
 R_lens = 2.4 
