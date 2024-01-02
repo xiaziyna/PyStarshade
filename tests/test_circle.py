@@ -110,9 +110,9 @@ def lommels_U(u,v,nt=10):
         UU_2 += (-1.)**m*(u/v)**(2+2.*m)*jn(2+2*m,v)
     return UU_1, UU_2
 
-def numerical_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = 8001, N_t = 257, \
+def pystar_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = 8001, N_t = 257, \
                                                         dx = 0.0075, dt = 0.01875):
-    """ Fresnel diffraction via PyStarshade for comparison to numerical/analytic circle mask diffraction"""
+    """ Fresnel diffraction via PyStarshade for comparison to analytic circle mask diffraction"""
 
     ps = PointSource(dx, N_x, wl, 0, 0, dist_xo_ss, 1)
     k_vals = ps.wave_numbers()
@@ -132,6 +132,6 @@ def numerical_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = 8001, N_t = 257, \
 
 @pytest.mark.parametrize("wl, dist_xo_ss, dist_ss_t, R_ss, N_x, N_t, dx, dt", test_data)
 def test_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x, N_t, dx, dt):
-    field_circ = numerical_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = N_x, N_t = N_t, dx = dx, dt = dt)
+    field_circ = pystar_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = N_x, N_t = N_t, dx = dx, dt = dt)
     analytic_circ = calculate_circle_solution(wl, dist_xo_ss, dist_ss_t, R_ss, N_t = N_t, dt = dt)
     assert(np.max(np.abs(np.abs(field_circ) - np.abs(analytic_circ)))**2 < 1e-6)
