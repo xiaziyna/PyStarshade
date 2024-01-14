@@ -172,13 +172,14 @@ def wrap_chunk_fft(x, N_x, N_out, N_X, mod=0):
     os.remove('mm_data.dat')
     return chunked_fft
     
+
 def zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0):
     """
     Computes a quadrant of the output spectrum (upper left, upper right, lower left, or lower right)
     With N_out samples, and as if input was zero-padded to N_X, such that output sample size is
     d_f = 1/(N_X * dx).
     This version with the extension 'mod' computes this as if the input is ifftshift(x). 
-    
+
     Args
     x: Input signal
     N_x : size in one dimension of x_file
@@ -189,13 +190,14 @@ def zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0):
     Returns
     zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
     """
-    if chunk not in np.arange(3): raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
+
+    if chunk not in [0, 1, 2, 3]: raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
 
     N_chirp = N_x + N_out - 1
     bit_chirp = N_chirp % 2
     bit_out = N_out % 2
 
-    trunc_x = trunc_2d(x, N_chirp)
+    trunc_x = bluestein_pad(x, N_x, N_out)
     
     b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange( -(N_chirp//2), (N_chirp//2) + bit_chirp)**2)
     
@@ -245,8 +247,7 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
 
     Note: Use this with the four chunked FFT, if you can't fit your full input on harddisk (or if you want some quadrant region)
     """
-    if chunk not in np.arange(3): raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
-
+    if chunk not in [0, 1, 2, 3]: raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
     phase_shift = float((N_X - 1) //2 + 1)
     if chunk == 0:
         out_fac1 = out_fac2 = np.exp ( np.arange(-N_out, 0) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
