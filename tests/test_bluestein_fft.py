@@ -7,7 +7,7 @@ import pytest
 import random
 import numpy as np
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d, N_in_2d
-from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, wrap_chunk_fft
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, zoom_fft_quad_out_mod, wrap_chunk_fft
 
 def gen_param():
     N_x = random.randrange(3, 200, 2)
@@ -72,6 +72,22 @@ def test_bluestein_fft(N_x, N_X, N_out, Z_pad, N_chirp, x):
     assert np.allclose(blue_ft_x, real_ft_x)
     assert np.allclose(blue_ft_x_new, blue_ft_x)
 
+@pytest.mark.parametrize("N_x, N_X, N_out, Z_pad, N_chirp, x", test_data[:8])
+def test_quad_out(N_x, N_X, N_out, Z_pad, N_chirp, x):
+    real_ft_x = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(x)))
+    real_ft_quad0 = real_ft_x[N_X//2 - N_out: N_X//2, N_X//2 - N_out: N_X//2]
+    real_ft_quad1 = real_ft_x[N_X//2 - N_out: N_X//2, N_X//2: N_X//2 + N_out]
+    real_ft_quad2 = real_ft_x[N_X//2: N_X//2 + N_out, N_X//2 - N_out: N_X//2]
+    real_ft_quad3 = real_ft_x[N_X//2: N_X//2 + N_out, N_X//2: N_X//2 + N_out]
+    print (np.shape(x), np.shape(real_ft_x), N_x, N_X, N_out)
+    zoom_ft_quad0 = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0)
+    zoom_ft_quad1 = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=1)
+    zoom_ft_quad2 = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=2)
+    zoom_ft_quad3 = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=3)
+    assert np.allclose(zoom_ft_quad0, real_ft_quad0)
+    assert np.allclose(zoom_ft_quad1, real_ft_quad1)
+    assert np.allclose(zoom_ft_quad2, real_ft_quad2)
+    assert np.allclose(zoom_ft_quad3, real_ft_quad3)
 
 @pytest.mark.parametrize("N_x, N_X, N_out, Z_pad, N_chirp, x", test_data)
 def test_chunked_bluestein_fft(N_x, N_X, N_out, Z_pad, N_chirp, x):
