@@ -72,22 +72,22 @@ class FresnelSingle(Fresnel):
         for chunk in range(4):
 	    x_trunc = np.memmap(x_file, dtype=np.complex128, mode='w+', shape=(self.N_in, self.N_in))
 	    if chunk == 0:
-	            xx = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
-	            yy = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
-		    x_trunc[:self.N_in//2 + bit_x, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
-	        elif chunk == 1:
-	            xx = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
-	            yy = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
-		    x_trunc[:self.N_in//2 + bit_x, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
-	        elif chunk == 2:
-	            xx = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
-	            yy = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
-	            x_trunc[self.N_in//2 + bit_x:, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
-	        elif chunk == 3:
-	            xx = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
-	            yy = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
-		    x_trunc[self.N_in//2 + bit_x:, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
-		x_trunc.flush()
+	        xx = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+	        yy = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+		x_trunc[:self.N_in//2 + bit_x, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+            elif chunk == 1:
+	        xx = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+	        yy = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+		x_trunc[:self.N_in//2 + bit_x, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+            elif chunk == 2:
+	        xx = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+	        yy = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+	        x_trunc[self.N_in//2 + bit_x:, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+            elif chunk == 3:
+	        xx = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+	        yy = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+		x_trunc[self.N_in//2 + bit_x:, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+	    x_trunc.flush()
 	output_field = four_chunked_zoom_fft_mod(x_file, self.N_in, N_out, self.N_X) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df )
