@@ -54,7 +54,7 @@ class FresnelSingle(Fresnel):
         ZP = ((self.max_freq * self.wl_z / self.d_f) - 1) / self.N_in
         return ZP
 
-    def chunk_zoom_fresnel_single_fft(self, field, N_out):
+    def chunk_zoom_fresnel_single_fft(self, x_file, N_out):
         """
         Single FFT Fresnel diffraction calculated using a four-way chunked
         Bluestein FFT (caps peak memory usage).
@@ -68,10 +68,27 @@ class FresnelSingle(Fresnel):
         """
         field_copy = np.copy(field)
         k = 2 * np.pi / self.wavelength
-        Ny, Nx = field_copy.shape
-        in_xy = grid_points(Nx, Ny, dx = self.d_x)
-        field_copy *= np.exp(1j * (np.pi /self.wl_z) * (in_xy[0]**2 + in_xy[1]**2))
-        output_field = wrap_chunk_fft(field_copy, self.N_in, N_out, self.N_X, mod=1) * (self.d_x**2)
+	bit_x = self.N_in%2
+        for chunk in range(4):
+	    x_trunc = np.memmap(x_file, dtype=np.complex128, mode='w+', shape=(self.N_in, self.N_in))
+	    if chunk == 0:
+	            xx = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+	            yy = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+		    x_trunc[:self.N_in//2 + bit_x, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+	        elif chunk == 1:
+	            xx = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+	            yy = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+		    x_trunc[:self.N_in//2 + bit_x, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+	        elif chunk == 2:
+	            xx = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+	            yy = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+	            x_trunc[self.N_in//2 + bit_x:, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+	        elif chunk == 3:
+	            xx = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+	            yy = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+		    x_trunc[self.N_in//2 + bit_x:, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+		x_trunc.flush()
+	output_field = four_chunked_zoom_fft_mod(x_file, self.N_in, N_out, self.N_X) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df )
         quad_out_fac = np.exp(1j * k * self.z) * np.exp(1j * k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z)
