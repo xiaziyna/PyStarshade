@@ -150,28 +150,6 @@ def four_chunked_zoom_fft(x_file, N_x, N_out, N_X):
     uncorrected_output_field = four_chunked_zoom_fft_mod(x_file, N_x, N_out, N_X)
     return uncorrected_output_field*np.outer(out_fac, out_fac)
 
-def wrap_chunk_fft(x, N_x, N_out, N_X, mod=0):
-    """
-    Call the four-way chunked FFT with this wrapper to handle memmap create/delete
-    Args
-    x : Centered input signal
-    N_x : Non-zero length of input signal in one direction
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
-    """
-    x_trunc = trunc_2d(x, N_x)
-    x_memmap = np.memmap('mm_data.dat', dtype=np.complex128,mode='w+',shape=(N_x, N_x))
-    x_memmap[:] = x_trunc[:]
-    x_memmap.flush()
-    if mod: chunked_fft = four_chunked_zoom_fft_mod('mm_data.dat', N_x, N_out, N_X)
-    else: chunked_fft = four_chunked_zoom_fft('mm_data.dat', N_x, N_out, N_X)
-    os.remove('mm_data.dat')
-    return chunked_fft
-    
 
 def zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0):
     """
