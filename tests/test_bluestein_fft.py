@@ -6,8 +6,9 @@ test_chunked_bluestein_fft tests (chunked out of memory) bluestein FFT
 import pytest
 import random
 import numpy as np
+import os
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d, N_in_2d
-from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, zoom_fft_quad_out_mod, wrap_chunk_fft
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, zoom_fft_quad_out_mod
 
 def gen_param():
     N_x = random.randrange(3, 200, 2)
@@ -93,7 +94,12 @@ def test_quad_out(N_x, N_X, N_out, Z_pad, N_chirp, x):
 def test_chunked_bluestein_fft(N_x, N_X, N_out, Z_pad, N_chirp, x):
     # Test chunked FFT in a compact way
     print (N_x, N_X, N_out)
-    test_chunked_bs = wrap_chunk_fft(x, N_x, N_out, N_X, mod=0)
+    x_trunc = trunc_2d(x, N_x)
+    x_memmap = np.memmap('mm_data.dat', dtype=np.complex128,mode='w+',shape=(N_x, N_x))
+    x_memmap[:] = x_trunc[:]
+    x_memmap.flush()
+    test_chunked_bs = four_chunked_zoom_fft('mm_data.dat', N_x, N_out, N_X)
+    os.remove('mm_data.dat')
     real_ft_x = np.fft.fftshift(np.fft.fft2(x))[N_X//2 - N_out//2: N_X//2 + N_out//2 + 1, N_X//2 - N_out//2: N_X//2 + N_out//2 + 1]
     assert np.allclose(test_chunked_bs, real_ft_x)
 
@@ -196,7 +202,13 @@ def test_chunked_bluestein_fft_verbose(N_x, N_X, N_out, Z_pad, N_chirp, x):
     real_ft_x_4 = np.fft.fftshift(np.fft.fft2(x_test))[N_X//2 - N_out//2: N_X//2 + N_out//2 + 1, N_X//2 - N_out//2: N_X//2 + N_out//2 + 1]
     chunk_ft_x_4 = zoom_ft_x_4*np.outer(out_fac_1, out_fac_2)
 
-    test_chunked_bs = wrap_chunk_fft(x, N_x, N_out, N_X, mod=0)
+    x_trunc = trunc_2d(x, N_x)
+    x_memmap = np.memmap('mm_data.dat', dtype=np.complex128, mode='w+',shape=(N_x, N_x))
+    x_memmap[:] = x_trunc[:]
+    x_memmap.flush()
+    test_chunked_bs = four_chunked_zoom_fft('mm_data.dat', N_x, N_out, N_X)
+    os.remove('mm_data.dat')
+    
     assert np.allclose(real_ft_x_1, chunk_ft_x_1)
     assert np.allclose(real_ft_x_2, chunk_ft_x_2)
     assert np.allclose(real_ft_x_3, chunk_ft_x_3)
