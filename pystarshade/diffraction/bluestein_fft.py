@@ -235,7 +235,7 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
     elif chunk == 2:
         out_fac1 = np.exp ( np.arange(N_out) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
         out_fac2 = np.exp ( np.arange(-N_out, 0) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
-    elif chunk == 4:
+    elif chunk == 3:
         out_fac1 = out_fac2 = np.exp ( np.arange(N_out) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
     uncorrected_output_field = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=chunk)
     return uncorrected_output_field*np.outer(out_fac1, out_fac2)
