@@ -239,3 +239,52 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
         out_fac1 = out_fac2 = np.exp ( np.arange(N_out) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
     uncorrected_output_field = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=chunk)
     return uncorrected_output_field*np.outer(out_fac1, out_fac2)
+
+def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
+    """
+    Compute a chunk of 2D FFT using the Bluestein algorithm. 
+    Experimental chunked version - outputs are computed in chunks.
+    
+    Args
+    x: Centered Input signal (complex numpy array).
+    N_x: Length of the input signal.
+    N_out_x, N_out_y: Length of the output signal chunk in x and y.
+    start_chunk_x, start_chunk_y: first index (freqency sample) of output chunk in x and y.
+    Z_pad: Zero-padding factor.
+    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
+
+    Returns
+    Chunk of zoomed FFT of the input signal (complex numpy array).
+    """
+    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
+        raise ValueError("You must provide exactly one of Z_pad or N_X.")
+
+    if Z_pad is not None: N_X = Z_pad*N_x + 1 #X before truncation
+
+    N_chirp_x = N_x + N_out_x - 1
+    N_chirp_y = N_x + N_out_y - 1
+
+    bit_x = N_x % 2
+    bit_chirp_x = N_chirp_x % 2
+    bit_chirp_y = N_chirp_y % 2
+    bit_out_x = N_out_x % 2
+    bit_out_y = N_out_y % 2
+
+    trunc_x = bluestein_pad(x, N_x, N_out_x, N_out_y)
+    h1 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_x, (N_x//2) + start_chunk_x + N_out_x )**2) #may not be len of chirp because of 0
+    h2 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_y, (N_x//2) + start_chunk_y + N_out_y )**2) #may not be len of chirp because of 0
+    c1 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_x, start_chunk_x + N_out_x )**2))
+    c2 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_y, start_chunk_y + N_out_y )**2))
+    b1 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_x//2), (N_chirp_x//2) + bit_chirp_x)**2)
+    b2 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_y//2), (N_chirp_y//2) + bit_chirp_y)**2)
+
+    h1 = np.roll(h1, (N_chirp_x//2) + 1)
+    h2 = np.roll(h2, (N_chirp_y//2) + 1)
+    ft_h1 = np.fft.fft(h1)
+    ft_h2 = np.fft.fft(h2)
+
+    zoom_fft =  (np.fft.ifft2( np.fft.fft2(np.outer(b1, b2) * trunc_x) * np.outer(ft_h1, ft_h2) ) )
+    zoom_fft = zoom_fft[(N_chirp_x//2) - (N_out_x//2) : (N_chirp_x//2) + (N_out_x//2) + bit_out_x, 
+                        (N_chirp_y//2) - (N_out_y//2) : (N_chirp_y//2) + (N_out_y//2) + bit_out_y]
+    zoom_fft *= np.outer(c1, c2)
+    return zoom_fft
