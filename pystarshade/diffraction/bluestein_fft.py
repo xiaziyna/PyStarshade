@@ -242,8 +242,8 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
 
 def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
     """
-    Compute a chunk of 2D FFT using the Bluestein algorithm. 
-    Experimental chunked version - outputs are computed in chunks.
+    Compute a non-centered output chunk of 2D FFT using the Bluestein algorithm. Use this if you don't have enough memory for a full FFT. 
+    fftshift(fft2(ifftshift(x)))[N_X//2 + start_chunk_x: N_X//2 + start_chunk_x + N_out_x,...]
     
     Args
     x: Centered Input signal (complex numpy array).
@@ -292,21 +292,19 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
 
 def chunk_out_zoom_fft_2d(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
     """
-    Computes a quadrant of the output spectrum (upper left, upper right, lower left, or lower right)
-    With N_out samples, and as if input was zero-padded to N_X, such that output sample size is
-    d_f = 1/(N_X * dx).
-
+    Compute a non-centered output chunk of 2D FFT using the Bluestein algorithm. 
+    fftshift(fft2(x))[N_X//2 + start_chunk_x: N_X//2 + start_chunk_x + N_out_x,...]
+    
     Args
-    x: Input signal
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-    chunk: The chunk index is between {0 and 3} (UL UR LL LR)
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    x: Centered Input signal (complex numpy array).
+    N_x: Length of the input signal.
+    N_out_x, N_out_y: Length of the output signal chunk in x and y.
+    start_chunk_x, start_chunk_y: first index (freqency sample) of output chunk in x and y.
+    Z_pad: Zero-padding factor.
+    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
 
-    Note: Use this with the four chunked FFT, if you can't fit your full input on harddisk (or if you want some quadrant region)
+    Returns
+    Chunk of zoomed FFT of the input signal (complex numpy array).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
