@@ -269,10 +269,11 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
     bit_chirp_y = N_chirp_y % 2
     bit_out_x = N_out_x % 2
     bit_out_y = N_out_y % 2
+    print (bit_x, bit_chirp_x, bit_chirp_y, bit_out_x, bit_out_y)
 
     trunc_x = bluestein_pad(x, N_x, N_out_x, N_out_y)
-    h1 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_x, (N_x//2) + start_chunk_x + N_out_x )**2) 
-    h2 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_y, (N_x//2) + start_chunk_y + N_out_y )**2) 
+    h1 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_x, (N_x//2) + start_chunk_x + N_out_x )**2) #may not be len of chirp because of 0
+    h2 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_y, (N_x//2) + start_chunk_y + N_out_y )**2) #may not be len of chirp because of 0
     c1 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_x, start_chunk_x + N_out_x )**2))
     c2 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_y, start_chunk_y + N_out_y )**2))
     b1 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_x//2), (N_chirp_x//2) + bit_chirp_x)**2)
@@ -288,3 +289,31 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
                         (N_chirp_y//2) - (N_out_y//2) : (N_chirp_y//2) + (N_out_y//2) + bit_out_y]
     zoom_fft *= np.outer(c1, c2)
     return zoom_fft
+
+def chunk_out_zoom_fft_2d(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
+    """
+    Computes a quadrant of the output spectrum (upper left, upper right, lower left, or lower right)
+    With N_out samples, and as if input was zero-padded to N_X, such that output sample size is
+    d_f = 1/(N_X * dx).
+
+    Args
+    x: Input signal
+    N_x : size in one dimension of x_file
+    N_out : Number of output points of FFT needed
+    N_X : Phantom zero-padded length of input x_file for desired output sampling
+          (see the fresnel class to calculate this)
+    chunk: The chunk index is between {0 and 3} (UL UR LL LR)
+    Returns
+    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+
+    Note: Use this with the four chunked FFT, if you can't fit your full input on harddisk (or if you want some quadrant region)
+    """
+    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
+        raise ValueError("You must provide exactly one of Z_pad or N_X.")
+
+    phase_shift = float((N_X - 1) //2 + 1)
+    out_fac1 = np.exp ( np.arange(start_chunk_x, start_chunk_x + N_out_x ) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
+    out_fac2 = np.exp ( np.arange(start_chunk_y, start_chunk_y + N_out_y ) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
+    if Z_pad is not None: uncorrected_output_field = chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=Z_pad)
+    else: uncorrected_output_field = chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, N_X = N_X)
+    return uncorrected_output_field*np.outer(out_fac1, out_fac2)
