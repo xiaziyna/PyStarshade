@@ -271,8 +271,8 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
     bit_out_y = N_out_y % 2
 
     trunc_x = bluestein_pad(x, N_x, N_out_x, N_out_y)
-    h1 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_x, (N_x//2) + start_chunk_x + N_out_x )**2) #may not be len of chirp because of 0
-    h2 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_y, (N_x//2) + start_chunk_y + N_out_y )**2) #may not be len of chirp because of 0
+    h1 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_x, (N_x//2) + start_chunk_x + N_out_x )**2) 
+    h2 = np.exp(   np.pi*(1/(N_X))*1j*np.arange( -(N_x//2) + start_chunk_y, (N_x//2) + start_chunk_y + N_out_y )**2) 
     c1 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_x, start_chunk_x + N_out_x )**2))
     c2 = np.exp(-1*np.pi*(1/N_X)*1j* (np.arange( start_chunk_y, start_chunk_y + N_out_y )**2))
     b1 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_x//2), (N_chirp_x//2) + bit_chirp_x)**2)
