@@ -57,27 +57,29 @@ def N_in_2d(arr):
     
     return max_x, max_y
 
-
-def bluestein_pad(arr, N_in, N_out):
+def bluestein_pad(arr, N_in, N_out_x, N_out_y=None):
     """
-    Pad a 2D array to size (N_in + N_out - 1, N_in + N_out - 1) for computing a Bluestein FFT
+    Pad a 2D array to size (N_in + N_out_x - 1, N_in + N_out_y - 1) for computing a Bluestein FFT
     with N_in non-zero elements and N_out FFT samples needed. 
     The original array will be centered in the padded output.
 
     Args:
         arr: The 2D input array to be padded.
         N_in: The number of non-zero elements of the input arr
-        N_out: The number of output elements of the Bluestein FFT.
-
+        N_out_x: The number of output elements of the Bluestein FFT.
+        if N_out_y undefined, assume x and y out are the same
+        
     Returns:
         The (centered) padded 2D array with zeros.
     """
-    zp_arr = np.zeros((N_in + N_out - 1, N_in + N_out - 1), dtype=np.complex128)
-    half_zp_N = (N_in + N_out - 1) // 2
+    if N_out_y == None: N_out_y = N_out_x
+    zp_arr = np.zeros((N_in + N_out_x - 1, N_in + N_out_y - 1), dtype=np.complex128)
+    half_zp_N_x = (N_in + N_out_x - 1) // 2
+    half_zp_N_y = (N_in + N_out_y - 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
-    zp_arr[half_zp_N - N_in//2 : half_zp_N + N_in//2 + bit_arr, \
-           half_zp_N - N_in//2 : half_zp_N + N_in//2 + bit_arr] \
+    zp_arr[half_zp_N_x - N_in//2 : half_zp_N_x + N_in//2 + bit_arr, \
+           half_zp_N_y - N_in//2 : half_zp_N_y + N_in//2 + bit_arr] \
             = arr[half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr, \
             half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr]
     return zp_arr
