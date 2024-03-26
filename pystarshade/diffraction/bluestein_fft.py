@@ -278,8 +278,8 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
     b1 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_x//2), (N_chirp_x//2) + bit_chirp_x)**2)
     b2 = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp_y//2), (N_chirp_y//2) + bit_chirp_y)**2)
 
-    h1 = np.roll(h1, (N_chirp_x//2) + 1)
-    h2 = np.roll(h2, (N_chirp_y//2) + 1)
+    h1 = np.roll(h1, (N_chirp_x//2) + bit_chirp_x)
+    h2 = np.roll(h2, (N_chirp_y//2) + bit_chirp_y)
     ft_h1 = np.fft.fft(h1)
     ft_h2 = np.fft.fft(h2)
 
