@@ -34,9 +34,8 @@ class SourceField:
             numpy.ndarray: A 2D array representing the computed field over the grid.
         """ 
         ZP = (((1/self.d_s) * self.wavelength * self.z / d_x) - 1) / self.N_s
-        source_field_pad = bluestein_pad(self.source_field, self.N_s, N_x)
-        out_field = zoom_fft_2d_mod(source_field_pad, self.N_s, N_x, ZP)
-        out_fac = np.exp ( 1j * 2*np.pi * z1 / self.wavelength) 
+        out_field = zoom_fft_2d_mod(source_field, self.N_s, N_x, ZP)
+        out_fac = np.exp( 1j* (2 * np.pi/self.wavelength) * z1)
         return out_fac*out_field
 
 class Field:
