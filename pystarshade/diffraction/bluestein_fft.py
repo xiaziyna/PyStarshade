@@ -315,3 +315,49 @@ def chunk_out_zoom_fft_2d(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y
     if Z_pad is not None: uncorrected_output_field = chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=Z_pad)
     else: uncorrected_output_field = chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, N_X = N_X)
     return uncorrected_output_field*np.outer(out_fac1, out_fac2)
+    
+def chunk_in_zoom_fft_2d_mod(x_file, N_x, N_out, N_X, N_chunk=4):
+    '''
+    Compute a 2D FFT using the Bluestein algorithm. 
+    Experimental chunked version - computed in chunks of the input.
+
+    Define x_file as: 
+    arr = np.memmap('x.dat', dtype=np.complex128,mode='w+',shape=(N_x, N_x))
+    arr[:] = trunc_x
+    arr.flush()
+
+    Args
+    x: Input signal
+    N_x : size in one dimension of x_file
+    N_out : Number of output points of FFT needed
+    N_X : Phantom zero-padded length of input x_file for desired output sampling
+          (see the fresnel class to calculate this)
+    N_chunk: Number of chunks along one axis
+    Returns
+    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+
+    '''
+    x_vals = np.linspace(-(N_x//2), (N_x//2), N_x)
+    chunk = (N_x//N_chunk) + 1 - ((N_x//N_chunk)%2)
+    zoom_fft_out = np.zeros((N_out, N_out), dtype=np.complex128)
+    x_trunc = np.memmap(x_file, dtype=np.complex128, mode='r', shape=(N_x, N_x))
+    for i in range(N_chunk):
+        for j in range(N_chunk):
+            sec_N_x = sec_N_y = chunk
+            if i == N_chunk-1:
+                sec_N_x = N_x - i*sec_N_x
+                sec_N_x += 1 - (sec_N_x%2)
+            if j == N_chunk-1:
+                sec_N_y = N_x - j*sec_N_y
+                sec_N_y += 1 - (sec_N_y%2)
+            x = x_trunc[i*chunk : min(i*chunk + sec_N_x, N_x), j*chunk : min(j*chunk + sec_N_y, N_x)]
+            if sec_N_x != sec_N_y:
+                sec_N_x = sec_N_y = max(sec_N_x, sec_N_y)
+            x = np.pad(x, [(0, sec_N_x-np.shape(x)[0]), (0, sec_N_y-np.shape(x)[1])], mode='constant')
+            ph1 = - x_vals[i*chunk + (sec_N_x//2)]
+            ph2 = - x_vals[j*chunk + (sec_N_y//2)]
+            out_fac_1 = np.exp ( np.arange(-(N_out//2), (N_out//2) + N_out%2) * (1j * 2 * np.pi * ph1 * (1 / (N_X)) ) )
+            out_fac_2 = np.exp ( np.arange(-(N_out//2), (N_out//2) + N_out%2) * (1j * 2 * np.pi * ph2 * (1 / (N_X)) ) )
+            ft_x = zoom_fft_2d_mod(x, sec_N_x, N_out, N_X = N_X)
+            zoom_fft_out +=  ft_x * np.outer(out_fac_1, out_fac_2)
+    return zoom_fft_out
