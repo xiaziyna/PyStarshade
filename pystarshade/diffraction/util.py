@@ -3,6 +3,7 @@ import numpy as np
 #=== useful constants====
 pc_to_meter = 3.08567782e16
 au_to_meter = 149597870700.
+rad_to_mas = 206264806.2471
 #========================
 
 def trunc_2d(x, N_out):

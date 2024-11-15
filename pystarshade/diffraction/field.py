@@ -1,24 +1,91 @@
 from .util import *
 from .bluestein_fft import zoom_fft_2d_mod
+from .data import telescope_params
 import numpy as np
+
+#If want to do planets are stars separately, call starshade prop twice or something
+
+class StarshadeProp:
+    """
+    drm : 'wfirst' or 'hwo'
+    """
+    def __init__(self, source_field, drm = None, ):
+        self.light_source = light_source()  # Instantiate the light source
+        self.detector = detector()          # Instantiate the detector
+        self.lens = lens() if lens else None  # Optionally include a lens
+        self.d_p_mas = ..
+        factor_source_pupil = d_s_mas/d_p_mas 
+        if np.abs(factor_source_pupil%1):
+            from scipy.ndimage import zoom:
+            scale_factor = d_x / d_x_new
+
+            # Apply zoom to resample the image with the calculated scale factor
+            new_image = zoom(image, scale=(scale_factor, scale_factor), order=3)
+
+        if drm is not None: 
+            
+            drm_params = telescope_params[drm]
+
+
+
+    # a wl range has to be defined
+    # for a given source field, either grab f name of or generate the PSF over wavelengths
+    # one function to convolve the source with this over a specific wl
+    # then             
+    def source_convolve:
+        #test = np.zeros((2*N_t - 1, 2*N_t - 1))
+        #test[100, 0] = 1
+        # need to stagger the source field by factor_source_pupil
+        # what if its a non-int?
+
+        source_upsampled = np.zeros(())
+        source = bluestein_pad(source_field, )
+        #test2 = bluestein_pad(field_free_prop, N_t, N_t)
+        #test3 = np.fft.ifft2(np.fft.fft2(test)*np.fft.fft2(test2))
+        #print (np.allclose(field_free_prop, test3[N_t - (N_t//2) + 100: N_t + N_t//2 + 1 + 100, N_t - (N_t//2) : N_t + N_t//2 + 1]))
+
+
+    def run_simulation(self):
+        # Example method that might coordinate interactions between components
+        light = self.light_source.emit()
+
+    def pupilfield()
+        """
+        Generates the incoherent field at the pupil for choice of starshade
+        """
+        if os.path.exists('pupil_out/hwo_pupil_'+drm_params['grey_mask_dx'][mask_choice]+'_'+str(500)+'.npz'):
+            print("File exists.")
+        else:
+            print("File does not exist.")
+            for wl_i in np.arange(500, 1050, 50, dtype=np.float64):
+                 print (wl_i)
+                 chunk_in_source_field_to_pupil(source_field, wl_i*1e-09, dist_xo_ss, dist_ss_t, ss_mask_fname_memmap, N_s = 101, N_x = N_x, N_t = over_N_t, ds = 0.04*au_to_meter,  dx = drm_params['dx_'][mask_choice], dt = dt)
+
 
 class SourceField:
     """
     This class returns far-field diffraction for an N_s x N_s source-field, calculated via a Bluestein FFT
-    
+    Either define d_s_mas or d_s and z
+
     Attributes:
+        d_s_mas (float): Source field sampling in mas
         d_s (float): Source field sampling
         N_s (int): Number of samples of the field
         wavelength (float): Wavelength of light
         z (float): Far-field distance
     Note: Uses planar wave description of far-field
     """
-    def __init__(self, d_s, N_s, wavelength, z, source_field):
-        self.d_s = d_s
+    def __init__(self, N_s, wavelength, source_field, d_s_mas = None, d_s = None, z = None):
         self.N_s = N_s
         self.wavelength = wavelength
-        self.z = z
+        self.d_s = d_s if d_s is not None
+        self.z = z if z is not None
+        self.d_s_mas = d_s_mas if d_s_mas is not None else self.calculate_d_s_mas(self.d_s, self.z)
         self.source_field = source_field
+        if any(f.startswith("data/"+ss_file) for f in os.listdir()):
+
+    def calculate_d_s_mas(self, d_s, z):
+        return (d_s / z) * rad_to_mas
 
     def farfield(self, d_x, N_x, z1):
         """
