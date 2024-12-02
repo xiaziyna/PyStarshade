@@ -1,0 +1,6 @@
+Obtain NI2.mat in SISTERS project (http://sister.caltech.edu/)
+1) Run mpi_gen_mask.py to interpolate starshade edge and create mask
+2) Run grey_mask.py to average a bool mask
+
+Filename convention:
+'grey_wfirst_mask_005m' - grey (anti-aliased) sampling dx = 0.005m

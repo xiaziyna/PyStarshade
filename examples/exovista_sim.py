@@ -1,5 +1,8 @@
+"""
+Load a scene simulated with exovista and simulate imaging with starshade
+Uses 'exovista_scene.py' available in exovista directory on Github, called 'scene.py'
+"""
 from astropy.io import fits
-# file available in exovista directory on Github, called 'scene.py'
 from input.exovista_scene_data.exovista_scene import *
 
 #------------------------- load and construct exovista scene

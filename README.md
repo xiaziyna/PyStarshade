@@ -83,15 +83,30 @@ See examples folder for different simulation examples.
 
 <pre>
 Pystarshade
+├── data
+│   ├── drm.py
+│   ├── exovista_scene.py
+│   ├── fields
+│   ├── __init__.py
+│   ├── out
+│   ├── psf
+│   └── pupils
 ├── examples
+│   ├── exovista_sim.py
 │   ├── haystacks_model.py
-│   └── star_exo.py
+│   ├── star_exo.py
+│   └── starshade_masks
+│       ├── grey_mask.py
+│       ├── mp_gen_mask.py
+│       ├── README
+│       └── wfirst_locus.p
 ├── images
 │   └── contrast_.gif
 ├── pystarshade
 │   ├── apodization
 │   │   ├── apodize.py
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── pupil.py
 │   ├── diffraction
 │   │   ├── bluestein_fft.py
 │   │   ├── diffract.py
@@ -99,10 +114,14 @@ Pystarshade
 │   │   ├── __init__.py
 │   │   └── util.py
 │   ├── __init__.py
-│   ├── simulate_field.py
-│   └── version.py
+│   ├── propagator.py
+│   └── simulate_field.py
 ├── README.md
-└── setup.py
+├── setup.py
+└── tests
+    ├── test_bluestein_fft.py
+    ├── test_chunk_fft.py
+    └── test_circle.py
 
 </pre>
 
