@@ -2,7 +2,7 @@ import pytest
 import random
 import numpy as np
 import os
-from bluestein_fft import chunk_out_zoom_fft_2d, chunk_out_zoom_fft_2d_mod
+from pystarshade.diffraction.bluestein_fft import chunk_out_zoom_fft_2d, chunk_out_zoom_fft_2d_mod
 #Test the Bluestein chunk out functions
 
 # Centered data

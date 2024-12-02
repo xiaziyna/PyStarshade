@@ -2,23 +2,32 @@ from data.drm import telescope_params, mas_to_rad
 import glob
 import numpy as np
 from simulate_field import source_field_to_pupil, pupil_to_ccd
-from pupil import make_pupil
-from util import flat_grid, bluestein_pad, trunc_2d, pad_2d
+from apodization.pupil import make_pupil
+from diffraction.util import flat_grid, bluestein_pad, trunc_2d, pad_2d
 
 class StarshadeProp:
     """
-    source angular resolution, default = 2mas
-    drm : 'wfirst' or 'hwo'
-    
-    Use: 
-        Pick DRM
-        This class will generate the necessary files, 
-        suppress_region is the angular region where starlight is suppressed
-    Example:
-        hwo_starshade = StarshadeProp(drm = 'hwo')
-        hwo_starshade.gen_pupil_field()
-        hwo_starshade.gen_psf_basis(pupil_type = 'hex')
+    Pre-compute files and propagate light past a starshade.
 
+    The class is initialized with a design reference mission (DRM) in data.drm, 
+    An example of how to use this class is below.
+
+    :param drm: Design reference mission (e.g. 'wfirst' or 'hwo').
+    :type drm: str
+    :param d_s_mas: Source angular resolution in milliarcseconds, defaults to 2.
+    :type d_s_mas: float, optional
+    :param d_t_mas: Pixel shift in the pupil plane corresponding to the angular field, defaults to 0.05.
+    :type d_t_mas: float, optional
+    :param d_p_mas: Pixel size in the focal plane in milliarcseconds, defaults to 2.
+    :type d_p_mas: float, optional
+    :param d_wl: Wavelength step size in nanometers, defaults to 50.
+    :type d_wl: float, optional
+
+    Example:
+        hwo_starshade = StarshadeProp(drm='hwo')
+        hwo_starshade.gen_pupil_field()
+        hwo_starshade.gen_psf_basis(pupil_type='hex')
+        hwo_starshade.gen_scene(pupil_type='hex', source_field, 500e-9)
     """
     def __init__(self, drm = None, d_s_mas = 2, d_t_mas = 0.05, d_p_mas = 2, d_wl = 50):
         self.drm = drm
@@ -34,9 +43,16 @@ class StarshadeProp:
         else: self.set_mission_params(self.drm)
 
     def set_mission_params(self, drm, mask_choice = 1, band_i = 0):
-        '''
-        Load the design reference mission (defined inside data/telescope_drm.py)
-        '''
+        """
+        Load the design reference mission (defined inside data/telescope_drm.py).
+
+        :param drm: Design reference mission ('wfirst', 'hwo', etc.).
+        :type drm: str
+        :param mask_choice: Mask sampling choice.
+        :type mask_choice: int, optional
+        :param band_i: Wavelength band index.
+        :type band_i: int, optional
+        """
         drm_params = telescope_params[drm]
         self.f = drm_params['focal_length_lens']
         self.suppress_region = int(2 * drm_params['iwa'][band_i])
@@ -67,6 +83,14 @@ class StarshadeProp:
         self.d_p = (self.d_p_mas) * self.f * mas_to_rad # physical pixel size
 
     def calc_magnification(self, dist_xo_ss):
+        """
+        Calculate the magnification of the field-of-view for a telescope focal number.
+
+        :param dist_xo_ss: Distance from the observer to the starshade.
+        :type dist_xo_ss: float
+        :return: Magnification factor.
+        :rtype: float
+        """
         return self.f / (dist_xo_ss + self.dist_ss_t)
 
     def calc_d_s(self, d_s_mas, dist_xo_ss):
@@ -77,7 +101,10 @@ class StarshadeProp:
 
     def gen_pupil_field(self, chunk = 1):
         """
-        Generates the field at the pupil for choice of starshade
+        Generate the field at the pupil for the chosen starshade.
+
+        :param chunk: Whether to use chunked parallel processing (if so, must use a memmap file).
+        :type chunk: int, optional
         """
         if glob.glob(f"data/fields/{self.drm}_pupil_{self.d_x_str}*.npz"): return
 
@@ -96,8 +123,12 @@ class StarshadeProp:
 
     def gen_pupil(self, pupil_type):
         """
-        Options for pupil_type (generated with HCIPy): 
-        circ, ELT, GMT, TMT, Hale, LUVOIR-A, LUVOIR-B, Magellan, VLT, HiCAT, HabEx, HST, JWST, Keck, hex
+        Generate a pupil mask (uses HCIPy)
+        Pupil options are:
+            circ, ELT, GMT, TMT, Hale, LUVOIR-A, LUVOIR-B, Magellan, VLT, HiCAT, HabEx, HST, JWST, Keck, hex
+
+        :param pupil_type: The type of pupil aperture (e.g., 'circ', 'hex').
+        :type pupil_type: str
         """
         try:
             pupil_data = np.load('data/pupils/'+pupil_type+'_'+str(int(self.N_t))+'.npz')
@@ -110,10 +141,16 @@ class StarshadeProp:
 
     def gen_psf_basis(self, pupil_type, pupil_symmetry = False):
         """
-        Generates the incoherent field at the pupil for choice of starshade
+        Generate the incoherent PSF basis for a particular pupil and starshade.
         Contrast is measured in units of if no starhade were present, i.e. just FFT of the pupil_mask 
         If the pupil is symmetric, only generate the positive quadrant of PSF's
+
+        :param pupil_type: The type of pupil aperture (e.g., 'circ', 'hex').
+        :type pupil_type: str
+        :param pupil_symmetry: Whether to use symmetry to reduce computation, defaults to False.
+        :type pupil_symmetry: bool, optional
         """
+
         if glob.glob(f"data/psf/{self.drm}_psf_{pupil_type}_{self.d_x_str}*.npz"): return
 
         print("PSF file does not exist. Generating: ")
@@ -171,26 +208,26 @@ class StarshadeProp:
         wl=self.wl_range, d_pix_mas = self.d_p_mas)
 
     def gen_scene(self, pupil_type, source_field, wl, pupil_symmetry = False):
-        '''
-        Generate the scene intensity based on the specified pupil type, source field, wavelength, 
-        and pupil symmetry.
-        Args:
-            pupil_type : str
-                The type of pupil used (e.g., circular, hex).
-            source_field : np.ndarray
-                The input source field array, representing the spatial distribution of the source.
-            wl : float
-                The wavelength of light in meters.
-            pupil_symmetry : bool, optional
-                Whether the pupil symmetry should be considered. Default is False.
+        """
+        Generate the output scene intensity
 
-        Returns:
-            output_intensity: 2D imaged field
+        :param pupil_type: The type of pupil used (e.g., circular, hex).
+        :type pupil_type: str
+        :param source_field: The input source field array, representing the spatial distribution of the source.
+        :type source_field: np.ndarray
+        :param wl: The wavelength of light in meters.
+        :type wl: float
+        :param pupil_symmetry: Whether the pupil symmetry should be considered, defaults to False.
+        :type pupil_symmetry: bool, optional
 
-        psf_off_axis can be much larger than output N_p
-        N_p : number of output pixels
+        :returns: A 2D imaged field representing the output intensity.
+        :rtype: np.ndarray
 
-        '''
+        :notes:
+            - `psf_off_axis` can be much larger than the output `N_p`.
+            - `N_s`: Number of source pixels.
+            - `N_p`: Number of output pixels.
+        """
         psf = np.load('data/psf/'+self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz')
         _, _, norm_contrast, N_basis, N_pix, N_pix_overcomplete = psf['params']
         psf_basis = psf['psf_basis']
