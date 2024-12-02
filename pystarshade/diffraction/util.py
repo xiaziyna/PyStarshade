@@ -3,8 +3,26 @@ import numpy as np
 #=== useful constants====
 pc_to_meter = 3.08567782e16
 au_to_meter = 149597870700.
+mas_to_rad = mas_to_rad = 4.84814e-9 # preference
 rad_to_mas = 206264806.2471
 #========================
+
+def ang_res(wl, D):
+    return (wl/D)/mas_to_rad
+
+def fresnel_num(R, wl, dist_ss_t):
+    return R**2 / (wl * dist_ss_t)
+
+def flat_grid(N, negative=True):
+    """
+    Generate a 2D grid of points into a flat array
+    If negative is true, the grid will range from (-N/2 to N/2) including zero
+    If negative is false, the grid will range from (0 to N)
+    """
+    if negative: xv, yv = np.meshgrid(np.arange(-(N//2), (N//2)+1), np.arange(-(N//2), (N//2)+1))
+    else: xv, yv = np.meshgrid(np.arange(N), np.arange(N))
+    return np.hstack((xv.flatten('F')[:,np.newaxis],yv.flatten('F')[:,np.newaxis]))
+
 
 def trunc_2d(x, N_out):
     """
@@ -84,6 +102,14 @@ def bluestein_pad(arr, N_in, N_out_x, N_out_y=None):
             = arr[half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr, \
             half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr]
     return zp_arr
+
+def pad_2d(arr, N_out):
+    pad_arr = np.zeros((N_out, N_out), dtype=arr.dtype)
+    half_N_in = arr.shape[0] // 2
+    bit = arr.shape[0] % 2
+    pad_arr[N_out//2 - half_N_in : N_out//2 + half_N_in + bit ,N_out//2 - half_N_in : N_out//2 + half_N_in + bit] = arr
+    return pad_arr
+
 
 def zero_pad(arr, N_in, ZP):
     """

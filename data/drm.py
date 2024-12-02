@@ -11,8 +11,8 @@ telescope_params = {
         'focal_length_lens': 30,
         'diameter_telescope_m': 2.36,
         'radius_lens': 2.36 / 2,
-        'geo_dist_ss_t': 3.724225668350351e+07,
-        'geo_iwa_mas': 72,
+        'dist_ss_t': 3.724225668350351e+07,
+        'iwa_mas': 72,
         'num_pet': 16,
         'ss_radius': 13,
         'grey_mask_dx': ['01m', '005m', '002m', '001m', '0005m'],
@@ -21,8 +21,8 @@ telescope_params = {
         'dist_ss_t': 3.724225668350351e+07 * np.sum(wfirst_wl_bands[0])/np.sum(wfirst_wl_bands, axis=1),
         'iwa': 72 * np.sum(wfirst_wl_bands, axis=1)/np.sum(wfirst_wl_bands[0])
     },
-    'hwo': {
-        'focal_length_lens': None,
+    'HWO': {
+        'focal_length_lens': 10,
         'diameter_telescope_m': 6,
         'radius_lens': 3,
         'ss_radius': 30,
@@ -32,7 +32,29 @@ telescope_params = {
         'dx_': [0.04, 0.001],
         'grey_mask_dx': ['04m', '001m'],
         'iwa': [30 / 9.52e+07 / mas_to_rad]  # R_ss / dist_ss_t in MAS
+    },
+    'habex': {
+        'focal_length_lens': 11,
+        'diameter_telescope_m': 4,
+        'radius_lens': 3,
+        'ss_radius': 36,
+        'dist_ss_t': [1.24e+08],
+        'num_pet': 24,
+        'wl_bands': [[300, 1000]],
+        'dx_': [0.01, 0.005, 0.002, 0.001, 0.0005],
+        'grey_mask_dx': ['01m', '005m', '002m', '001m', '0005m'],
+        'iwa': [60]  # R_ss / dist_ss_t in MAS
+    },
+    'hwo': {
+        'focal_length_lens': 10,
+        'diameter_telescope_m': 6,
+        'radius_lens': 3,
+        'ss_radius': 30,
+        'dist_ss_t': [9.52e+07],
+        'num_pet': 24,
+        'wl_bands': [[500, 600]],
+        'dx_': [0.04, 0.001],
+        'grey_mask_dx': ['04m', '001m'],
+        'iwa': [30 / 9.52e+07 / mas_to_rad]  # R_ss / dist_ss_t in MAS
     }
 }
-
-
