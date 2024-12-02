@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pystarshade",
-    version="0.1.7",
+    version="0.1.8",
     description="A python package for end-to-end starshade simulation",
     author="Jamila Taaki",
     author_email="xiaziyna@gmail.com",
@@ -12,6 +12,11 @@ setup(
         "numpy",
         "scipy",
     ],
+    extras_require={
+        "extra": [
+            "hcipy",
+            "astropy"
+    ]}
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",

@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from .util import bluestein_pad, trunc_2d
+from util import bluestein_pad, trunc_2d
 
 def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
     """
@@ -239,6 +239,43 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
         out_fac1 = out_fac2 = np.exp ( np.arange(N_out) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
     uncorrected_output_field = zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=chunk)
     return uncorrected_output_field*np.outer(out_fac1, out_fac2)
+
+def single_chunked_zoom_fft_mod(x, N_x, N_out, N_X, i=0):
+    # For computing the FFT over a single input chunk i = 0...3, and deciding which one
+    bit_x = N_x%2
+    sec_N_x = N_x//2 + 1 # this is the (max) size of non-zero portion of segment, same for all 4
+    shift_bit = 1 - sec_N_x%2
+    sec_N_x += shift_bit # want this to be an odd number as it makes it easier to calculate shifts and center
+    phase_shift =  sec_N_x//2
+    zoom_fft_out = np.zeros((N_out, N_out), dtype=np.complex128)
+    if shift_bit:
+        if i == 0: x = np.pad(x, ((0,1),(0,1)), 'constant')
+        elif i == 1: x = np.pad(x, ((0,1),(0,2)), 'constant')
+        elif i == 2: x = np.pad(x, ((0,2),(0,2)), 'constant')
+        elif i == 3: x = np.pad(x, ((0,2),(0,1)), 'constant')
+    else:
+        if i == 1: x = np.pad(x, ((0,0),(0,1)), 'constant')
+        elif i == 2: x = np.pad(x, ((0,1),(0,1)), 'constant')
+        elif i == 3: x = np.pad(x, ((0,1),(0,0)), 'constant')
+    x_cent = bluestein_pad(x, sec_N_x, N_out)
+    zoom_ft_x = zoom_fft_2d_mod(x_cent, sec_N_x, N_out, N_X = N_X)
+    if i == 0:
+        ph_1 = phase_shift - shift_bit
+        ph_2 = ph_1
+    elif i == 1:
+        ph_1 = phase_shift - shift_bit
+        ph_2 = -(phase_shift + 1)
+    elif i == 2:
+        ph_1 = -(phase_shift + 1)
+        ph_2 = -(phase_shift + 1)
+    elif i == 3:
+        ph_1 = -(phase_shift + 1)
+        ph_2 = phase_shift - shift_bit
+
+    out_fac_1 = np.exp ( np.arange(-(N_out//2), (N_out//2) + 1) * (1j * 2 * np.pi * ph_1 * (1 / (N_X)) ) )
+    out_fac_2 = np.exp ( np.arange(-(N_out//2), (N_out//2) + 1) * (1j * 2 * np.pi * ph_2 * (1 / (N_X)) ) )
+    zoom_fft_out = zoom_ft_x * np.outer(out_fac_1, out_fac_2)
+    return zoom_fft_out
 
 def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
     """

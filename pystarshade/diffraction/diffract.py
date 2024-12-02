@@ -1,6 +1,6 @@
 import numpy as np
-from .bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod
-from .util import *
+from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod
+from util import *
 
 class Fresnel:
     def __init__(self, d_x, N_in, z, wavelength):
@@ -33,7 +33,7 @@ class FresnelSingle(Fresnel):
 
         Returns:
             float : N_X = Z_pad * N_in + 1 - phantom padded length of input signal
-	"""
+	    """
         N_X = self.max_freq * self.wl_z / self.d_f
         return N_X
 
@@ -84,7 +84,6 @@ class FresnelSingle(Fresnel):
         quad_out_fac = np.exp(1j * self.k * self.z) * np.exp(1j * self.k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z) 
         return quad_out_fac * output_field, df
 
-
     def nchunk_zoom_fresnel_single_fft(self, x_file, N_out, N_chunk = 4):
         """
         Single FFT Fresnel diffraction calculated using an N_chunk*N_chunk -way chunked
@@ -121,31 +120,55 @@ class FresnelSingle(Fresnel):
         Returns
         output_field, df : Diffracted output field and sample size
         """
-	    bit_x = self.N_in%2
+        bit_x = self.N_in%2
         for chunk in range(4):
-	        x_trunc = np.memmap(x_file, dtype=np.complex128, mode='w+', shape=(self.N_in, self.N_in))
-	        if chunk == 0:
-	            xx = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
-	            yy = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
-	            x_trunc[:self.N_in//2 + bit_x, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+            x_trunc = np.memmap(x_file, dtype=np.complex128, mode='w+', shape=(self.N_in, self.N_in))
+            if chunk == 0:
+                xx = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+                yy = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+                x_trunc[:self.N_in//2 + bit_x, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
             elif chunk == 1:
-	            xx = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
-	            yy = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
-		        x_trunc[:self.N_in//2 + bit_x, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+                xx = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+                yy = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+                x_trunc[:self.N_in//2 + bit_x, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
             elif chunk == 2:
-	            xx = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
-	            yy = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
-	            x_trunc[self.N_in//2 + bit_x:, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+                xx = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+                yy = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+                x_trunc[self.N_in//2 + bit_x:, self.N_in//2 + bit_x:] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
             elif chunk == 3:
-	            xx = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
-	            yy = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
-		        x_trunc[self.N_in//2 + bit_x:, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
-	        x_trunc.flush()
-	    output_field = four_chunked_zoom_fft_mod(x_file, self.N_in, N_out, self.N_X) * (self.d_x**2)
+                xx = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+                yy = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+                x_trunc[self.N_in//2 + bit_x:, :self.N_in//2 + bit_x] *= np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)).astype(np.complex128)
+            x_trunc.flush()
+        output_field = four_chunked_zoom_fft_mod(x_file, self.N_in, N_out, self.N_X) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df )
         quad_out_fac = np.exp(1j * self.k * self.z) * np.exp(1j * self.k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z)
         return quad_out_fac * output_field, df
+
+    def one_chunk_zoom_fresnel_single_fft(self, field, N_out, chunk=0):
+        # Use me if you'd rather not load a full-starshade or store one on memory
+        # first call zoom_fft_quad_out_mod and compute the field on a single quadrant)
+        k = 2 * np.pi / self.wavelength
+        bit_x = self.N_in%2
+        if chunk == 0:
+            x = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+            y = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+        elif chunk == 1:
+            x = np.arange(-(self.N_in//2), 1)[:, np.newaxis] * self.d_x
+            y = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+        elif chunk == 2:
+            x = np.arange(1, self.N_in//2 + bit_x)[np.newaxis, :] * self.d_x
+            y = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+        elif chunk == 3:
+            x = np.arange(1, self.N_in//2 + bit_x)[:, np.newaxis] * self.d_x
+            y = np.arange(-(self.N_in//2), 1)[np.newaxis, :] * self.d_x
+        field *= np.exp(1j * (np.pi /self.wl_z) * (x**2 + y**2))
+        field = single_chunked_zoom_fft_mod(field, self.N_in, N_out, self.N_X, i=chunk) * (self.d_x**2)
+        df = self.max_freq*self.wl_z / self.N_X
+        out_xy = grid_points(N_out, N_out, dx = df )
+        quad_out_fac = np.exp(1j * k * self.z) * np.exp(1j * k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z)
+        return quad_out_fac * field, df
 
 class FresnelDouble(Fresnel):
     """

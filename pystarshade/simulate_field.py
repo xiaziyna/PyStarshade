@@ -1,8 +1,103 @@
 import numpy as np
-from .apodization.apodize import *
-from .diffraction.util import *
-from .diffraction.field import *
-from .diffraction.diffract import *
+from apodize import *
+from util import *
+from field import *
+from diffract import *
+
+def pupil_to_ccd(wl, focal_length_lens, pupil_field, pupil_mask, dt, dp,  N_t, N_pix):
+    '''
+    Propagate a field from a pupil to the CCD
+    Args:
+        wl (float): Wavelength.
+        focal_length_lens (float): Focal length of the telescope lens.
+        pupil_field (complex float, np.ndarray): Field incident on pupil.
+        dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
+    Returns:
+        out_field_ss (complex float, np.ndarray): field in focal plane
+    '''
+    field_aperture_ss = bluestein_pad(pupil_field*pupil_mask, N_t, N_pix)
+    fraunhofer = Fraunhofer(dt, dp, N_t, focal_length_lens, wl)
+    out_field_ss, dp = fraunhofer.zoom_fraunhofer(field_aperture_ss, N_pix)
+    return out_field_ss
+
+def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001, dx = 0.01, dt = 0.03, chunk = 1):
+    '''
+    Propagate starshade mask to the pupil using chunking of the input mask
+    For generating an incoherent PSF basis
+
+    Args:
+        ss_mask_fname (str): starshade mask filename (stored in mask directory)
+        wl (float): Wavelength.
+        dist_ss_t (float): Distance between starshade and telescope.
+        N_x (int): Number of non-zero samples in starshade plane. Diameter of the starshade ~ N_x * dx. 
+        N_t (int): Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
+        ds (float): Source field sampling
+        dx (float): Input mask sampling.
+        dt (float): Telescope sampling, must be less than (1/dx)*wl*dist_ss_t.
+        chunk (bool): True to use memory chunked FFT, if using chunk then must pass a memmmap file
+    Returns:
+        field_incident_telescope (complex float, np.ndarray): field incident on the telescope pupil.
+        field_free_prop (complex float, np.ndarray): field incident on the pupil if no starshade is used.
+        params (float, tuple): Tuple containing `(wl, dist_ss_t, dt)`.
+    '''
+    if chunk and not ss_mask_fname.endswith('.dat'):
+        raise ValueError(f'starshade mask must be a memmap file')
+    N_s=11
+    ds=0.04*au_to_meter
+    source_field = np.zeros((N_s, N_s))
+    source_field[N_s//2, N_s//2] = 1
+    dist_xo_ss = 10*pc_to_meter
+    source_prop = SourceField(ds, N_s, wl, dist_xo_ss, source_field)
+    field_free_prop = source_prop.farfield(dt, N_t, dist_ss_t)
+
+    field_incident_telescope_compl = np.zeros((N_t, N_t), dtype=np.complex128)
+    fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl)
+    if chunk:
+        field_incident_telescope_compl, dt = fresnel.nchunk_zoom_fresnel_single_fft(ss_mask_fname, N_t, N_chunk = 4)
+    else:
+        starshade_qu = np.load(ss_mask_fname)
+        starshade = qu_mask_to_full(starshade_qu)
+        field_incident_telescope_compl, dt = fresnel.zoom_fresnel_single_fft(starshade, field_after_ss, N_t)
+
+    field_incident_telescope = field_free_prop - field_incident_telescope_compl
+    params = np.array([wl, dist_xo_ss, dt])
+    return field_incident_telescope, field_free_prop, params
+
+
+def chunk_source_field_to_pupil(source_field, wl, dist_xo_ss, dist_ss_t, ss_mask_fname, N_s=1, N_x = 6401, N_t = 1001, ds=0.1*au_to_meter, dx = 0.01, dt = 0.03):
+    '''
+    !!!!!!!! I need checking, likely replace with chunky crazy, along wiht functions in fresnel and fft
+    '''
+    ps = PointSource(dx, N_x, wl, 0, 0, dist_xo_ss, 1)
+    k_vals = ps.wave_numbers()
+    field_incident_telescope_compl = np.zeros((N_t, N_t), dtype=np.complex128)
+    source_prop = SourceField(ds, N_s, wl, dist_xo_ss, source_field)
+#    test_plane = ps.plane_wave(k_vals, 0)
+    for chunk in range(4):
+    # chunk 0: UL, 1: UR, 2: LR, 3:LL
+#        field_after_ss = np.load('../mask/grey_wfirst_16_mask_%s_qu.npz' % (grey_mask_dx[mask_choice]))['data'].astype(np.complex128)
+        field_after_ss = np.load(ss_mask_fname)['grey_mask'].astype(np.complex128)
+        print (np.shape(field_after_ss))
+        if chunk == 0:
+            field_after_ss = np.fliplr(np.flipud(field_after_ss))
+        elif chunk == 1:
+            field_after_ss = np.flipud(field_after_ss[:, 1:])
+        elif chunk == 2:
+            field_after_ss = field_after_ss[1:, 1:]
+        elif chunk == 3:
+            field_after_ss = np.fliplr(field_after_ss[1:,])
+        fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl)
+        field_incident_telescope_compl_quad, dt = fresnel.one_chunk_zoom_fresnel_single_fft(self, field, N_out, chunk=0)(field_after_ss, N_t, chunk=chunk)
+        field_incident_telescope_compl += field_incident_telescope_compl_quad
+    #ss_qu = np.load(ss_mask_fname)['grey_mask'].astype(np.complex128)
+    #full_mask = qu_mask_to_full(ss_qu)
+    #test, dt = fresnel.zoom_fresnel_single_fft(full_mask, N_t)
+    field_free_prop = source_prop.farfield2(dt, N_t, dist_ss_t)
+    field_incident_telescope = field_free_prop - field_incident_telescope_compl
+    np.savetxt('out/pupil_test', np.abs(field_incident_telescope))
+    #np.savez_compressed('pupil_out/hwo_pupil_'+drm_params['grey_mask_dx'][mask_choice]+'_'+str(wl)+'.npz', field=field_incident_telescope)
+    #print (np.allclose(test, field_incident_telescope_compl))
+
 
 def source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, 
                         N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
