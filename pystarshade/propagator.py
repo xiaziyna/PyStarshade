@@ -1,33 +1,33 @@
-from data.drm import telescope_params, mas_to_rad
+from pystarshade.data.drm import telescope_params, mas_to_rad
 import glob
 import numpy as np
-from simulate_field import source_field_to_pupil, pupil_to_ccd
-from apodization.pupil import make_pupil
-from diffraction.util import flat_grid, bluestein_pad, trunc_2d, pad_2d
+from pystarshade.simulate_field import source_field_to_pupil, pupil_to_ccd
+from pystarshade.apodization.pupil import make_pupil
+from pystarshade.diffraction.util import flat_grid, bluestein_pad, trunc_2d, pad_2d, data_file_path
 
 class StarshadeProp:
     """
     Pre-compute files and propagate light past a starshade.
 
-    The class is initialized with a design reference mission (DRM) in data.drm, 
-    An example of how to use this class is below.
+    Parameters
+    ----------
+    drm : str
+        Design reference mission (e.g., 'wfirst' or 'hwo').
+    d_s_mas : float, optional
+        Source angular resolution in milliarcseconds, defaults to 2.
+    d_t_mas : float, optional
+        Pixel shift in the pupil plane corresponding to the angular field, defaults to 0.05.
+    d_p_mas : float, optional
+        Pixel size in the focal plane in milliarcseconds, defaults to 2.
+    d_wl : float, optional
+        Wavelength step size in nanometers, defaults to 50.
 
-    :param drm: Design reference mission (e.g. 'wfirst' or 'hwo').
-    :type drm: str
-    :param d_s_mas: Source angular resolution in milliarcseconds, defaults to 2.
-    :type d_s_mas: float, optional
-    :param d_t_mas: Pixel shift in the pupil plane corresponding to the angular field, defaults to 0.05.
-    :type d_t_mas: float, optional
-    :param d_p_mas: Pixel size in the focal plane in milliarcseconds, defaults to 2.
-    :type d_p_mas: float, optional
-    :param d_wl: Wavelength step size in nanometers, defaults to 50.
-    :type d_wl: float, optional
-
-    Example:
-        hwo_starshade = StarshadeProp(drm='hwo')
-        hwo_starshade.gen_pupil_field()
-        hwo_starshade.gen_psf_basis(pupil_type='hex')
-        hwo_starshade.gen_scene(pupil_type='hex', source_field, 500e-9)
+    Examples
+    --------
+    >>> hwo_starshade = StarshadeProp(drm='hwo')
+    >>> hwo_starshade.gen_pupil_field()
+    >>> hwo_starshade.gen_psf_basis(pupil_type='hex')
+    >>> hwo_starshade.gen_scene(pupil_type='hex', source_field, 500e-9)
     """
     def __init__(self, drm = None, d_s_mas = 2, d_t_mas = 0.05, d_p_mas = 2, d_wl = 50):
         self.drm = drm
@@ -44,14 +44,16 @@ class StarshadeProp:
 
     def set_mission_params(self, drm, mask_choice = 1, band_i = 0):
         """
-        Load the design reference mission (defined inside data/telescope_drm.py).
+        Load the design reference mission (defined inside `data/telescope_drm.py`).
 
-        :param drm: Design reference mission ('wfirst', 'hwo', etc.).
-        :type drm: str
-        :param mask_choice: Mask sampling choice.
-        :type mask_choice: int, optional
-        :param band_i: Wavelength band index.
-        :type band_i: int, optional
+        Parameters
+        ----------
+        drm : str
+            Design reference mission ('wfirst', 'hwo', etc.).
+        mask_choice : int, optional
+            Mask sampling choice.
+        band_i : int, optional
+            Wavelength band index.
         """
         drm_params = telescope_params[drm]
         self.f = drm_params['focal_length_lens']
@@ -63,7 +65,7 @@ class StarshadeProp:
         self.N_x =  int(2*(drm_params['ss_radius']+.2)*10 / (drm_params['dx_'][mask_choice]*10)) + 1
         self.d_x = drm_params['dx_'][mask_choice]
         self.d_x_str = drm_params['grey_mask_dx'][mask_choice]
-        self.ss_mask_fname_partial = '../../mask/grey_%s_%s_mask_%s' % (drm, str(drm_params['num_pet']), self.d_x_str) #change my path please 
+        self.ss_mask_fname_partial =  data_file_path('grey_%s_%s_mask_%s' % (drm, str(drm_params['num_pet']), self.d_x_str), 'masks', 'starshade_masks')
 
         # wavelength bands
         wl_min, wl_max = drm_params['wl_bands'][band_i][0], drm_params['wl_bands'][band_i][1]
@@ -86,14 +88,34 @@ class StarshadeProp:
         """
         Calculate the magnification of the field-of-view for a telescope focal number.
 
-        :param dist_xo_ss: Distance from the observer to the starshade.
-        :type dist_xo_ss: float
-        :return: Magnification factor.
-        :rtype: float
+        Parameters
+        ----------
+        dist_xo_ss : float
+            Distance from the observer to the starshade.
+
+        Returns
+        -------
+        float
+            Magnification factor.
         """
         return self.f / (dist_xo_ss + self.dist_ss_t)
 
     def calc_d_s(self, d_s_mas, dist_xo_ss):
+        """
+        Calculate the sampling size in meters.
+
+        Parameters
+        ----------
+        d_s_mas : float
+            Sampling size in milliarcseconds.
+        dist_xo_ss : float
+            Distance from observer to starshade.
+
+        Returns
+        -------
+        float
+            Sampling size in meters.
+        """
         return (d_s_mas * (dist_xo_ss * mas_to_rad))
 
     def calc_d_s_mas(self, d_s, dist_xo_ss):
@@ -103,55 +125,66 @@ class StarshadeProp:
         """
         Generate the field at the pupil for the chosen starshade.
 
-        :param chunk: Whether to use chunked parallel processing (if so, must use a memmap file).
-        :type chunk: int, optional
+        Parameters
+        ----------
+        chunk : int, optional
+            Whether to use chunked parallel processing (if so, must use a memmap file).
         """
-        if glob.glob(f"data/fields/{self.drm}_pupil_{self.d_x_str}*.npz"): return
 
-        print("File does not exist. Generating.")
+        fname = data_file_path(f"{self.drm}_pupil_{self.d_x_str}*.npz", 'fields')
+        if glob.glob(fname): return
+
+        print("Pupil field does not exist. Generating.")
         if chunk:
             ss_mask_fname = self.ss_mask_fname_partial + '.dat'
         else:
             ss_mask_fname = self.ss_mask_fname_partial + 'qu.npz'
+
         over_N_t = 2*int((self.suppress_region // self.d_t_mas) + 100)
         over_N_t += (1-over_N_t%2)
         for wl_i in self.wl_range:
+            save_path = data_file_path(self.drm+'_pupil_'+self.d_x_str+'_'+str(int(wl_i * 1e9))+'.npz', 'fields')
             field_incident_telescope, field_free_prop, params = source_field_to_pupil(ss_mask_fname, wl_i,\
             self.dist_ss_t, N_x = self.N_x, N_t = over_N_t, dx = self.d_x, dt = self.d_t, chunk=chunk)
-            np.savez_compressed('data/fields/'+self.drm+'_pupil_'+self.d_x_str+'_'+str(int(wl_i * 1e9))+'.npz',\
-            field=field_incident_telescope, freesp_field=field_free_prop, params=params)
+            np.savez_compressed(save_path, field=field_incident_telescope, freesp_field=field_free_prop, params=params)
 
     def gen_pupil(self, pupil_type):
         """
-        Generate a pupil mask (uses HCIPy)
+        Generate a pupil mask (uses HCIPy).
         Pupil options are:
             circ, ELT, GMT, TMT, Hale, LUVOIR-A, LUVOIR-B, Magellan, VLT, HiCAT, HabEx, HST, JWST, Keck, hex
 
-        :param pupil_type: The type of pupil aperture (e.g., 'circ', 'hex').
-        :type pupil_type: str
+        Parameters
+        ----------
+        pupil_type : str
+            The type of pupil aperture (e.g., 'circ', 'hex').
         """
+        file_path = data_file_path(pupil_type+'_'+str(int(self.N_t))+'.npz', 'pupils')
         try:
-            pupil_data = np.load('data/pupils/'+pupil_type+'_'+str(int(self.N_t))+'.npz')
+            pupil_data = np.load(file_path)
             self.pupil_mask = pupil_data['pupil']
         except FileNotFoundError:
-            print(f"File not found. Generating a new pupil mask.")
+            print(f"Generating a new pupil mask.")
             make_pupil(self.N_t, pupil_type)
-            pupil_data = np.load('data/pupils/'+pupil_type+'_'+str(int(self.N_t))+'.npz')
+            pupil_data = np.load(file_path)
             self.pupil_mask = pupil_data['pupil']
 
     def gen_psf_basis(self, pupil_type, pupil_symmetry = False):
         """
         Generate the incoherent PSF basis for a particular pupil and starshade.
-        Contrast is measured in units of if no starhade were present, i.e. just FFT of the pupil_mask 
-        If the pupil is symmetric, only generate the positive quadrant of PSF's
 
-        :param pupil_type: The type of pupil aperture (e.g., 'circ', 'hex').
-        :type pupil_type: str
-        :param pupil_symmetry: Whether to use symmetry to reduce computation, defaults to False.
-        :type pupil_symmetry: bool, optional
+        Contrast is measured in units of if no starshade were present, i.e., just FFT of the pupil_mask.
+        If the pupil is symmetric, only generate the positive quadrant of PSFs.
+
+        Parameters
+        ----------
+        pupil_type : str
+            The type of pupil aperture (e.g., 'circ', 'hex').
+        pupil_symmetry : bool, optional
+            Whether to use symmetry to reduce computation, defaults to False.
         """
-
-        if glob.glob(f"data/psf/{self.drm}_psf_{pupil_type}_{self.d_x_str}*.npz"): return
+        fname = data_file_path(f"{self.drm}_psf_{pupil_type}_{self.d_x_str}*.npz", 'psf')
+        if glob.glob(fname): return
 
         print("PSF file does not exist. Generating: ")
 
@@ -171,7 +204,7 @@ class StarshadeProp:
         for wl_i in range(self.N_wl):
             psf_basis = np.zeros((N_basis, N_basis, N_pix, N_pix), dtype=np.float32)
             on_axis_psf = np.zeros((N_pix_overcomplete, N_pix_overcomplete), dtype=np.float64)
-            data = np.load('data/fields/'+self.drm+'_pupil'+'_'+self.d_x_str+'_'+str(int(self.wl_range[wl_i]*1e9))+'.npz')
+            data = np.load(data_file_path(self.drm+'_pupil'+'_'+self.d_x_str+'_'+str(int(self.wl_range[wl_i]*1e9))+'.npz', 'fields'))
             wl = data['params'][0]
             pupil_field = data['field']
             over_N_t = int(np.shape(pupil_field)[0])
@@ -199,36 +232,42 @@ class StarshadeProp:
                     total_throughput[wl_i, p_i, p_j] = np.sum(on_axis_psf) / norm_factor
 
             params = np.array([ wl, self.d_p_mas, norm_contrast, N_basis, N_pix, N_pix_overcomplete])
-            np.savez_compressed('data/psf/'+self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz',\
-                                psf_basis=psf_basis / norm_contrast, on_axis_psf = on_axis_psf / norm_contrast,\
+            save_path = data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz','psf')
+            np.savez_compressed(save_path, psf_basis=psf_basis / norm_contrast, on_axis_psf = on_axis_psf / norm_contrast,\
                                 no_ss_psf = np.abs(focal_field_no_ss)**2 / norm_contrast, params=params)
 
-        np.savez_compressed('data/psf/'+self.drm+'_throughput_'+pupil_type+'_'+self.d_x_str+'.npz',\
-        core_throughput=core_throughput, total_throughput=total_throughput, grid_points = grid_points,\
-        wl=self.wl_range, d_pix_mas = self.d_p_mas)
+        save_path_throughput = data_file_path(self.drm+'_throughput_'+pupil_type+'_'+self.d_x_str+'.npz','psf')
+        np.savez_compressed(save_path_throughput, core_throughput=core_throughput, total_throughput=total_throughput,\
+                            grid_points = grid_points, wl=self.wl_range, d_pix_mas = self.d_p_mas)
 
     def gen_scene(self, pupil_type, source_field, wl, pupil_symmetry = False):
         """
-        Generate the output scene intensity
+        Generate the output scene intensity.
 
-        :param pupil_type: The type of pupil used (e.g., circular, hex).
-        :type pupil_type: str
-        :param source_field: The input source field array, representing the spatial distribution of the source.
-        :type source_field: np.ndarray
-        :param wl: The wavelength of light in meters.
-        :type wl: float
-        :param pupil_symmetry: Whether the pupil symmetry should be considered, defaults to False.
-        :type pupil_symmetry: bool, optional
+        Parameters
+        ----------
+        pupil_type : str
+            The type of pupil used (e.g., circular, hex).
+        source_field : np.ndarray
+            The input source field array, representing the spatial distribution of the source.
+        wl : float
+            The wavelength of light in meters.
+        pupil_symmetry : bool, optional
+            Whether the pupil symmetry should be considered, defaults to False.
 
-        :returns: A 2D imaged field representing the output intensity.
-        :rtype: np.ndarray
+        Returns
+        -------
+        np.ndarray
+            A 2D imaged field representing the output intensity.
 
-        :notes:
-            - `psf_off_axis` can be much larger than the output `N_p`.
-            - `N_s`: Number of source pixels.
-            - `N_p`: Number of output pixels.
+        Notes
+        -----
+        - `psf_off_axis` can be much larger than the output `N_p`.
+        - `N_s`: Number of source pixels.
+        - `N_p`: Number of output pixels.
         """
-        psf = np.load('data/psf/'+self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz')
+        bla = np.load('/home/ielo/Projects/PyStarshade/pystarshade/data/psf/hwo_psf_hex_001m_500.npz')
+        psf = np.load(data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz', 'psf'))
         _, _, norm_contrast, N_basis, N_pix, N_pix_overcomplete = psf['params']
         psf_basis = psf['psf_basis']
         N_basis, N_pix, N_pix_overcomplete = int(N_basis), int(N_pix), int(N_pix_overcomplete)

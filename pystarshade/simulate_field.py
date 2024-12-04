@@ -1,45 +1,68 @@
 import numpy as np
-from apodize import *
-from util import *
-from field import *
-from diffract import *
+from pystarshade.apodization.apodize import *
+from pystarshade.diffraction.util import *
+from pystarshade.diffraction.field import *
+from pystarshade.diffraction.diffract import *
 
 def pupil_to_ccd(wl, focal_length_lens, pupil_field, pupil_mask, dt, dp,  N_t, N_pix):
-    '''
-    Propagate a field from a pupil to the CCD
-    Args:
-        wl (float): Wavelength.
-        focal_length_lens (float): Focal length of the telescope lens.
-        pupil_field (complex float, np.ndarray): Field incident on pupil.
-        dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
-    Returns:
-        out_field_ss (complex float, np.ndarray): field in focal plane
-    '''
+    """
+    Propagate a field from a pupil to the focal plane/CCD.
+
+    Parameters
+    ----------
+    wl : float
+        Wavelength.
+    focal_length_lens : float
+        Focal length of the telescope lens.
+    pupil_field : np.ndarray of complex
+        Field incident on the pupil.
+    dp : float
+        Focal plane sampling, depends on the telescope and the desired field-of-view.
+
+    Returns
+    -------
+    out_field_ss : np.ndarray of complex
+        Field in the focal plane.
+    """
     field_aperture_ss = bluestein_pad(pupil_field*pupil_mask, N_t, N_pix)
     fraunhofer = Fraunhofer(dt, dp, N_t, focal_length_lens, wl)
     out_field_ss, dp = fraunhofer.zoom_fraunhofer(field_aperture_ss, N_pix)
     return out_field_ss
 
 def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001, dx = 0.01, dt = 0.03, chunk = 1):
-    '''
-    Propagate starshade mask to the pupil using chunking of the input mask
-    For generating an incoherent PSF basis
+    """
+    Propagate starshade mask to the pupil using chunking of the input mask for generating an incoherent PSF basis.
 
-    Args:
-        ss_mask_fname (str): starshade mask filename (stored in mask directory)
-        wl (float): Wavelength.
-        dist_ss_t (float): Distance between starshade and telescope.
-        N_x (int): Number of non-zero samples in starshade plane. Diameter of the starshade ~ N_x * dx. 
-        N_t (int): Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
-        ds (float): Source field sampling
-        dx (float): Input mask sampling.
-        dt (float): Telescope sampling, must be less than (1/dx)*wl*dist_ss_t.
-        chunk (bool): True to use memory chunked FFT, if using chunk then must pass a memmmap file
-    Returns:
-        field_incident_telescope (complex float, np.ndarray): field incident on the telescope pupil.
-        field_free_prop (complex float, np.ndarray): field incident on the pupil if no starshade is used.
-        params (float, tuple): Tuple containing `(wl, dist_ss_t, dt)`.
-    '''
+    Parameters
+    ----------
+    ss_mask_fname : str
+        Starshade mask filename (stored in mask directory).
+    wl : float
+        Wavelength.
+    dist_ss_t : float
+        Distance between the starshade and the telescope.
+    N_x : int
+        Number of non-zero samples in the starshade plane. Diameter of the starshade ~ N_x * dx.
+    N_t : int
+        Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
+    ds : float
+        Source field sampling.
+    dx : float
+        Input starshade mask sampling.
+    dt : float
+        Telescope sampling, must be less than `(1 / dx) * wl * dist_ss_t`.
+    chunk : bool
+        If True, use memory chunked FFT. If using chunk, a memmap file must be passed.
+
+    Returns
+    -------
+    field_incident_telescope : np.ndarray of complex
+        Field incident on the telescope pupil.
+    field_free_prop : np.ndarray of complex
+        Field incident on the pupil if no starshade is used.
+    params : tuple of float
+        Tuple containing `(wl, dist_ss_t, dt)`.
+    """
     if chunk and not ss_mask_fname.endswith('.dat'):
         raise ValueError(f'starshade mask must be a memmap file')
     N_s=11
@@ -103,31 +126,46 @@ def source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_le
                         N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
                         ds = 10*0.03*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7):
     """
-    Propagate an (N_s * N_s) source field (far field) through a starshade to a CCD.    
+    Propagate an (N_s x N_s) source field (far field) through a starshade to a CCD/focal plane coherently.
     Field incident on starshade is calculated as sum of planar waves for each source pixel.
-    Fresnel diffraction from starshade to telescope, followed by Fraunhofer diffraction from telescope to CCD. 
+    Fresnel diffraction from starshade to telescope, followed by Fraunhofer diffraction from telescope to CCD/focal plane. 
     Uses Babinets principle, alongside Bluestein FFTs for high-resolution diffraction. 
-    Based on calculations (Taaki et al. 2023 in prep.).
 
-    Args:
-        source_field (float): N_s * N_s source field
-        wl (float): Wavelength of light.
-        dist_xo_ss (float): Distance between source plane and starshade.
-        dist_ss_t (float): Distance between starshade and telescope.
-        focal_length_lens (float): Focal length of the telescope lens.
-        radius_lens (float): Radius of the telescope lens.
-        N_s (int): Number of pixels in the source field. 
-        N_x (int): Number of non-zero samples in starshade plane. Diameter of the starshade ~ N_x * dx. 
-        N_t (int): Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
-        N_pix (int): Number of output pixels required.
-        ds (float): Source field sampling
-        dx (float): Input sampling. Default is 0.01.
-        dt (float): Telescope sampling, must be less than (1/dx)*wl*dist_ss_t.
-        dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
+    Parameters
+    ----------
+    source_field : float
+        N_s x N_s source field.
+    wl : float
+        Wavelength of light.
+    dist_xo_ss : float
+        Distance between the source plane and the starshade.
+    dist_ss_t : float
+        Distance between the starshade and the telescope.
+    focal_length_lens : float
+        Focal length of the telescope lens.
+    radius_lens : float
+        Radius of the telescope lens.
+    N_s : int
+        Number of pixels in the source field.
+    N_x : int
+        Number of non-zero samples in the starshade plane. Diameter of the starshade ~ N_x * dx.
+    N_t : int
+        Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
+    N_pix : int
+        Number of output pixels required.
+    ds : float
+        Source field sampling.
+    dx : float, optional
+        Input sampling. Default is 0.01.
+    dt : float
+        Telescope sampling, must be less than `(1 / dx) * wl * dist_ss_t`.
+    dp : float
+        Focal plane sampling, depends on the telescope and the desired field-of-view.
 
-    Returns:
-        The resulting field on the CCD plane of size (N_pix, N_pix).
-
+    Returns
+    -------
+    out_field_ss : np.ndarray of complex
+        Resulting field at the focal plane of size (N_pix, N_pix).
     """
 
     source_prop = SourceField(ds, N_s, wl, dist_xo_ss, source_field)
@@ -161,29 +199,43 @@ def point_source_to_ccd(mag_s, loc_s, wl, dist_xo_ss, dist_ss_t, focal_length_le
                         N_x = 6401, N_t = 1001, N_pix = 1001,
                         dx = 0.01, dt = 0.0116, dp=1.9e-7):
     """
-    Propagate a collection of point-sources located in the source plane through a starshade to a CCD.
-    Sequentially performs Fresnel diffraction from starshade to telescope, followed by Fraunhofer diffraction from telescope to CCD. 
+    Propagate a collection of point-sources located in the source plane through a starshade to a CCD/focal plane coherently.
+    Sequentially performs Fresnel diffraction from starshade to telescope, followed by Fraunhofer diffraction from telescope to CCD/focal plane. 
     Uses Babinets principle, alongside Bluestein FFTs for high-resolution diffraction. 
-    Based on calculations (Taaki et al. 2023 in prep.).
 
-    Args:
-        mag_s (list): List of magnitudes for each point source.
-        loc_s (list): List of locations (x, y, z) for each point source (z = 0 is starshade plane).
-        wl (float): Wavelength of light.
-        dist_xo_ss (float): Distance between source plane and starshade.
-        dist_ss_t (float): Distance between starshade and telescope.
-        focal_length_lens (float): Focal length of the telescope lens.
-        radius_lens (float): Radius of the telescope lens.
-        N_x (int): Number of non-zero samples in starshade plane. Diameter of the starshade ~ N_x * dx. 
-        N_t (int): Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
-        N_pix (int): Number of output pixels required. 
-        dx (float): Input sampling. Default is 0.01.
-        dt (float): Telescope sampling, must be less than (1/dx)*wl*dist_ss_t.
-        dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
+    Parameters
+    ----------
+    mag_s : list
+        List of magnitudes for each point source.
+    loc_s : list
+        List of locations `(x, y, z)` for each point source (z = 0 is the starshade plane).
+    wl : float
+        Wavelength of light.
+    dist_xo_ss : float
+        Distance between the source plane and the starshade.
+    dist_ss_t : float
+        Distance between the starshade and the telescope.
+    focal_length_lens : float
+        Focal length of the telescope lens.
+    radius_lens : float
+        Radius of the telescope lens.
+    N_x : int
+        Number of non-zero samples in the starshade plane. Diameter of the starshade ~ N_x * dx.
+    N_t : int
+        Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
+    N_pix : int
+        Number of output pixels required.
+    dx : float, optional
+        Input starshade sampling. Default is 0.01.
+    dt : float
+        Telescope sampling, must be less than `(1 / dx) * wl * dist_ss_t`.
+    dp : float
+        Focal plane sampling, depends on the telescope and the desired field-of-view.
 
-    Returns:
-        The resulting field on the CCD plane of size (N_pix, N_pix).
-
+    Returns
+    -------
+    out_field_ss : np.ndarray of complex
+        Resulting field at the focal plane of size (N_pix, N_pix).
     """
 
     N_X = N_x + N_t - 1 # The number of input samples required to perform Fresnel propagation with a Bluestein FFT

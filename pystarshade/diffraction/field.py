@@ -1,19 +1,27 @@
-from util import *
-from bluestein_fft import zoom_fft_2d_mod
+from pystarshade.diffraction.util import *
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod
 import numpy as np
 
 class SourceField:
     """
-    This class returns far-field diffraction for an N_s x N_s source-field, calculated via a Bluestein FFT
-    Either define d_s_mas or d_s and z
+    Computes far-field diffraction for an N_s x N_s source field using a Bluestein FFT.
 
-    Attributes:
-        d_s_mas (float): Source field sampling in mas
-        d_s (float): Source field sampling
-        N_s (int): Number of samples of the field
-        wavelength (float): Wavelength of light
-        z (float): Far-field distance
-    Note: Uses planar wave description of far-field
+    Attributes
+    ----------
+    d_s : float
+        Source field sampling.
+    N_s : int
+        Number of samples in the field.
+    wavelength : float
+        Wavelength of light.
+    z : float
+        Far-field distance.
+    source_field : np.ndarray
+        The source field array.
+
+    Notes
+    -----
+    The class uses a plane wave description of the far-field. Either `d_s_mas` or `d_s` and `z` must be defined.
     """
     def __init__(self, d_s, N_s, wavelength, z, source_field):
         self.N_s = N_s
@@ -26,17 +34,23 @@ class SourceField:
 
     def farfield(self, d_x, N_x, z1):
         """
-        Calculate the far-field diffraction of source field at local distance z1 over (N_x, N_x) grid with sampling dx
+        Calculate the far-field diffraction of a source field at a local distance `z1` over an (N_x, N_x) grid.
         Note: z1 is defined as a local distance, the origin is set in the far-field.
 
-        Arg:
-            d_x (float): Output spatial sampling 
-            N_x (int): Number of output samples
-            z1 (float): Propagtion distance (Note: for computational purposes treat origin as starshade plane)
+        Parameters
+        ----------
+        d_x : float
+            Output spatial sampling.
+        N_x : int
+            Number of output samples.
+        z1 : float
+            Propagation distance (Note: computationally, the origin is treated as the starshade plane).
 
-        Returns:
-            numpy.ndarray: A 2D array representing the computed field over the grid.
-        """ 
+        Returns
+        -------
+        np.ndarray
+            A 2D array representing the computed field over the grid.
+        """
         ZP = ((self.max_freq * self.wavelength * (self.z )  / d_x) - 1) / self.N_s
         out_field = zoom_fft_2d_mod(self.source_field, self.N_s, N_x, Z_pad = ZP)
         out_fac = np.exp( 1j* self.k * z1)
@@ -45,16 +59,21 @@ class SourceField:
 class Field:
     """
     This class returns analytic far-field diffraction for sources, or can be used to generate source fields
-    Inlcudes : Point source (off-axis), planar fields, Gaussian sources
-    
-    Attributes:
-        d_x (float): Spatial sampling of the field
-        N (int): Number of samples of the field
-        wavelength (float): Wavelength of light
-        z (float): Far-field distance
 
-    Note:
-        Any additional notes or important information about the class.
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling of the field.
+    N : int
+        Number of samples in the field.
+    wavelength : float
+        Wavelength of light.
+    z : float
+        Far-field distance.
+
+    Notes
+    -----
+    Includes plane-wave fields, Gaussian sources, and point sources.
     """
     def __init__(self, d_x, N, wavelength, z):
         self.d_x = d_x
@@ -64,11 +83,14 @@ class Field:
 
     def update(self, d_x=None, N=None):
         """
-        Update the values of d_x, N, and z.
+        Update the sampling (`d_x`) and number of samples (`N`).
 
-        Args:
-            d_x (float, optional): New value for d_x.
-            N (int, optional): New value for N.
+        Parameters
+        ----------
+        d_x : float, optional
+            New value for spatial sampling.
+        N : int, optional
+            New value for the number of samples.
         """
         if d_x is not None:
             self.d_x = d_x
@@ -77,25 +99,35 @@ class Field:
 
 class GaussianSource(Field):
     """
-    A class to calculate the far-field of a Gaussian source.
+    Computes far-field diffraction for a Gaussian source.
 
-    Attributes:
-        d_x (float): Spatial sampling of the output field.
-        N (int): Number of samples of the output field.
-        wavelength (float): Wavelength of light.
-        x (float): The x-coordinate of the Gaussian source origin in the source field.
-        y (float): The y-coordinate of the Gaussian source origin in the source field.
-        z (float): Far-field distance.
-        A (float): The amplitude of the Gaussian source.
-        sigma (float): The standard deviation of the Gaussian source.
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling of the output field.
+    N : int
+        Number of samples in the output field.
+    wavelength : float
+        Wavelength of light.
+    x : float
+        x-coordinate of the Gaussian source origin.
+    y : float
+        y-coordinate of the Gaussian source origin.
+    z : float
+        Far-field distance.
+    A : float
+        Amplitude of the Gaussian source.
+    sigma : float
+        Standard deviation of the Gaussian source.
 
+    Inherits From
+    -------------
+    Field
 
-    Inherits from:
-        Field
-
-    Note: source field is given by A * np.exp(-(x/sigma)**2)
+    Notes
+    -----
+    The source field is given by `A * exp(-(x/sigma)^2)`.
     """
-
     def __init__(self, d_x, N, wavelength, x, y, z, A, sigma):
         super().__init__(d_x, N, wavelength, z)
         self.x = x        
@@ -107,13 +139,17 @@ class GaussianSource(Field):
 
     def far_field_gaussian_params(self):
         """
-        Calculates the far-field amplitude (A) and inverse standard deviation (1/sigma).
+        Calculate far-field amplitude (`A`) and inverse standard deviation (`1/sigma`).
 
-        Returns:
-            far_A (float): The far-field amplitude.
-            far_inv_sigma (float): The inverse standard deviation of the far-field Gaussian.
+        Returns
+        -------
+        tuple of float
+            - `far_A` : Far-field amplitude.
+            - `far_inv_sigma` : Inverse standard deviation of the far-field Gaussian.
 
-        Notes: See https://www.pas.rochester.edu/~dmw/ast203/Lectures/Lect_14.pdf
+        Notes
+        -----
+        See: https://www.pas.rochester.edu/~dmw/ast203/Lectures/Lect_14.pdf
         """
         far_A = self.A * np.pi * self.sigma**2 / self.wl_z
         far_inv_sigma = np.pi * self.sigma / self.wl_z
@@ -121,15 +157,21 @@ class GaussianSource(Field):
 
     def far_field_gaussian(self, far_A, far_inv_sigma, z1):
         """
-        Calculates the far-field Gaussian with parameters (far_A, 1/far_inv_sigma) on a Cartesian grid. 
+        Compute the far-field Gaussian on a Cartesian grid.
 
-        Args:
-            far_A (float): The far-field amplitude.
-            far_inv_sigma (float): The inverse standard deviation of the far-field Gaussian.
-            z1 (float): Distance (Note: for computational purposes treat origin as starshade plane).
+        Parameters
+        ----------
+        far_A : float
+            Far-field amplitude.
+        far_inv_sigma : float
+            Inverse standard deviation of the far-field Gaussian.
+        z1 : float
+            Propagation distance (Note: the origin is treated as the starshade plane).
 
-        Returns:
-            numpy.ndarray: A 2D array representing the far-field Gaussian evaluated on a Cartesian grid.
+        Returns
+        -------
+        np.ndarray
+            A 2D array representing the far-field Gaussian on the grid.
         """
         vals = np.linspace(-(self.N//2),(self.N//2),self.N)*self.d_x
         xx, yy = np.meshgrid(vals, vals)
@@ -137,6 +179,31 @@ class GaussianSource(Field):
         return far_A * np.exp( - ( xx**2 + yy**2 ) * far_inv_sigma**2) * np.exp( 1j * 2 * np.pi * z1 / self.wavelength)
 
 class PointSource(Field):
+    """
+    Computes far-field diffraction for a point source.
+
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling of the output field.
+    N : int
+        Number of samples in the output field.
+    wavelength : float
+        Wavelength of light.
+    x : float
+        x-coordinate of the source.
+    y : float
+        y-coordinate of the source.
+    z : float
+        Far-field distance.
+    A : float
+        Amplitude of the source.
+
+    Inherits From
+    -------------
+    Field
+    """
+
     def __init__(self, d_x, N, wavelength, x, y, z, A):
         super().__init__(d_x, N, wavelength, z)
         self.x = x        
@@ -145,15 +212,16 @@ class PointSource(Field):
 
     def wave_numbers(self):
         """
-        Calculate the planar wave numbers for a point source at position (x, y, z)
+        Calculate planar wave numbers for a point source at position `(x, y, z)`.
 
-        See Blahut (Theory of Remote Image Formation, sec 1.7).
+        Returns
+        -------
+        np.ndarray
+            A 1D array `[k_x, k_y, k_z]` representing planar wave numbers.
 
-        Args: 
-            Coordinates of source (x, y, z)
-
-        Returns:
-            numpy.ndarray: Planar wave numbers [k_x, k_y, k_z] for the point source.
+        Notes
+        -----
+        Based on Blahut (Theory of Remote Image Formation, sec 1.7).
         """
         if (self.x == 0 and self.y == 0): 
             theta = 0
@@ -169,18 +237,20 @@ class PointSource(Field):
 
     def plane_wave(self, k, z1):
         """
-        Calculate a plane wave with amplitude A and wavevector k on a Cartesian grid.
-        
-        Arg:
-            k: Wave vector 
-            z1: Propagtion distance (Note: for computational purposes treat origin as starshade plane)
+        Compute a plane wave with amplitude `A` and wavevector `k` on a Cartesian grid.
 
-        The grid has a pixel size of d_x and dimensions N x N. The resulting plane wave is 
-        computed for each point on the grid.
+        Parameters
+        ----------
+        k : np.ndarray
+            Wave vector `[k_x, k_y, k_z]`.
+        z1 : float
+            Propagation distance (Note: computationally, the origin is treated as the starshade plane).
 
-        Returns:
-            numpy.ndarray: A 2D array representing the computed plane wave over the grid.
-        """     
+        Returns
+        -------
+        np.ndarray
+            A 2D array representing the computed plane wave on the grid.
+        """    
         vals = np.linspace(-(self.N//2),(self.N//2),self.N)*self.d_x
         xx, yy = np.meshgrid(vals, vals)
         vec = np.array([xx,yy]).T

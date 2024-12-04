@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from util import bluestein_pad, trunc_2d
+from pystarshade.diffraction.util import bluestein_pad, trunc_2d
 
 def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
     """
@@ -8,18 +8,26 @@ def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
 
     MODIFIED VERSION: computes the Bluestein FFT equivalent to
     fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
-    where x_pad is x zero-padded to length N_X
+    where x_pad is x zero-padded to length N_X.
     The input x is centered. 
     
-    Args
-    x: Centered Input signal (complex numpy array).
-    N_x: Length of the input signal.
-    N_out: Length of the output signal.
-    Z_pad: Zero-padding factor.
-    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the output signal.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
     
     Returns
-    Zoomed FFT of the input signal (complex numpy array).
+    -------
+    zoom_fft: np.ndarray
+        Zoomed FFT of the input signal (complex numpy array).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
@@ -49,15 +57,23 @@ def zoom_fft_2d(x, N_x, N_out, Z_pad=None, N_X=None):
     Compute a zoomed 2D FFT using the Bluestein algorithm.
     The input x is centered. 
     
-    Args
-    x: Centered Input signal (complex numpy array).
-    N_x: Length of the input signal.
-    N_out: Length of the output signal.
-    Z_pad: Zero-padding factor.
-    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the output signal.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
 
     Returns
-    Zoomed FFT of the input signal (complex numpy array).
+    -------
+    out_fac: np.ndarray
+        Zoomed FFT of the input signal (complex numpy array).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
@@ -73,21 +89,28 @@ def zoom_fft_2d(x, N_x, N_out, Z_pad=None, N_X=None):
 
 def four_chunked_zoom_fft_mod(x_file, N_x, N_out, N_X):
     """
-    Cumulatively computes a 2D zoom FFT with four smaller Bluestein FFTs
-    Peak memory usage ~ N_x/4 + N_out
+    Cumulatively computes a 2D zoom FFT with four smaller Bluestein FFTs.
+    Peak memory usage ~ N_x/4 + N_out.
     MODIFIED VERSION:
-    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
+    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2],
     where x_pad is the zero-padded x_file to length N_X.
 
-    Args
-    x_file : input to FFT (a numpy memmap object of type np.complex128)
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
+    Parameters
+    ----------
+    x_file : np.memmap
+        Input to FFT (a numpy memmap object of type np.complex128).
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling 
+        (see the fresnel class to calculate this).
 
     Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    -------
+    zoom_fft_out: np.ndarray
+        Returns the 2D FFT over the chosen output region (np.complex128).
     """
     bit_x = N_x%2
     sec_N_x = N_x//2 + 1 # this is the (max) size of non-zero portion of segment, same for all 4
@@ -133,17 +156,25 @@ def four_chunked_zoom_fft_mod(x_file, N_x, N_out, N_X):
 
 def four_chunked_zoom_fft(x_file, N_x, N_out, N_X):
     """
-    Cumulatively computes a 2D zoom FFT with four smaller Bluestein FFTs
-    Peak memory usage ~ N_x/4 + N_out
-    Args
-    x_file : input to FFT (a numpy memmap object of type np.complex128)
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
+    Cumulatively computes a 2D zoom FFT with four smaller Bluestein FFTs.
+    Peak memory usage ~ N_x/4 + N_out.
+
+    Parameters
+    ----------
+    x_file : np.memmap
+        Input to FFT (a numpy memmap object of type np.complex128).
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling 
+        (see the fresnel class to calculate this).
 
     Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    -------
+    np.ndarray
+        The 2D FFT over the chosen output region (complex).
     """
     phase_shift = float((N_X - 1) //2 + 1)
     out_fac = np.exp ( np.arange(-(N_out//2), (N_out//2) + 1) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
@@ -158,17 +189,25 @@ def zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0):
     d_f = 1/(N_X * dx).
     This version with the extension 'mod' computes this as if the input is ifftshift(x). 
 
-    Args
-    x: Input signal
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-    chunk: The chunk index is between {0 and 3} (UL UR LL LR)
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
-    """
+    Parameters
+    ----------
+    x : np.ndarray
+        Input signal.
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling 
+        (see the fresnel class to calculate this).
+    chunk : int
+        The chunk index is between {0 and 3} (UL, UR, LL, LR).
 
+    Returns
+    -------
+    zoom_fft_out : np.ndarray
+        The 2D FFT over the chosen output region (complex).
+    """
     if chunk not in [0, 1, 2, 3]: raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
 
     N_chirp = N_x + N_out - 1
@@ -213,17 +252,27 @@ def zoom_fft_quad_out(x, N_x, N_out, N_X, chunk=0):
     With N_out samples, and as if input was zero-padded to N_X, such that output sample size is
     d_f = 1/(N_X * dx).
 
-    Args
-    x: Input signal
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-    chunk: The chunk index is between {0 and 3} (UL UR LL LR)
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    Note: Use this with the four chunked FFT, if you can't fit your full input on harddisk 
+    (or if you want some quadrant region).
 
-    Note: Use this with the four chunked FFT, if you can't fit your full input on harddisk (or if you want some quadrant region)
+    Parameters
+    ----------
+    x : np.ndarray
+        Input signal.
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling 
+        (see the fresnel class to calculate this).
+    chunk : int
+        The chunk index is between {0 and 3} (UL, UR, LL, LR).
+
+    Returns
+    -------
+    zoom_fft_out : np.ndarray
+        The 2D FFT over the chosen output region (complex).
     """
     if chunk not in [0, 1, 2, 3]: raise ValueError("Invalid value for chunk, must be 0, 1, 2, or 3.")
     phase_shift = float((N_X - 1) //2 + 1)
@@ -279,19 +328,32 @@ def single_chunked_zoom_fft_mod(x, N_x, N_out, N_X, i=0):
 
 def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y, Z_pad=None, N_X=None):
     """
-    Compute a non-centered output chunk of 2D FFT using the Bluestein algorithm. Use this if you don't have enough memory for a full FFT. 
+    Compute a non-centered output chunk of 2D FFT using the Bluestein algorithm. 
     fftshift(fft2(ifftshift(x)))[N_X//2 + start_chunk_x: N_X//2 + start_chunk_x + N_out_x,...]
-    
-    Args
-    x: Centered Input signal (complex numpy array).
-    N_x: Length of the input signal.
-    N_out_x, N_out_y: Length of the output signal chunk in x and y.
-    start_chunk_x, start_chunk_y: first index (freqency sample) of output chunk in x and y.
-    Z_pad: Zero-padding factor.
-    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out_x : int
+        Length of the output signal chunk in the x-dimension.
+    N_out_y : int
+        Length of the output signal chunk in the y-dimension.
+    start_chunk_x : int
+        First index (frequency sample) of the output chunk in the x-dimension.
+    start_chunk_y : int
+        First index (frequency sample) of the output chunk in the y-dimension.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
 
     Returns
-    Chunk of zoomed FFT of the input signal (complex numpy array).
+    -------
+    zoom_fft : np.ndarray
+        Chunk of the zoomed FFT of the input signal (complex).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
@@ -331,17 +393,30 @@ def chunk_out_zoom_fft_2d(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y
     """
     Compute a non-centered output chunk of 2D FFT using the Bluestein algorithm. 
     fftshift(fft2(x))[N_X//2 + start_chunk_x: N_X//2 + start_chunk_x + N_out_x,...]
-    
-    Args
-    x: Centered Input signal (complex numpy array).
-    N_x: Length of the input signal.
-    N_out_x, N_out_y: Length of the output signal chunk in x and y.
-    start_chunk_x, start_chunk_y: first index (freqency sample) of output chunk in x and y.
-    Z_pad: Zero-padding factor.
-    N_X: Zero-padded length of input signal (Z_pad * N_x + 1).
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out_x : int
+        Length of the output signal chunk in the x-dimension.
+    N_out_y : int
+        Length of the output signal chunk in the y-dimension.
+    start_chunk_x : int
+        First index (frequency sample) of the output chunk in the x-dimension.
+    start_chunk_y : int
+        First index (frequency sample) of the output chunk in the y-dimension.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
 
     Returns
-    Chunk of zoomed FFT of the input signal (complex numpy array).
+    -------
+    np.ndarray
+        Chunk of the zoomed FFT of the input signal (complex).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
@@ -354,7 +429,7 @@ def chunk_out_zoom_fft_2d(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chunk_y
     return uncorrected_output_field*np.outer(out_fac1, out_fac2)
     
 def chunk_in_zoom_fft_2d_mod(x_file, N_x, N_out, N_X, N_chunk=4):
-    '''
+    """
     Compute a 2D FFT using the Bluestein algorithm. 
     Experimental chunked version - computed in chunks of the input.
 
@@ -363,17 +438,25 @@ def chunk_in_zoom_fft_2d_mod(x_file, N_x, N_out, N_X, N_chunk=4):
     arr[:] = trunc_x
     arr.flush()
 
-    Args
-    x: Input signal
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-    N_chunk: Number of chunks along one axis
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    Parameters
+    ----------
+    x_file : str
+        Path to the input signal as a memmap object.
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling
+        (see the fresnel class to calculate this).
+    N_chunk : int, optional
+        Number of chunks along one axis (default is 4).
 
-    '''
+    Returns
+    -------
+    zoom_fft_out : np.ndarray
+        The 2D FFT over the output region (np.complex128).
+    """
     x_vals = np.linspace(-(N_x//2), (N_x//2), N_x)
     chunk = (N_x//N_chunk) + 1 - ((N_x//N_chunk)%2)
     zoom_fft_out = np.zeros((N_out, N_out), dtype=np.complex128)
@@ -400,7 +483,7 @@ def chunk_in_zoom_fft_2d_mod(x_file, N_x, N_out, N_X, N_chunk=4):
     return zoom_fft_out
 
 def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk = 4):
-    '''
+    """
     Compute a 2D FFT using the Bluestein algorithm over x_file for different wl_z. 
     Experimental chunked version - computed in chunks of the input (x_file).
 
@@ -414,17 +497,29 @@ def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk =
     arr[:] = x
     arr.flush()
 
-    Args
-    x: Input signal
-    N_x : size in one dimension of x_file
-    N_out : Number of output points of FFT needed
-    N_X : Phantom zero-padded length of input x_file for desired output sampling
-          (see the fresnel class to calculate this)
-    N_chunk: Number of chunks along one axis
-    Returns
-    zoom_fft_out : Returns the 2D FFT over chosen output region (np.complex128)
+    Parameters
+    ----------
+    x_file : str
+        Path to the input signal as a memmap object.
+    wl_z : float
+        Wavelength times distance (lambda * z).
+    d_x : float
+        Sampling interval of the input field.
+    N_x : int
+        Size in one dimension of x_file.
+    N_out : int
+        Number of output points of FFT needed.
+    N_X : int
+        Phantom zero-padded length of input x_file for desired output sampling
+        (see the fresnel class to calculate this).
+    N_chunk : int, optional
+        Number of chunks along one axis (default is 4).
 
-    '''
+    Returns
+    -------
+    zoom_fft_out : np.ndarray
+        The 2D FFT over the chosen output region (np.complex128).
+    """
     x_vals = np.linspace(-(N_x//2), (N_x//2), N_x)
     chunk = (N_x//N_chunk) + 1 - ((N_x//N_chunk)%2)
     zoom_fft_out = np.zeros((N_out, N_out), dtype=np.complex128)
