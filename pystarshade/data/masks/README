@@ -1,0 +1,10 @@
+Obtain NI2.mat in SISTERS project (http://sister.caltech.edu/)
+
+1) Run mpi_gen_mask.py to interpolate starshade edge (in edge folder) and create mask. Some of these are provided in the starshade_masks folder. 
+
+2) If did not generate a spatially-anti aliased mask and want to: run grey_mask.py to average a bool mask and create a grey-scale mask
+3) If want to use chunked propagation, create a memmaped mask using make_memmap.py
+
+Filename convention:
+'grey_wfirst_16_mask_005m.npz' - grey (anti-aliased) sampling dx = 0.005m
+'grey_drm_petalnumber_mask_dx.npz'

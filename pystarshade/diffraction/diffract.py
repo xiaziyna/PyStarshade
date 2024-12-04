@@ -1,8 +1,28 @@
 import numpy as np
-from bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod
-from util import *
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod
+from pystarshade.diffraction.util import *
 
 class Fresnel:
+    """
+    Represents a Fresnel diffraction computation setup.
+
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling interval of the input field [m].
+    N_in : int
+        Number of non-zero input samples.
+    z : float
+        Propagation distance [m].
+    wavelength : float
+        Wavelength of the light [m].
+    wl_z : float
+        Product of the wavelength and propagation distance.
+    k : float
+        Wave number.
+    max_freq : float
+        Maximum frequency of the input field.
+    """
     def __init__(self, d_x, N_in, z, wavelength):
         self.d_x = d_x
         self.N_in = N_in
@@ -13,6 +33,32 @@ class Fresnel:
         self.max_freq = 1 / self.d_x
 
 class FresnelSingle(Fresnel):
+    """
+    Single FFT Fresnel diffraction.
+
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling interval of the input field [m].
+    d_f : float
+        Desired frequency sampling interval [m^-1].
+    N_in : int
+        Number of non-zero input samples.
+    z : float
+        Propagation distance [m].
+    wavelength : float
+        Wavelength of the light [m].
+    wl_z : float
+        Product of the wavelength and propagation distance.
+    ZP : float
+        Zero-padding factor.
+    N_X : float
+        Phantom length for zero-padded signal.
+
+    Inherits From
+    -------------
+    Fresnel
+    """
     def __init__(self, d_x, d_f, N_in, z, wavelength):
         super().__init__(d_x, N_in, z, wavelength)
         self.d_f = d_f
@@ -22,18 +68,14 @@ class FresnelSingle(Fresnel):
     def calc_phantom_length(self):
         """
         Calculate the equivalent zero-padded signal length N_X to achieve a specified output 
-        frequency (d_f) for spatial sampling (d_x) using the single FT method
+        frequency (d_f) for spatial sampling (d_x) using the single FT method.
+    
 
-        Args: 
-            d_x : Spatial sampling.
-            d_f : Desired frequency sampling.
-            N_in : Number of non-zero input samples.
-            wavelength : Wavelength of the light.
-            z: Propagation distance in m.
-
-        Returns:
-            float : N_X = Z_pad * N_in + 1 - phantom padded length of input signal
-	    """
+        Returns
+        -------
+        float
+            Zero-padded signal length (N_X). N_X = Z_pad * N_in + 1 - phantom padded length of input signal
+        """
         N_X = self.max_freq * self.wl_z / self.d_f
         return N_X
 
@@ -42,36 +84,33 @@ class FresnelSingle(Fresnel):
         Calculate the zero-padding factor (ZP * N_in) to achieve a specified frequency spacing
         (d_f) for a given spatial sampling (d_x) using the Fresnel single FT method.
 
-        Args:
-            d_x : Spatial sampling.
-            d_f : Desired frequency spacing.
-            N_in : Number of non-zero input samples.
-            wavelength : Wavelength of the light.
-            z: Propagation distance in m.
-
-        Returns:
-            float: Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
+        Returns
+        -------
+        float
+             Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
         """
+
+
         ZP = ((self.max_freq * self.wl_z / self.d_f) - 1) / self.N_in
         return ZP
 
     def zoom_fresnel_single_fft(self, field, N_out):
         """
-        Single FFT fresnel diffraction using Bluestein FFT
-
+        Perform single FFT Fresnel diffraction using a Bluestein FFT.
         Output on grid defined by (N_out/ZP*N_in)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x
 
-        Args:
-            field : 2D input field to be propagated. 
-            d_x : Sampling interval of the input field [m]
-            z : Propagation distance [m]
-            wavelength : Wavelength of light [m]
-            ZP : Zero-padding factor
-            N_in :  Number of non-zero input samples in each dimension
-            N_out : Number of output samples in each dimension
+        Parameters
+        ----------
+        field : np.ndarray
+            2D input field to be propagated.
+        N_out : int
+            Number of output samples in each dimension.
 
-        Returns:
-            tuple: The propagated output field and the output grid sampling
+        Returns
+        -------
+        tuple
+            - np.ndarray: Propagated output field.
+            - float: Output grid sampling.
         """
         Ny, Nx = field.shape
         in_xy = grid_points(Nx, Ny, dx = self.d_x)
@@ -94,14 +133,21 @@ class FresnelSingle(Fresnel):
         arr[:] = x
         arr.flush()
 
-        Args
-        x_file : Input mask as a memmap object
-        N_out : Number of output samples.
+        Parameters
+        ----------
+        x_file : np.memmap
+            Input mask filename as a memory-mapped object.
+        N_out : int
+            Number of output samples.
+        N_chunk : int, optional
+            Number of chunks. Default is 4.
 
         Returns
-        output_field, df : Diffracted output field and sample size
+        -------
+        tuple
+            - np.ndarray: Propagated output field.
+            - float: Output grid sampling.
         """
-
         field = chunk_in_chirp_zoom_fft_2d_mod(x_file, self.wl_z, self.d_x, self.N_in, N_out, self.N_X, N_chunk = 4) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df)
@@ -114,11 +160,19 @@ class FresnelSingle(Fresnel):
         Bluestein FFT (caps peak memory usage).
 
         Args
-        x_file = Input mask as a memmap object
-        N_out : Number of output samples.
+        ----
+        x_file : np.memmap
+            Input mask filename as a memmap object.
+        N_out : int
+            Number of output samples.
 
         Returns
-        output_field, df : Diffracted output field and sample size
+        -------
+        tuple
+            - output_field : np.ndarray
+                Diffracted output field.
+            - df : float
+                Sample size.
         """
         bit_x = self.N_in%2
         for chunk in range(4):
@@ -147,8 +201,29 @@ class FresnelSingle(Fresnel):
         return quad_out_fac * output_field, df
 
     def one_chunk_zoom_fresnel_single_fft(self, field, N_out, chunk=0):
-        # Use me if you'd rather not load a full-starshade or store one on memory
-        # first call zoom_fft_quad_out_mod and compute the field on a single quadrant)
+        """
+        Perform single FFT Fresnel diffraction on a single quadrant.
+
+        Use this method if you'd rather not load a full-starshade or store one in memory.
+        First, call `zoom_fft_quad_out_mod` and compute the field on a single quadrant.
+
+        Parameters
+        ----------
+        field : np.ndarray
+            Input field for the computation.
+        N_out : int
+            Number of output samples.
+        chunk : int, optional
+            Quadrant index (0-3). Default is 0.
+
+        Returns
+        -------
+        tuple
+            - field : np.ndarray
+                The propagated output field for the specified quadrant.
+            - df : float
+                Output grid sampling.
+        """
         k = 2 * np.pi / self.wavelength
         bit_x = self.N_in%2
         if chunk == 0:
@@ -172,27 +247,47 @@ class FresnelSingle(Fresnel):
 
 class FresnelDouble(Fresnel):
     """
-    Fresnel diffraction with a forwards-backwards Fourier transform 
-    Reference: Introduction to Fourier Optics, Goodman. Ch 5. 
-    Output spatial location same as input
+    This class inherits from the `Fresnel` class and represents a setup for
+    computing Fresnel diffraction where the output spatial grid matches the
+    input spatial grid i.e. double Fourier transform Fresnel diffraction.
+
+    Parameters
+    ----------
+    d_x : float
+        Spatial sampling interval of the input field [m].
+    N_in : int
+        Number of non-zero input samples.
+    z : float
+        Propagation distance [m].
+    wavelength : float
+        Wavelength of light [m].
+
+    Inherits From
+    -------------
+    Fresnel
     """
+
     def __init__(self, d_x, N_in, z, wavelength):
         super().__init__(d_x, N_in, z, wavelength)
 
     def fresnel_double_fft(self, field):
         """
-        Double FFT fresnel diffraction
+        Perform double FFT Fresnel diffraction.
 
-        Output on same grid as input
+        The output is computed on the same grid as the input field.
 
-        Args:
-            field : 2D input field to be propagated.
-            d_x : Sampling interval of the input field [m]
-            z : Propagation distance [m]
-            wl : Wavelength of light [m]
+        Parameters
+        ----------
+        field : np.ndarray
+            2D input field to be propagated.
 
-        Returns:
-            tuple: The propagated output field and the output grid sampling
+        Returns
+        -------
+        tuple
+            - output_field : np.ndarray
+                Propagated output field.
+            - df : float
+                Output grid sampling.
         """
         field_copy = np.copy(field)
         k = 2 * np.pi / self.wavelength
@@ -206,6 +301,30 @@ class FresnelDouble(Fresnel):
         return output_field, df
 
 class Fraunhofer:
+    """
+    This class computes Fraunhofer diffraction, including zero-padding calculations.
+
+    Attributes
+    ----------
+    d_x : float
+        Spatial sampling interval of the input field [m].
+    d_f : float
+        Desired frequency sampling interval [m^-1].
+    N_in : int
+        Number of non-zero input samples.
+    z : float
+        Propagation distance [m].
+    wavelength : float
+        Wavelength of light [m].
+    wl_z : float
+        Product of the wavelength and propagation distance (wavelength * z).
+    max_freq : float
+        Maximum frequency of the input field, defined as 1 / d_x.
+    ZP : float
+        Zero-padding factor, computed to achieve a specified frequency spacing.
+    N_X : float
+        Phantom length for zero-padded signal, calculated based on input parameters.
+    """
     def __init__(self, d_x, d_f, N_in, z, wavelength):
         self.d_x = d_x
         self.d_f = d_f
@@ -219,19 +338,19 @@ class Fraunhofer:
 
     def calc_phantom_length(self):
         """
-        Calculate the equivalent zero-padded signal length N_X to achieve a specified output 
-        frequency (d_f) for spatial sampling (d_x) using the single FT method
+        Calculate the equivalent zero-padded signal length (N_X) to achieve a specified output
+        frequency (d_f) for spatial sampling (d_x) using the single FT method.
 
-        Args: 
-            d_x : Spatial sampling.
-            d_f : Desired frequency sampling.
-            N_in : Number of non-zero input samples.
-            wavelength : Wavelength of the light.
-            z: Propagation distance in m.
+        Parameters
+        ----------
+        None (all relevant attributes are already part of the class).
 
-        Returns:
-            float : N_X = Z_pad * N_in + 1 - phantom padded length of input signal
-	    """
+        Returns
+        -------
+        float
+            N_X :  N_X = Z_pad * N_in + 1 - phantom padded length of input signal
+        """
+
         N_X = self.max_freq * self.wl_z / self.d_f
         return N_X
         
@@ -240,35 +359,38 @@ class Fraunhofer:
         Calculate the zero-padding factor (ZP * N_in) to achieve a specified frequency spacing
         (d_f) for a given spatial sampling (d_x) using the Fresnel single FT method.
 
-        Args:
-            d_x : Spatial sampling.
-            d_f : Desired frequency spacing.
-            N_in : Number of non-zero input samples.
-            wavelength : Wavelength of the light.
-            z: Propagation distance in m.
+        Parameters
+        ----------
+        None (all relevant attributes are already part of the class).
 
-        Returns:
-            float: Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
+        Returns
+        -------
+        float
+            Zero-padding factor (ZP * N_in) to achieve the desired frequency spacing.
         """
+
         ZP = ((self.max_freq * self.wl_z / self.d_f) - 1) / self.N_in
         return ZP
 
     def zoom_fraunhofer(self, field, N_out):
         """
-        Fraunhofer diffraction at points within [ (N_out/ZP*N_in)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x ]
-        using the Bluestein FFT.
+        Perform Fraunhofer diffraction at points within
+        [(N_out/ZP*N_in)*wl_z/d_x, (N_out/ZP*N_in)*wl_z/d_x] using the Bluestein FFT.
 
-        Args:
-            field : 2D input field to be propagated. 
-            d_x : Sampling interval of the input field [m]
-            z : Propagation distance [m]
-            wavelength : Wavelength of light [m]
-            ZP : Zero-padding factor
-            N_in :  Number of non-zero input samples in each dimension
-            N_out : Number of output samples in each dimension
+        Parameters
+        ----------
+        field : np.ndarray
+            2D input field to be propagated.
+        N_out : int
+            Number of output samples in each dimension.
 
-        Returns:
-            tuple: The propagated output field and the output grid sampling
+        Returns
+        -------
+        tuple
+            - output_field : np.ndarray
+                Propagated output field.
+            - df : float
+                Output grid sampling.
         """
         field_copy = np.copy(field)
         k = 2 * np.pi / self.wavelength
