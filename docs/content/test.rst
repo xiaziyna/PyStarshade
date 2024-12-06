@@ -1,2 +1,2 @@
-.. automodule:: propagator
+.. automodule:: pystarshade.propagator.StarshadeProp
    :members:
