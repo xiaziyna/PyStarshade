@@ -17,11 +17,31 @@ Developed by Jamila Taaki (MIDAS).
 Installation
 --------
 
+```bash
 pip install pystarshade
-
+```
 
 Usage
 --------
+
+The simplest way to use PyStarshade is by calling the function 'source_field_to_ccd', this function
+takes as input a 2D source-field of size (N_s, N_s) and spatial sampling ds and returns the 2D output
+field incident on a CCD of size (N_pix, N_pix) and pixel size dp. 
+
+```bash
+from pystarshade.simulate_field import source_field_to_ccd
+
+source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, 
+                    N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
+                    ds = 0.3*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7)
+```
+
+Input data
+--------
+
+PyStarshade can take as input any pixelized source-field such as Haystacks model, or analytic descriptions of sources
+(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
+use 'pystarshade.simulate_field.point_source_to_ccd'. 
 
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <content/fft>`_
