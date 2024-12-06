@@ -37,11 +37,6 @@ napoleon_use_ivar = True 	     # For maths symbology
 imgmath_image_format = 'svg'
 highlight_language = 'python'
 
-imgmath_latex_preamble = r"""
-\usepackage{amsmath}
-\usepackage{amssymb}
-"""
-
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
