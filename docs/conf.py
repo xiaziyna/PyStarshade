@@ -15,10 +15,15 @@ release = '1.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 # paths from conf.py
+#import sys
+#import os
+#sys.path.insert(0, os.path.abspath('../'))
+#sys.path.insert(0, os.path.abspath('.'))
+
 import sys
-import os
-sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('.'))
+from pathlib import Path
+
+sys.path.insert(0, str(Path('..', 'pystarshade').resolve()))
 
 extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
     'sphinx.ext.mathjax',           # autodoc with maths
