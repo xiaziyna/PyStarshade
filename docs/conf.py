@@ -29,8 +29,6 @@ extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
                    'sphinx.ext.imgmath',
 #    'sphinx.ext.mathjax',           # autodoc with maths
     'sphinx.ext.napoleon',           # For auto-doc configuration
-    'sphinx.ext.highlighting',  # Ensures syntax highlighting works
-
 ]
 
 napoleon_google_docstring = False   # Turn off googledoc strings
