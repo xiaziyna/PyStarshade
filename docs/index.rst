@@ -12,6 +12,8 @@ What is a starshade? A starshade is a shaped mask flown in formation with a tele
 
 Complex electric fields are propagated at three planes (starshade, telescope aperture and focal plane) using Fresnel or Fraunhofer diffraction, computed with Bluesteins FFT. `PyStarshade` allows for simulating imaging for a discretized exoplanetary scene of flux, varying starshade mask and telescope aperture mask (interfacing with HCIPy to generate mission telescope apertures).
 
+Developed by Jamila Taaki (MIDAS).
+
 :doc:`content/bluestein`
 
 Usage
@@ -25,5 +27,6 @@ Contents
 --------
 
 .. toctree::
-    content/test
     content/bluestein
+    content/test
+
