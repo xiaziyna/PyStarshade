@@ -6,8 +6,6 @@
 PyStarshade documentation
 =========================
 
-Developed by Jamila Taaki (MIDAS).
-
 `PyStarshade` is a tool for simulating high-contrast imaging of exoplanets with starshades. 
 
 What is a starshade? A starshade is a shaped mask flown in formation with a telescope to block starlight and image faint exoplanets.
@@ -28,3 +26,4 @@ Contents
 
 .. toctree::
     content/test
+    content/bluestein
