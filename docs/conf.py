@@ -26,7 +26,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 #sys.path.insert(0, str(Path('..', 'pystarshade').resolve()))
 
 extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
-    'sphinx.ext.mathjax',           # autodoc with maths
+                   'sphinx.ext.imgmath',
+#    'sphinx.ext.mathjax',           # autodoc with maths
     'sphinx.ext.napoleon'           # For auto-doc configuration
 ]
 
