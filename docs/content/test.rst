@@ -1,2 +1,2 @@
-.. automodule:: StarshadeProp
+.. automodule:: propagator
    :members:
