@@ -12,7 +12,5 @@ documentation for details.
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-    content/test.rst
+    content/test
 
