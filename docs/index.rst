@@ -14,19 +14,23 @@ Complex electric fields are propagated at three planes (starshade, telescope ape
 
 Developed by Jamila Taaki (MIDAS).
 
-:doc:`content/bluestein`
+Installation
+--------
+
+pip install pystarshade
+
 
 Usage
 --------
 
 Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <content/bluestein>`_
+`reStructuredText <content/fft>`_
 documentation for details.
 
 Contents
 --------
 
 .. toctree::
-    content/bluestein
+    content/fft
     content/test
 
