@@ -29,6 +29,8 @@ extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
                    'sphinx.ext.imgmath',
 #    'sphinx.ext.mathjax',           # autodoc with maths
     'sphinx.ext.napoleon'           # For auto-doc configuration
+    'sphinx.ext.highlighting',  # Ensures syntax highlighting works
+
 ]
 
 napoleon_google_docstring = False   # Turn off googledoc strings
@@ -36,6 +38,12 @@ napoleon_numpy_docstring = True     # Turn on numpydoc strings
 napoleon_use_ivar = True 	     # For maths symbology
 imgmath_image_format = 'svg'
 highlight_language = 'python'
+
+
+#imgmath_latex_preamble = r"""
+#\usepackage{amsmath}
+#\usepackage{amssymb}
+#"""
 
 
 templates_path = ['_templates']
