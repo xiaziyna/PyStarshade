@@ -34,8 +34,14 @@ extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
 napoleon_google_docstring = False   # Turn off googledoc strings
 napoleon_numpy_docstring = True     # Turn on numpydoc strings
 napoleon_use_ivar = True 	     # For maths symbology
+imgmath_latex = 'latex'  # Use the default LaTeX command
 imgmath_image_format = 'svg'
 highlight_language = 'python'
+
+imgmath_latex_preamble = r"""
+\usepackage{amsmath}
+\usepackage{amssymb}
+"""
 
 
 templates_path = ['_templates']
