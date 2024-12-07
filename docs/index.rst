@@ -17,9 +17,9 @@ Developed by Jamila Taaki (MIDAS).
 Installation
 --------
 
-```
+.. code-block:: bash
+
     pip install pystarshade
-```
 
 Usage
 --------
