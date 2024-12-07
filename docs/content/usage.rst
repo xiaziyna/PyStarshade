@@ -1,5 +1,8 @@
 Usage
-------
+=========================
+
+Overview
+----------
 
 PyStarshade will compute fields and PSF files for a given starshade configuration and store these on disk for simulating imaging of new scenes.
 To start pick a starshade configuration , some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission)
@@ -45,4 +48,26 @@ Note: there is an important setting called 'chunk', if this is invoked a chunked
     hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
     focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
 
+Fourier propagator
+-------------------
 
+In PyStarshade, the classes and functions are generally designed to act on a spatial grid of size N * N, where N is an odd number and the origin is at (N/2, N/2). 
+
+Data
+----------
+
+The data directory is structured like so:
+
+.. code-block:: bash
+
+    data
+    ├── fields
+    ├── masks
+    │   ├── starshade_edge_files
+    │   └── starshade_masks
+    ├── out
+    ├── psf
+    ├── pupils
+    └── scenes
+
+If you have new masks for the starshade, or telescope aperture masks, place them in the correct folders (starshade_masks and pupils respectively). 
