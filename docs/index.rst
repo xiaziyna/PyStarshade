@@ -51,6 +51,11 @@ Contents
 --------
 
 .. toctree::
+   :caption: Usage
+    content/usage
     content/fft
+
+.. toctree::
+   :caption: Utilities
     content/test
 
