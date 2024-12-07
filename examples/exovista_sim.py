@@ -86,7 +86,6 @@ plt.imshow(focal_intensity, norm=LogNorm(), cmap='jet')
 plt.colorbar()
 plt.show()
 
-
 save_path = data_file_path('exo_scene_'+drm+'_'+pupil_type+'.npz', 'out')
 print (save_path)
 np.savez_compressed(save_path, field = focal_intensity)
