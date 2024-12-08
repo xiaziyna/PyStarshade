@@ -14,8 +14,6 @@ When a starshade is aligned with a star, starlight is diffracted by the starshad
  $$f_{\lambda}[u, v] \propto \mathcal{F} \left( s(u, v) e^{\frac{j \pi}{\lambda z} (u^2 + v^2)} \right) \left[ \frac{x}{\lambda z} ,\frac{y}{\lambda z} \right]$$
 Numerical diffraction calculations must use a very small numerical resolution $d u$ of the starshade $s(u, v)$ in order to accurately calculate starlight suppression. Using a standard FFT to perform these calculations is inefficient as very large zero-padding factors are needed to sample the field at the telescope aperture. The Bluestein FFT is a technique to calculate arbitrary spectral samples of a propagated field, indirectly using FFTs and therefore benefiting from their efficiency. For an $N \cdot N$ starshade mask, and an $M \cdot M$ telescope aperture, the Bluestein FFT approach achieves a complexity of $O((N+M)^2 \log (M+N))$. This technique is utilized in multiple aspects of the optical train to efficiently propagate fields.
 
-This library is compatible with Python 3.6 and later versions. 
-
 
 ## Example
 Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios in amplitude (sqare root of intensity) between (10e-8, 10e-3). Planet at a 2 AU separation and 10 pc distance from Earth. 
@@ -41,28 +39,32 @@ $ git lfs pull
 ## Dependencies
 
 Scipy, Numpy
+Optional: HCIPy, astropy
 
 ## Quickstart
+
 Detailed [documentation](https://pystarshade.readthedocs.io/en/latest/) for all PyStarshade utilities.
-
-### Use
-The simplest way to use PyStarshade is by calling the function 'source_field_to_ccd', this function
-takes as input a 2D source-field of size (N_s, N_s) and spatial sampling ds and returns the 2D output
-field incident on a CCD of size (N_pix, N_pix) and pixel size dp. 
-
-```bash
-from pystarshade.simulate_field import source_field_to_ccd
-
-source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, 
-                    N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
-                    ds = 0.3*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7)
-```
 
 ### Input data
 
 PyStarshade can take as input any pixelized source-field such as Haystacks model, or analytic descriptions of sources
 (so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
-use 'pystarshade.simulate_field.point_source_to_ccd'. 
+use 'pystarshade.simulate_field.point_source_to_ccd'.
+
+The easiest way to interface with PyStarshade is via the StarshadeProp class. Generate fields/psf models for a chosen design reference mission (drm).
+Simulate imaging for a 'source_field' with a default 2 mas sampling.
+
+```python
+    from pystarshade.propagator import StarshadeProp
+
+    drm = 'hwo'
+    hwo_starshade = StarshadeProp(drm = drm)
+    hwo_starshade.gen_pupil_field()
+
+    pupil_type = 'hex'
+    hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
+    focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
+```
 
 
 ### Worked examples
