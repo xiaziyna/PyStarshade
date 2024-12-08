@@ -31,6 +31,7 @@ If you wanted to design your own drm (or modify one of these), go to the file 'd
 The easiest way to interface with PyStarshade is via the StarshadeProp class. 
 
 .. code-block:: python
+
     from pystarshade.propagator import StarshadeProp
 
     drm = 'hwo'
@@ -47,6 +48,8 @@ Note: there is an important setting called 'chunk', if this is invoked a chunked
     pupil_type = 'hex'
     hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
     focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
+
+
 
 Fourier propagator
 -------------------
