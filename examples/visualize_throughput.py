@@ -56,6 +56,8 @@ through_fname_on = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_onaxis
 through_fname_off = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
 
 data_throughput_on = np.load(through_fname_on)
+wl = data_throughput_on['wl']
+
 N_wl, N, _ = np.shape(data_throughput_on['total_throughput'])
 total_throughput_on = data_throughput_on['total_throughput'][:, N//2, N//2:]
 core_throughput_on = data_throughput_on['core_throughput'][:, N//2, N//2:]
