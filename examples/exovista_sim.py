@@ -7,7 +7,6 @@ Scenes generated with ExoVista are used here
 Each pixel is 1 mas spacing, with 1001x1001 scene
 """
 from astropy.io import fits
-from astropy import units as u
 from . import download_exovista
 download_exovista.exovista_scenes_file()
 from pystarshade.data.scenes.Scene import *
