@@ -5,13 +5,13 @@ Overview
 ----------
 
 PyStarshade will compute fields and PSF files for a given starshade configuration and store these on disk for simulating imaging of new scenes.
-To start pick a starshade configuration , some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission)
+To start pick a starshade configuration, some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission).
 
 .. code-block:: python
 
     drm = 'hwo'
 
-If you wanted to design your own drm (or modify one of these), go to the file 'data/drm.py' and change some the parameters. The drm parameters define the size of the starshade, it's flight distance, number of petals, wavelength bands, size of the telescope aperture and focal length. In the drm is a parameter called 'dx_' which is the pixel size of the starshade mask in meters, you need to have a starshade mask on file (pystarshade cannot generate these from scratch). Some masks are provided for the drm's listed (stored in data/masks). An example drm is:
+If you wanted to design your own drm (or modify one of these), go to the file 'data/drm.py' and change some the instrument parameters. The drm parameters define the size of the starshade, it's flight distance, number of petals, wavelength bands, size of the telescope aperture and focal length. In the drm is a parameter called 'dx_' which is the pixel size of the starshade mask in meters. You need to have a starshade mask on file (pystarshade cannot generate these from scratch). Some masks are provided for the drm's listed (stored in data/masks). An example drm is:
 
 .. code-block:: python
 
@@ -71,3 +71,32 @@ The data directory is structured like so:
     └── scenes
 
 If you have new masks for the starshade, or telescope aperture masks, place them in the correct folders (starshade_masks and pupils respectively). 
+
+
+Usage
+--------
+
+The simplest way to use PyStarshade is by using the precomputed pupil fields and the StarshadeProp class as described. The StarshadeProp class is designed to abstract away sampling calculations, as well as pre-compute data products and interface with them.
+However, if desired, one may more directly interface with the optical propagation classes (Fresnel and Fraunhofer), or at a slightly higher level, the functions 'pupil_to_ccd' and 'source_field_to_pupil'.
+
+As an example, calling the function 'source_field_to_ccd', this function
+takes as input a 2D source-field of size (N_s, N_s) and spatial sampling ds and returns the 2D output
+field incident on a CCD of size (N_pix, N_pix) and pixel size dp. 
+
+.. code-block:: python
+
+    from pystarshade.simulate_field import source_field_to_ccd
+
+    source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, 
+                            N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
+                            ds = 10*0.03*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7)
+
+Please see the examples folder for detailed examples!
+
+Input data
+--------
+
+PyStarshade can take as input any pixelized source-field such as Haystacks model or an ExoVista model, or analytic descriptions of sources
+(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
+use 'pystarshade.simulate_field.point_source_to_ccd'. 
+
