@@ -75,6 +75,7 @@ drm = 'hwo'
 pupil_type = 'hex'
 hwo_starshade = StarshadeProp(drm = drm)
 hwo_starshade.gen_pupil_field()
+hwo_starshade.N_wl = 1 # edit an internal variable so that only a single wavelength PSF basis is calculated
 hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
 focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
 

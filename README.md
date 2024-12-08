@@ -4,7 +4,7 @@
 
 ## Overview
 
-Developed by Jamila Taaki (UIUC).
+Developed by Jamila Taaki (MIDAS fellow).
 
 PyStarshade is a Python library for Starshade (or any external occulter) simulations from star-planet system to CCD with Fresnel diffraction methods. This library efficiently calculates output fields using Bluestein FFTs.
 
@@ -13,10 +13,6 @@ What is a starshade? A starshade is a particular apodization (mask), which flown
 When a starshade is aligned with a star, starlight is diffracted by the starshade $s(\mathbf{x})$ onto a telescope aperture. For a starshade mask $s(u, v)$ which is zero inside the mask and unity outside, at a wavelength $\lambda$ and starshade-telescope distance $z$, the field at the telescope aperture is $f_{\lambda}(x, y)$ is related to the Fourier transform of the starshade mask:
  $$f_{\lambda}[u, v] \propto \mathcal{F} \left( s(u, v) e^{\frac{j \pi}{\lambda z} (u^2 + v^2)} \right) \left[ \frac{x}{\lambda z} ,\frac{y}{\lambda z} \right]$$
 Numerical diffraction calculations must use a very small numerical resolution $d u$ of the starshade $s(u, v)$ in order to accurately calculate starlight suppression. Using a standard FFT to perform these calculations is inefficient as very large zero-padding factors are needed to sample the field at the telescope aperture. The Bluestein FFT is a technique to calculate arbitrary spectral samples of a propagated field, indirectly using FFTs and therefore benefiting from their efficiency. For an $N \cdot N$ starshade mask, and an $M \cdot M$ telescope aperture, the Bluestein FFT approach achieves a complexity of $O((N+M)^2 \log (M+N))$. This technique is utilized in multiple aspects of the optical train to efficiently propagate fields.
-
-What is a Bluestein FFT? The Bluestein Fast Fourier Transform (1968) is an algorithm that computes M equispaced samples of arbitrary size df, of the Discrete-Time Fourier Transform (DTFT) over an arbitrary frequency region between [0, 1/dx] for a compact input signal containing N non-zero samples, each with a size of dx. The computational complexity of this method in one dimension is O((N+M)log(N+M)). The Bluestein FFT is particularly advantageous when large zero-padding factors would be needed for performing optical propagation using FFT's.
-
-This means that end-to-end simulation can be performed with arbitrary high-resolution sampling in each plane of propagation. 
 
 This library is compatible with Python 3.6 and later versions. 
 
@@ -35,12 +31,19 @@ You can install PyStarshade using pip:
 pip install pystarshade
 ```
 
+To use pre-computed data, use [git lfs](https://git-lfs.com): 
+```bash
+$ git clone https://github.com/xiaziyna/PyStarshade.git PyStarshade
+$ cd PyStarshade
+$ git lfs pull
+```
+
 ## Dependencies
 
 Scipy, Numpy
 
 ## Quickstart
-Detailed documentation for all PyStarshade utilities can be found within the code's docstrings.
+Detailed [documentation](https://pystarshade.readthedocs.io/en/latest/) for all PyStarshade utilities.
 
 ### Use
 The simplest way to use PyStarshade is by calling the function 'source_field_to_ccd', this function
@@ -61,73 +64,10 @@ PyStarshade can take as input any pixelized source-field such as Haystacks model
 (so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
 use 'pystarshade.simulate_field.point_source_to_ccd'. 
 
-### Parameters
-    Args:
-        source_field (float): N_s * N_s source field
-        wl (float): Wavelength of light.
-        dist_xo_ss (float): Distance between source plane and starshade.
-        dist_ss_t (float): Distance between starshade and telescope.
-        focal_length_lens (float): Focal length of the telescope lens.
-        radius_lens (float): Radius of the telescope lens.
-        N_s (int): Number of pixels in the source field. 
-        N_x (int): Number of non-zero samples in starshade plane. Diameter of the starshade ~ N_x * dx. 
-        N_t (int): Number of output samples in the telescope plane. Diameter of the telescope ~ N_t * dt.
-        N_pix (int): Number of output pixels required.
-        ds (float): Source field sampling
-        dx (float): Input sampling. Default is 0.01.
-        dt (float): Telescope sampling, must be less than (1/dx)*wl*dist_ss_t.
-        dp (float): Pixel size sampling, depends on the telescope and the desired field-of-view. 
-
 
 ### Worked examples
 
 See examples folder for different simulation examples.
-
-## Organization
-
-<pre>
-Pystarshade
-├── data
-│   ├── drm.py
-│   ├── exovista_scene.py
-│   ├── fields
-│   ├── __init__.py
-│   ├── out
-│   ├── psf
-│   └── pupils
-├── examples
-│   ├── exovista_sim.py
-│   ├── haystacks_model.py
-│   ├── star_exo.py
-│   └── starshade_masks
-│       ├── grey_mask.py
-│       ├── mp_gen_mask.py
-│       ├── README
-│       └── wfirst_locus.p
-├── images
-│   └── contrast_.gif
-├── pystarshade
-│   ├── apodization
-│   │   ├── apodize.py
-│   │   ├── __init__.py
-│   │   └── pupil.py
-│   ├── diffraction
-│   │   ├── bluestein_fft.py
-│   │   ├── diffract.py
-│   │   ├── field.py
-│   │   ├── __init__.py
-│   │   └── util.py
-│   ├── __init__.py
-│   ├── propagator.py
-│   └── simulate_field.py
-├── README.md
-├── setup.py
-└── tests
-    ├── test_bluestein_fft.py
-    ├── test_chunk_fft.py
-    └── test_circle.py
-
-</pre>
 
 ## License
 
