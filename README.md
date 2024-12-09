@@ -16,9 +16,11 @@ Numerical diffraction calculations must use a very small numerical resolution $d
 
 
 ## Example
-Log starlight supression with a truncated Hypergaussian apodization, sweeping star planet brightness ratios in amplitude (sqare root of intensity) between (10e-8, 10e-3). Planet at a 2 AU separation and 10 pc distance from Earth. 
+Simulated imaging of a synthetic exoscene (ExoVista) with three visible exoplanets at a
+wavelength of 500 nm. A 60 m starshade configuration and a 6m segmented pupil was used for this
+example.
 <p align="center">
-  <img src="images/contrast_.gif" alt="Star planet brightness ratio range (10e-8, 10e-3)">
+  <img src="images/exo_scene.png" alt="Three planets imaged with a HWO concept starshade and a 6m hexagonal segmented pupil.">
 </p>
 
 ## Installation
