@@ -84,6 +84,33 @@ class StarshadeProp:
         self.N_t += (1 - self.N_t%2)
         self.d_p = (self.d_p_mas) * self.f * mas_to_rad # physical pixel size
 
+    def mirr_symm_psf(self, psf_basis, N_basis, N_pix):
+        """
+        Mirror a quadrant of a symmetric psf object four ways.
+
+        Parameters
+        ----------
+        psf_basis : np.ndarray
+            quadrant of a psf basis
+        N_basis : int
+            full-size outpu5 number of PSF's along one axis
+        N_pix : int
+            number of pixels along one axis for a PSF
+
+        Returns
+        -------
+        np.ndarray
+            Mirrored PSF basis
+        """
+
+        psf_basis_mirrored = np.zeros((N_basis, N_basis, N_pix, N_pix), dtype=np.float32)
+        N_basis_half = N_basis//2      
+        psf_basis_mirrored[:N_basis_half, N_basis_half+1:] = np.flipud(psf_basis[1:, 1:])
+        psf_basis_mirrored[N_basis_half:, N_basis_half:] = psf_basis
+        psf_basis_mirrored[N_basis_half+1:, :N_basis_half] = np.fliplr(psf_basis[1:, 1:])
+        psf_basis_mirrored[:N_basis_half+1, :N_basis_half+1] = np.fliplr(np.flipud(psf_basis))
+        return psf_basis_mirrored
+
     def calc_magnification(self, dist_xo_ss):
         """
         Calculate the magnification of the field-of-view for a telescope focal number.
@@ -199,7 +226,7 @@ class StarshadeProp:
         core_throughput = np.zeros((self.N_wl, N_basis, N_basis))
         total_throughput = np.zeros((self.N_wl, N_basis, N_basis))
 
-        grid_points = flat_grid(N_basis, negative = 1 - pupil_symmetry)
+        psf_points = flat_grid(N_basis, negative = 1 - pupil_symmetry)
 
         for wl_i in range(self.N_wl):
             psf_basis = np.zeros((N_basis, N_basis, N_pix, N_pix), dtype=np.float32)
@@ -214,8 +241,10 @@ class StarshadeProp:
             norm_factor = np.sum(np.abs(focal_field_no_ss)**2)
             circ_mask = np.hypot(x, y) <= self.ang_res_pix[wl_i]
 
-            for (i, j) in grid_points:
-                p_i, p_j = i + N_basis//2, j + N_basis//2
+            for (i, j) in psf_points:
+                if pupil_symmetry: p_i, p_j = i, j
+                else: p_i, p_j = i + N_basis//2, j + N_basis//2
+
                 if i == 0 and j == 0:
                     on_axis_field = trunc_2d(pupil_field, self.N_t)
                     focal_field = pupil_to_ccd(wl, self.f, on_axis_field, self.pupil_mask, self.d_t, self.d_p, self.N_t, N_pix_overcomplete)
@@ -238,7 +267,8 @@ class StarshadeProp:
 
         save_path_throughput = data_file_path(self.drm+'_throughput_'+pupil_type+'_'+self.d_x_str+'.npz','psf')
         np.savez_compressed(save_path_throughput, core_throughput=core_throughput, total_throughput=total_throughput,\
-                            grid_points = grid_points, wl=self.wl_range, d_pix_mas = self.d_p_mas)
+                            grid_points = psf_points, wl=self.wl_range, d_pix_mas = self.d_p_mas)
+
 
     def gen_scene(self, pupil_type, source_field, wl, pupil_symmetry = False):
         """
@@ -266,19 +296,20 @@ class StarshadeProp:
         - `N_s`: Number of source pixels.
         - `N_p`: Number of output pixels.
         """
-        bla = np.load('/home/ielo/Projects/PyStarshade/pystarshade/data/psf/hwo_psf_hex_001m_500.npz')
         psf = np.load(data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz', 'psf'))
         _, _, norm_contrast, N_basis, N_pix, N_pix_overcomplete = psf['params']
-        psf_basis = psf['psf_basis']
-        N_basis, N_pix, N_pix_overcomplete = int(N_basis), int(N_pix), int(N_pix_overcomplete)
+        N_basis, N_pix, N_pix_overcomplete = int(N_basis)*(1 + pupil_symmetry) - pupil_symmetry*1, int(N_pix), int(N_pix_overcomplete)
+        if pupil_symmetry: psf_basis = self.mirr_symm_psf(psf['psf_basis'], N_basis, N_pix)
+        else: psf_basis = psf['psf_basis']
         N_s = np.shape(source_field)[0]
         N_p = int(N_s * self.ratio_s_p)
         output_intensity = np.zeros((N_p, N_p), dtype=np.float32)
         suppress_field = trunc_2d(source_field, N_basis)
-        grid_points = flat_grid(N_basis, negative = 1 - pupil_symmetry)
+
+        psf_points = flat_grid(N_basis)
         psf_basis *= suppress_field[:, :, np.newaxis, np.newaxis]
 
-        for (i, j) in grid_points:
+        for (i, j) in psf_points:
             p_i, p_j = i + N_basis//2, j + N_basis//2
             s_i, s_j = i + N_s//2, j + N_s//2
             if i == 0 and j == 0:
@@ -298,12 +329,3 @@ class StarshadeProp:
         pad_source = pad_2d(source_field, N_pix_overcomplete*2 - 1)
         output_intensity += trunc_2d(np.abs(np.fft.ifftshift(np.fft.ifft2(np.fft.fft2(pad_source)*np.fft.fft2(psf_uniform)))), N_p)
         return output_intensity
-
-#hwo_starshade = StarshadeProp(drm = 'hwo')
-#hwo_starshade.gen_pupil_field()
-#hwo_starshade.gen_psf_basis('hex')
-#test_field = np.zeros((1001, 1001))
-#test_field[500, 500] = 1e11
-#test_field[800, 760] = 1
-#out = hwo_starshade.gen_scene('hex', test_field, 500e-9)
-#np.savez_compressed('test_field.npz', field = out)
