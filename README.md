@@ -38,7 +38,8 @@ $ git lfs pull
 
 ## Dependencies
 
-Scipy, Numpy
+Scipy, Numpy,
+
 Optional: HCIPy, astropy
 
 ## Quickstart
