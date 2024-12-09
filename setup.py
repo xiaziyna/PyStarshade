@@ -16,7 +16,8 @@ setup(
         "extra": [
             "hcipy",
             "astropy"
-    ]}
+        ]
+    },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
@@ -28,5 +29,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
+    python_requires=">=3.6"
 )
 
