@@ -12,6 +12,8 @@ download_exovista.exovista_scenes_file()
 from pystarshade.data.scenes.Scene import *
 from pystarshade.diffraction.util import mas_to_rad, au_to_meter, pc_to_meter, data_file_path
 from pystarshade.propagator import StarshadeProp
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import os
 
 fname = '1215-HIP_16537-TYC_-mv_3.72-L_0.35-d_3.20-Teff_5048.07.fits'
@@ -76,11 +78,9 @@ pupil_type = 'hex'
 hwo_starshade = StarshadeProp(drm = drm)
 hwo_starshade.gen_pupil_field()
 hwo_starshade.N_wl = 1 # edit an internal variable so that only a single wavelength PSF basis is calculated
-hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
-focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
+hwo_starshade.gen_psf_basis(pupil_type = pupil_type, pupil_symmetry = True)
+focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9, pupil_symmetry = True)
 
-import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
 plt.figure()
 plt.imshow(focal_intensity, norm=LogNorm(), cmap='jet')
 plt.colorbar()

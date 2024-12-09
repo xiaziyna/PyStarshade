@@ -29,6 +29,9 @@ Contents
     content/usage
     content/fft
 
+API
+--------
+
 .. toctree::
     content/test
 
