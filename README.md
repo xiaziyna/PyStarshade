@@ -20,7 +20,7 @@ Simulated imaging of a synthetic exoscene (ExoVista) with three visible exoplane
 wavelength of 500 nm. A 60 m starshade configuration and a 6m segmented pupil was used for this
 example.
 <p align="center">
-  <img src="images/exo_scene.png" alt="Three planets imaged with a HWO concept starshade and a 6m hexagonal segmented pupil.">
+  <img src="images/exo_scene.png" alt="Three planets imaged with a HWO concept starshade and a 6m hexagonal segmented pupil." width="50%">
 </p>
 
 ## Installation
