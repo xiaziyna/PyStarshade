@@ -6,7 +6,7 @@
 PyStarshade documentation
 =========================
 
-`PyStarshade` is a tool for simulating high-contrast imaging of exoplanets with starshades. 
+`PyStarshade` is a tool for simulating high-contrast imaging of exoplanets with starshades.
 
 What is a starshade? A starshade is a shaped mask flown in formation with a telescope to block starlight and image faint exoplanets.
 
@@ -34,4 +34,3 @@ API
 
 .. toctree::
     content/test
-

@@ -1,13 +1,15 @@
-import numpy as np
 import os
+
+import numpy as np
 import pkg_resources
 
-#=== useful constants====
+# === useful constants====
 pc_to_meter = 3.08567782e16
-au_to_meter = 149597870700.
-mas_to_rad = 4.84814e-9 # preference
+au_to_meter = 149597870700.0
+mas_to_rad = 4.84814e-9  # preference
 rad_to_mas = 206264806.2471
-#========================
+# ========================
+
 
 def data_file_path(file_name, *subfolders):
     """
@@ -25,11 +27,14 @@ def data_file_path(file_name, *subfolders):
     str
         The full path to the file.
     """
-    package_path = pkg_resources.resource_filename('pystarshade', '')
+    package_path = pkg_resources.resource_filename("pystarshade", "")
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    os.environ['BASE_PATH'] = os.path.abspath(os.path.join(package_path, 'data'))
-    base_path = os.environ.get('BASE_PATH')
+    os.environ["BASE_PATH"] = os.path.abspath(
+        os.path.join(package_path, "data")
+    )
+    base_path = os.environ.get("BASE_PATH")
     return os.path.join(base_path, *subfolders, file_name)
+
 
 def ang_res(wl, D):
     """
@@ -47,7 +52,8 @@ def ang_res(wl, D):
     float
         Angular resolution in milliarcseconds.
     """
-    return (wl/D)/mas_to_rad
+    return (wl / D) / mas_to_rad
+
 
 def fresnel_num(R, wl, dist_ss_t):
     """
@@ -69,6 +75,7 @@ def fresnel_num(R, wl, dist_ss_t):
     """
     return R**2 / (wl * dist_ss_t)
 
+
 def flat_grid(N, negative=True):
     """
     Generate a 2D grid of points as a flat array.
@@ -86,9 +93,16 @@ def flat_grid(N, negative=True):
     np.ndarray
         A flattened array containing grid points.
     """
-    if negative: xv, yv = np.meshgrid(np.arange(-(N//2), (N//2)+1), np.arange(-(N//2), (N//2)+1))
-    else: xv, yv = np.meshgrid(np.arange(N), np.arange(N))
-    return np.hstack((xv.flatten('F')[:,np.newaxis],yv.flatten('F')[:,np.newaxis]))
+    if negative:
+        xv, yv = np.meshgrid(
+            np.arange(-(N // 2), (N // 2) + 1),
+            np.arange(-(N // 2), (N // 2) + 1),
+        )
+    else:
+        xv, yv = np.meshgrid(np.arange(N), np.arange(N))
+    return np.hstack(
+        (xv.flatten("F")[:, np.newaxis], yv.flatten("F")[:, np.newaxis])
+    )
 
 
 def trunc_2d(x, N_out):
@@ -108,11 +122,20 @@ def trunc_2d(x, N_out):
         The truncated square 2D array of size (N_out x N_out).
     """
     bit = N_out % 2
-    trunc_x = x[(x.shape[0]//2) - (N_out//2) : (x.shape[0]//2) + (N_out//2) + bit, (x.shape[1]//2) - (N_out//2) : (x.shape[1]//2) + (N_out//2) + bit]
+    trunc_x = x[
+        (x.shape[0] // 2)
+        - (N_out // 2) : (x.shape[0] // 2)
+        + (N_out // 2)
+        + bit,
+        (x.shape[1] // 2)
+        - (N_out // 2) : (x.shape[1] // 2)
+        + (N_out // 2)
+        + bit,
+    ]
     return trunc_x
 
 
-def grid_points(Nx, Ny, dx = 1):
+def grid_points(Nx, Ny, dx=1):
     """
     Generate a grid of points with specified dimensions and sampling interval.
 
@@ -134,6 +157,7 @@ def grid_points(Nx, Ny, dx = 1):
     y = np.arange(-(Ny // 2), (Ny // 2) + 1)[:, np.newaxis] * dx
     return [x, y]
 
+
 def N_in_2d(arr):
     """
     Find the largest number of non-zero values along the x and y axes of a 2D array.
@@ -152,11 +176,12 @@ def N_in_2d(arr):
     """
     non_zero_x = np.count_nonzero(arr, axis=0)
     non_zero_y = np.count_nonzero(arr, axis=1)
-    
+
     max_x = np.max(non_zero_x)
     max_y = np.max(non_zero_y)
-    
+
     return max_x, max_y
+
 
 def bluestein_pad(arr, N_in, N_out_x, N_out_y=None):
     """
@@ -178,17 +203,24 @@ def bluestein_pad(arr, N_in, N_out_x, N_out_y=None):
     np.ndarray
         The padded 2D array with zeros, centered around the original array.
     """
-    if N_out_y == None: N_out_y = N_out_x
-    zp_arr = np.zeros((N_in + N_out_x - 1, N_in + N_out_y - 1), dtype=np.complex128)
+    if N_out_y == None:
+        N_out_y = N_out_x
+    zp_arr = np.zeros(
+        (N_in + N_out_x - 1, N_in + N_out_y - 1), dtype=np.complex128
+    )
     half_zp_N_x = (N_in + N_out_x - 1) // 2
     half_zp_N_y = (N_in + N_out_y - 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
-    zp_arr[half_zp_N_x - N_in//2 : half_zp_N_x + N_in//2 + bit_arr, \
-           half_zp_N_y - N_in//2 : half_zp_N_y + N_in//2 + bit_arr] \
-            = arr[half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr, \
-            half_arr_N - N_in//2 : half_arr_N + N_in//2 + bit_arr]
+    zp_arr[
+        half_zp_N_x - N_in // 2 : half_zp_N_x + N_in // 2 + bit_arr,
+        half_zp_N_y - N_in // 2 : half_zp_N_y + N_in // 2 + bit_arr,
+    ] = arr[
+        half_arr_N - N_in // 2 : half_arr_N + N_in // 2 + bit_arr,
+        half_arr_N - N_in // 2 : half_arr_N + N_in // 2 + bit_arr,
+    ]
     return zp_arr
+
 
 def pad_2d(arr, N_out):
     """
@@ -209,7 +241,10 @@ def pad_2d(arr, N_out):
     pad_arr = np.zeros((N_out, N_out), dtype=arr.dtype)
     half_N_in = arr.shape[0] // 2
     bit = arr.shape[0] % 2
-    pad_arr[N_out//2 - half_N_in : N_out//2 + half_N_in + bit ,N_out//2 - half_N_in : N_out//2 + half_N_in + bit] = arr
+    pad_arr[
+        N_out // 2 - half_N_in : N_out // 2 + half_N_in + bit,
+        N_out // 2 - half_N_in : N_out // 2 + half_N_in + bit,
+    ] = arr
     return pad_arr
 
 
@@ -235,6 +270,8 @@ def zero_pad(arr, N_in, ZP):
     half_zp_N = (N_in * ZP + 1) // 2
     half_arr_N = np.shape(arr)[0] // 2
     bit_arr = np.shape(arr)[0] % 2
-    zp_arr[half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
-           half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr] = arr
+    zp_arr[
+        half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
+        half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
+    ] = arr
     return zp_arr

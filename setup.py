@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="pystarshade",
@@ -12,12 +12,7 @@ setup(
         "numpy",
         "scipy",
     ],
-    extras_require={
-        "extra": [
-            "hcipy",
-            "astropy"
-        ]
-    },
+    extras_require={"extra": ["hcipy", "astropy"]},
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
@@ -29,6 +24,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    python_requires=">=3.6"
+    python_requires=">=3.6",
 )
-

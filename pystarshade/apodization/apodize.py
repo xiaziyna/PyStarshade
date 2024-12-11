@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.ndimage import convolve
+
 from pystarshade.diffraction.util import grid_points
+
 
 def eval_hypergauss(N, dx):
     """
@@ -21,6 +23,7 @@ def eval_hypergauss(N, dx):
     grid_xy = grid_points(N, N, dx=dx)
     (r_, th) = cart_to_pol(grid_xy[0], grid_xy[1])
     return hypergauss(r_, th)
+
 
 def hypergauss(r, theta):
     """
@@ -43,16 +46,17 @@ def hypergauss(r, theta):
     Hidden parameters: (a, b, n). See Cash (2011).
     """
 
-    a=b=12.5
+    a = b = 12.5
     R = 32
-    n=6.
-    
+    n = 6.0
+
     mask_within_a = 1 * (r <= a)
-    mask_between_a_and_R = (r > a) * np.exp(-((r - a) / b) ** n) * (r < R)
+    mask_between_a_and_R = (r > a) * np.exp(-(((r - a) / b) ** n)) * (r < R)
 
     return 1 - (mask_within_a + mask_between_a_and_R)
 
-def cart_to_pol(x,y):
+
+def cart_to_pol(x, y):
     """
     Convert Cartesian coordinates (x, y) to polar coordinates (r, theta).
 
@@ -71,6 +75,7 @@ def cart_to_pol(x,y):
     r = np.hypot(x, y)
     theta = np.arctan2(y, x)
     return r, theta
+
 
 def spher_to_cart(r, theta, phi):
     """
@@ -95,6 +100,7 @@ def spher_to_cart(r, theta, phi):
     z = r * np.cos(theta)
     return np.array([x, y, z])
 
+
 def cart_to_spher(x, y, z):
     """
     Convert Cartesian coordinates (x, y, z) to spherical coordinates (r, theta, phi).
@@ -118,7 +124,8 @@ def cart_to_spher(x, y, z):
     phi = np.arctan2(y, x)
     return np.array([r, theta, phi])
 
-def pupil_func(x, y, r = 3.):
+
+def pupil_func(x, y, r=3.0):
     """
     Return binary circle mask of radius r on Cartesian grid (x, y).
 
@@ -139,7 +146,7 @@ def pupil_func(x, y, r = 3.):
     return np.hypot(x, y) <= r
 
 
-def grey_pupil_func(Nx, dx = 1, r = 3.):
+def grey_pupil_func(Nx, dx=1, r=3.0):
     """
     Grey-pixel pupil function for spatial anti-aliasing using upsampling method.
 
@@ -162,14 +169,23 @@ def grey_pupil_func(Nx, dx = 1, r = 3.):
     x_ = y_ = np.arange((up_fac * Nx / 2) + bool_var)
     xv, yv = np.meshgrid(x_, y_)
     bool_mask = (np.hypot(xv, yv) <= (up_fac * r / dx)).astype(float)
-    grey_mask = (up_fac**-2)*convolve(bool_mask, np.ones((up_fac, up_fac)))[::up_fac, ::up_fac].astype(np.float32)
+    grey_mask = (up_fac**-2) * convolve(
+        bool_mask, np.ones((up_fac, up_fac))
+    )[::up_fac, ::up_fac].astype(np.float32)
     full_mask = np.zeros((Nx, Nx))
-    full_mask[:Nx//2, Nx//2 + bool_var:] = np.flipud(grey_mask[bool_var:, bool_var:])
-    full_mask[Nx//2:, Nx//2:] = grey_mask
-    full_mask[Nx//2 + bool_var:, :Nx//2] = np.fliplr(grey_mask[bool_var:, bool_var:])
-    full_mask[:Nx//2 + bool_var, :Nx//2 + bool_var] = np.fliplr(np.flipud(grey_mask))
+    full_mask[: Nx // 2, Nx // 2 + bool_var :] = np.flipud(
+        grey_mask[bool_var:, bool_var:]
+    )
+    full_mask[Nx // 2 :, Nx // 2 :] = grey_mask
+    full_mask[Nx // 2 + bool_var :, : Nx // 2] = np.fliplr(
+        grey_mask[bool_var:, bool_var:]
+    )
+    full_mask[: Nx // 2 + bool_var, : Nx // 2 + bool_var] = np.fliplr(
+        np.flipud(grey_mask)
+    )
 
     return full_mask
+
 
 def qu_mask_to_full(grey_mask):
     """
@@ -186,9 +202,9 @@ def qu_mask_to_full(grey_mask):
         Full mask made by flipping the negative quadrant.
     """
     Nx = Ny = len(grey_mask) - 1
-    full_mask = np.zeros((2*Nx + 1, 2*Ny + 1), dtype=grey_mask.dtype)
-    full_mask[:Nx, Ny+1:] = np.flipud(grey_mask[1:, 1:])
+    full_mask = np.zeros((2 * Nx + 1, 2 * Ny + 1), dtype=grey_mask.dtype)
+    full_mask[:Nx, Ny + 1 :] = np.flipud(grey_mask[1:, 1:])
     full_mask[Nx:, Ny:] = grey_mask
-    full_mask[Nx+1:, :Ny] = np.fliplr(grey_mask[1:, 1:])
-    full_mask[:Nx+1, :Ny+1] = np.fliplr(np.flipud(grey_mask))
+    full_mask[Nx + 1 :, :Ny] = np.fliplr(grey_mask[1:, 1:])
+    full_mask[: Nx + 1, : Ny + 1] = np.fliplr(np.flipud(grey_mask))
     return full_mask

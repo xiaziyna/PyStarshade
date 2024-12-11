@@ -1,6 +1,8 @@
-from pystarshade.diffraction.util import *
-from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod
 import numpy as np
+
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod
+from pystarshade.diffraction.util import *
+
 
 class SourceField:
     """
@@ -23,6 +25,7 @@ class SourceField:
     -----
     The class uses a plane wave description of the far-field. Either `d_s_mas` or `d_s` and `z` must be defined.
     """
+
     def __init__(self, d_s, N_s, wavelength, z, source_field):
         self.N_s = N_s
         self.wavelength = wavelength
@@ -51,10 +54,13 @@ class SourceField:
         np.ndarray
             A 2D array representing the computed field over the grid.
         """
-        ZP = ((self.max_freq * self.wavelength * (self.z )  / d_x) - 1) / self.N_s
-        out_field = zoom_fft_2d_mod(self.source_field, self.N_s, N_x, Z_pad = ZP)
-        out_fac = np.exp( 1j* self.k * z1)
-        return out_fac*out_field
+        ZP = (
+            (self.max_freq * self.wavelength * (self.z) / d_x) - 1
+        ) / self.N_s
+        out_field = zoom_fft_2d_mod(self.source_field, self.N_s, N_x, Z_pad=ZP)
+        out_fac = np.exp(1j * self.k * z1)
+        return out_fac * out_field
+
 
 class Field:
     """
@@ -75,6 +81,7 @@ class Field:
     -----
     Includes plane-wave fields, Gaussian sources, and point sources.
     """
+
     def __init__(self, d_x, N, wavelength, z):
         self.d_x = d_x
         self.N = N
@@ -96,6 +103,7 @@ class Field:
             self.d_x = d_x
         if N is not None:
             self.N = N
+
 
 class GaussianSource(Field):
     """
@@ -128,14 +136,14 @@ class GaussianSource(Field):
     -----
     The source field is given by `A * exp(-(x/sigma)^2)`.
     """
+
     def __init__(self, d_x, N, wavelength, x, y, z, A, sigma):
         super().__init__(d_x, N, wavelength, z)
-        self.x = x        
+        self.x = x
         self.y = y
         self.A = A
         self.sigma = sigma
         self.wl_z = self.wavelength * self.z
-
 
     def far_field_gaussian_params(self):
         """
@@ -173,10 +181,15 @@ class GaussianSource(Field):
         np.ndarray
             A 2D array representing the far-field Gaussian on the grid.
         """
-        vals = np.linspace(-(self.N//2),(self.N//2),self.N)*self.d_x
+        vals = np.linspace(-(self.N // 2), (self.N // 2), self.N) * self.d_x
         xx, yy = np.meshgrid(vals, vals)
 
-        return far_A * np.exp( - ( xx**2 + yy**2 ) * far_inv_sigma**2) * np.exp( 1j * 2 * np.pi * z1 / self.wavelength)
+        return (
+            far_A
+            * np.exp(-(xx**2 + yy**2) * far_inv_sigma**2)
+            * np.exp(1j * 2 * np.pi * z1 / self.wavelength)
+        )
+
 
 class PointSource(Field):
     """
@@ -206,7 +219,7 @@ class PointSource(Field):
 
     def __init__(self, d_x, N, wavelength, x, y, z, A):
         super().__init__(d_x, N, wavelength, z)
-        self.x = x        
+        self.x = x
         self.y = y
         self.A = A
 
@@ -223,16 +236,18 @@ class PointSource(Field):
         -----
         Based on Blahut (Theory of Remote Image Formation, sec 1.7).
         """
-        if (self.x == 0 and self.y == 0): 
+        if self.x == 0 and self.y == 0:
             theta = 0
-        else: theta = np.hypot(self.x, self.y) / self.z
+        else:
+            theta = np.hypot(self.x, self.y) / self.z
         if self.x == 0:
-            phi = np.pi/2
-        else: phi = np.arccos ( self.x / np.hypot(self.x, self.y) )
+            phi = np.pi / 2
+        else:
+            phi = np.arccos(self.x / np.hypot(self.x, self.y))
         ax = np.cos(phi) * np.sin(theta)
         by = np.sin(theta) * np.sin(phi)
         cz = np.cos(theta)
-        k = np.array([ax, by, cz]) * 2*np.pi/self.wavelength
+        k = np.array([ax, by, cz]) * 2 * np.pi / self.wavelength
         return k
 
     def plane_wave(self, k, z1):
@@ -250,8 +265,10 @@ class PointSource(Field):
         -------
         np.ndarray
             A 2D array representing the computed plane wave on the grid.
-        """    
-        vals = np.linspace(-(self.N//2),(self.N//2),self.N)*self.d_x
+        """
+        vals = np.linspace(-(self.N // 2), (self.N // 2), self.N) * self.d_x
         xx, yy = np.meshgrid(vals, vals)
-        vec = np.array([xx,yy]).T
-        return self.A*np.exp(1j* np.inner(k[:2], vec))*np.exp(1j * k[2]*z1) 
+        vec = np.array([xx, yy]).T
+        return (
+            self.A * np.exp(1j * np.inner(k[:2], vec)) * np.exp(1j * k[2] * z1)
+        )

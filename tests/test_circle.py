@@ -6,17 +6,16 @@ are adapted/taken from DIFFRAQ (Harness) see solution_util.py of DIFFRAQ
 
 import numpy as np
 import pytest
-from from pystarshade.apodization.apodize import *
-from from pystarshade.diffraction.util import *
-from from pystarshade.diffraction.diffract import *
-from from pystarshade.diffraction.field import *
-from scipy.ndimage import convolve
+from frompystarshade.apodization.apodize import *
+from frompystarshade.diffraction.diffract import *
+from frompystarshade.diffraction.field import *
+from frompystarshade.diffraction.util import *
 from scipy.special import jn
 
 np.set_printoptions(suppress=True)
 
 wl = 633e-9
-R_lens = 2.4 
+R_lens = 2.4
 R_ss = 30
 dist_xo_ss = 10*pc_to_meter
 dist_ss_t = 63942090. # distance for hypergaussian mask
@@ -119,7 +118,7 @@ def pystar_circle(wl, dist_xo_ss, dist_ss_t, R_ss, N_x = 8001, N_t = 257, \
     field_incident_ss = ps.plane_wave(k_vals, 0)
 
     ss_complement = grey_pupil_func(N_x, dx, R_ss)
-    field_after_ss = field_incident_ss * ss_complement 
+    field_after_ss = field_incident_ss * ss_complement
 
     fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl)
     field_aperture, dt = fresnel.zoom_fresnel_single_fft(field_after_ss, N_t)

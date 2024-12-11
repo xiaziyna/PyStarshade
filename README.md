@@ -8,7 +8,7 @@ Developed by Jamila Taaki (MIDAS fellow).
 
 PyStarshade is a Python library for Starshade (or any external occulter) simulations from star-planet system to CCD with Fresnel diffraction methods. This library efficiently calculates output fields using Bluestein FFTs.
 
-What is a starshade? A starshade is a particular apodization (mask), which flown at Fresnel distances from a telescope achieves star-light suppression for imaging exoplanets in orbit around the star. 
+What is a starshade? A starshade is a particular apodization (mask), which flown at Fresnel distances from a telescope achieves star-light suppression for imaging exoplanets in orbit around the star.
 
 When a starshade is aligned with a star, starlight is diffracted by the starshade $s(\mathbf{x})$ onto a telescope aperture. For a starshade mask $s(u, v)$ which is zero inside the mask and unity outside, at a wavelength $\lambda$ and starshade-telescope distance $z$, the field at the telescope aperture is $f_{\lambda}(x, y)$ is related to the Fourier transform of the starshade mask:
  $$f_{\lambda}[u, v] \propto \mathcal{F} \left( s(u, v) e^{\frac{j \pi}{\lambda z} (u^2 + v^2)} \right) \left[ \frac{x}{\lambda z} ,\frac{y}{\lambda z} \right]$$
@@ -31,7 +31,7 @@ You can install PyStarshade using pip:
 pip install pystarshade
 ```
 
-To use pre-computed data, use [git lfs](https://git-lfs.com): 
+To use pre-computed data, use [git lfs](https://git-lfs.com):
 ```bash
 $ git clone https://github.com/xiaziyna/PyStarshade.git PyStarshade
 $ cd PyStarshade
@@ -51,7 +51,7 @@ Detailed [documentation](https://pystarshade.readthedocs.io/en/latest/) for all 
 ### Input data
 
 PyStarshade can take as input any pixelized source-field such as Haystacks model, or analytic descriptions of sources
-(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
+(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please
 use 'pystarshade.simulate_field.point_source_to_ccd'.
 
 The easiest way to interface with PyStarshade is via the StarshadeProp class. Generate fields/psf models for a chosen design reference mission (drm).
