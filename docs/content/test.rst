@@ -3,7 +3,7 @@
 
 
 .. autoclass:: pystarshade.diffraction.diffract.Fresnel
-    :members: 
+    :members:
 
 .. autoclass:: pystarshade.diffraction.diffract.FresnelSingle
     :members:  calc_phantom_length, calc_zero_padding, zoom_fresnel_single_fft, nchunk_zoom_fresnel_single_fft

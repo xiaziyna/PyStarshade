@@ -28,7 +28,7 @@ If you wanted to design your own drm (or modify one of these), go to the file 'd
         'iwa': [30 / 9.52e+07 / mas_to_rad]  # R_ss / dist_ss_t in MAS
     }
 
-The easiest way to interface with PyStarshade is via the StarshadeProp class. 
+The easiest way to interface with PyStarshade is via the StarshadeProp class.
 
 .. code-block:: python
 
@@ -54,7 +54,7 @@ Note: there is an important setting called 'chunk', if this is invoked a chunked
 Fourier propagator
 -------------------
 
-In PyStarshade, the classes and functions are generally designed to act on a spatial grid of size N * N, where N is an odd number and the origin is at (N/2, N/2). 
+In PyStarshade, the classes and functions are generally designed to act on a spatial grid of size N * N, where N is an odd number and the origin is at (N/2, N/2).
 
 Data
 ----------
@@ -73,7 +73,7 @@ The data directory is structured like so:
     ├── pupils
     └── scenes
 
-If you have new masks for the starshade, or telescope aperture masks, place them in the correct folders (starshade_masks and pupils respectively). 
+If you have new masks for the starshade, or telescope aperture masks, place them in the correct folders (starshade_masks and pupils respectively).
 
 
 Usage
@@ -84,14 +84,14 @@ However, if desired, one may more directly interface with the optical propagatio
 
 As an example, calling the function 'source_field_to_ccd', this function
 takes as input a 2D source-field of size (N_s, N_s) and spatial sampling ds and returns the 2D output
-field incident on a CCD of size (N_pix, N_pix) and pixel size dp. 
+field incident on a CCD of size (N_pix, N_pix) and pixel size dp.
 
 .. code-block:: python
 
     from pystarshade.simulate_field import source_field_to_ccd
 
-    source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens, 
-                            N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001, 
+    source_field_to_ccd(source_field, wl, dist_xo_ss, dist_ss_t, focal_length_lens, radius_lens,
+                            N_s = 333, N_x = 6401, N_t = 1001, N_pix = 4001,
                             ds = 10*0.03*au_to_meter, dx = 0.01, dt = 0.0116, dp=.5*1.9e-7)
 
 Please see the examples folder for detailed examples!
@@ -100,6 +100,5 @@ Input data
 --------
 
 PyStarshade can take as input any pixelized source-field such as Haystacks model or an ExoVista model, or analytic descriptions of sources
-(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
-use 'pystarshade.simulate_field.point_source_to_ccd'. 
-
+(so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please
+use 'pystarshade.simulate_field.point_source_to_ccd'.

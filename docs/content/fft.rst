@@ -1,7 +1,7 @@
 Bluesteins FFT
 ---------------
 
-When a starshade is aligned with a star, starlight is diffracted by the starshade :math:`s(\mathbf{x})` onto a telescope aperture. For a starshade mask :math:`s(u, v)` which is zero inside the mask and unity outside, at a wavelength :math:`\lambda` and starshade-telescope distance :math:`z`, the field at the telescope aperture is :math:`f_{\lambda}(x, y)` (Eq :eq:`bluestein`) and is related to the Fourier transform of the starshade mask multipled by a highly oscillatory chirp term.
+When a starshade is aligned with a star, starlight is diffracted by the starshade :math:`s(\mathbf{x})` onto a telescope aperture. For a starshade mask :math:`s(u, v)` which is zero inside the mask and unity outside, at a wavelength :math:`\lambda` and starshade-telescope distance :math:`z`, the field at the telescope aperture is :math:`f_{\lambda}(x, y)` (Eq :eq:`bluestein`) and is related to the Fourier transform of the starshade mask multiplied by a highly oscillatory chirp term.
 
 .. math::
    f_{\lambda}[u, v] \propto \mathcal{F} \left( s(u, v) e^{\frac{j \pi (u^2 + v^2)}{\lambda z}} \right) \left[ \frac{x}{\lambda z}, \frac{y}{\lambda z} \right]
