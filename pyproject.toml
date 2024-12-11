@@ -4,9 +4,11 @@ version = "0.0.1"
 description = "PyStarshade is a Python library for efficient Fresnel optical simulations of direct imaging with an external occulter from stellar system to CCD."
 authors = ["Jamila Taaki"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
+numpy = "^2.2.0"
 
 
 [build-system]
