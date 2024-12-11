@@ -114,7 +114,7 @@ def chunk_source_field_to_pupil(
     dt=0.03,
 ):
     """
-    !!!!!!!! I need checking, likely replace with chunky crazy, along wiht functions in fresnel and fft
+    !!!!!!!! I need checking, likely replace with chunky crazy, along with functions in fresnel and fft
     """
     ps = PointSource(dx, N_x, wl, 0, 0, dist_xo_ss, 1)
     k_vals = ps.wave_numbers()

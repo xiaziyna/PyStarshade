@@ -1,3 +1,5 @@
+import numpy as np
+
 from pystarshade.propagator import StarshadeProp
 
 hwo_starshade = StarshadeProp(drm="hwo")

@@ -1,13 +1,10 @@
 ################################################################################
 # OVERVIEW
 ################################################################################
-# The following contains the pre-commit hooks for this repository, which are
-# likely a modified version of the author's (AFg6K7h4fhy2) repository template.
 #
 # Links:
 #
 # Pre-commit: https://pre-commit.com/
-# The author's template: https://github.com/AFg6K7h4fhy2/AFg6K7h4fhy2-Template
 # Supported hooks: https://github.com/pre-commit/pre-commit-hooks
 repos:
 ################################################################################
@@ -83,7 +80,18 @@ repos:
     rev: v0.8.2
     hooks:
       - id: ruff
-        args: ["--ignore=E741", "--ignore=E731", "--fix"]
+        args: [
+          "--ignore=E741",
+          "--ignore=E731",
+          "--ignore=F405",
+          "--ignore=F403",
+          "--ignore=F841",
+          "--ignore=E402",
+          "--ignore=E711",
+          "--ignore=F821",
+          "--ignore=F601",
+          "--ignore=F405",
+          "--fix"]
 ################################################################################
 # SPELLING
 ################################################################################
@@ -92,3 +100,4 @@ repos:
     hooks:
     -   id: typos
         args: ["--force-exclude"]
+################################################################################

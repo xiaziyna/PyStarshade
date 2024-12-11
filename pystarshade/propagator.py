@@ -50,7 +50,7 @@ class StarshadeProp:
 
         if not self.drm:
             raise ValueError(
-                "Design reference mission not set. Insert instrument paramters into data/telescope_drm.py"
+                "Design reference mission not set. Insert instrument parameters into data/telescope_drm.py"
             )
         else:
             self.set_mission_params(self.drm)

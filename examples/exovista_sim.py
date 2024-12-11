@@ -7,14 +7,10 @@ Scenes generated with ExoVista are used here
 Each pixel is 1 mas spacing, with 1001x1001 scene
 """
 
-from astropy.io import fits
-
-from . import download_exovista
-
-download_exovista.exovista_scenes_file()
 import os
 
 import matplotlib.pyplot as plt
+from astropy.io import fits
 from matplotlib.colors import LogNorm
 
 from pystarshade.data.scenes.Scene import *
@@ -25,6 +21,10 @@ from pystarshade.diffraction.util import (
     pc_to_meter,
 )
 from pystarshade.propagator import StarshadeProp
+
+from . import download_exovista
+
+download_exovista.exovista_scenes_file()
 
 fname = "1215-HIP_16537-TYC_-mv_3.72-L_0.35-d_3.20-Teff_5048.07.fits"
 script_dir = os.path.dirname(os.path.abspath(__file__))

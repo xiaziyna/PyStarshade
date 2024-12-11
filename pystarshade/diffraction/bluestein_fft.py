@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from pystarshade.diffraction.util import bluestein_pad
