@@ -239,7 +239,7 @@ class StarshadeProp:
             focal_field_no_ss = pupil_to_ccd(wl, self.f, pupil_field_no_ss, self.pupil_mask, self.d_t, self.d_p, self.N_t, N_pix_overcomplete)
             norm_contrast = np.max(np.abs(focal_field_no_ss)**2)
             norm_factor = np.sum(np.abs(focal_field_no_ss)**2)
-            circ_mask = np.hypot(x, y) <= self.ang_res_pix[wl_i]
+            circ_mask = np.hypot(x, y) <= self.ang_res_pix[wl_i] * 0.7
 
             for (i, j) in psf_points:
                 if pupil_symmetry: p_i, p_j = i, j
@@ -260,10 +260,10 @@ class StarshadeProp:
                 if i == 0 and j == 0:
                     total_throughput[wl_i, p_i, p_j] = np.sum(on_axis_psf) / norm_factor
 
-            params = np.array([ wl, self.d_p_mas, norm_contrast, N_basis, N_pix, N_pix_overcomplete])
+            params = np.array([ wl, self.d_p_mas, norm_contrast, norm_factor, N_basis, N_pix, N_pix_overcomplete])
             save_path = data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz','psf')
-            np.savez_compressed(save_path, psf_basis=psf_basis / norm_contrast, on_axis_psf = on_axis_psf / norm_contrast,\
-                                no_ss_psf = np.abs(focal_field_no_ss)**2 / norm_contrast, params=params)
+            np.savez_compressed(save_path, psf_basis=psf_basis / norm_factor, on_axis_psf = on_axis_psf / norm_factor,\
+                                no_ss_psf = np.abs(focal_field_no_ss)**2 / norm_factor, params=params)
 
         save_path_throughput = data_file_path(self.drm+'_throughput_'+pupil_type+'_'+self.d_x_str+'.npz','psf')
         np.savez_compressed(save_path_throughput, core_throughput=core_throughput, total_throughput=total_throughput,\
@@ -297,13 +297,15 @@ class StarshadeProp:
         - `N_p`: Number of output pixels.
         """
         psf = np.load(data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz', 'psf'))
-        _, _, norm_contrast, N_basis, N_pix, N_pix_overcomplete = psf['params']
+        _, _, norm_contrast, norm_factor, N_basis, N_pix, N_pix_overcomplete = psf['params']
         N_basis, N_pix, N_pix_overcomplete = int(N_basis)*(1 + pupil_symmetry) - pupil_symmetry*1, int(N_pix), int(N_pix_overcomplete)
         if pupil_symmetry: psf_basis = self.mirr_symm_psf(psf['psf_basis'], N_basis, N_pix)
         else: psf_basis = psf['psf_basis']
+
         N_s = np.shape(source_field)[0]
         N_p = int(N_s * self.ratio_s_p)
-        output_intensity = np.zeros((N_p, N_p), dtype=np.float32)
+        N_ghost_p = N_pix + N_p
+        output_intensity = np.zeros((N_ghost_p, N_ghost_p), dtype=np.float32)
         suppress_field = trunc_2d(source_field, N_basis)
 
         psf_points = flat_grid(N_basis)
@@ -314,15 +316,16 @@ class StarshadeProp:
             s_i, s_j = i + N_s//2, j + N_s//2
             if i == 0 and j == 0:
                 psf_ij = psf['on_axis_psf'] * source_field[s_i, s_j]
-                if N_pix_overcomplete > N_p:
-                    output_intensity += trunc_2d(psf_ij, N_p)
+                if N_pix_overcomplete > N_ghost_p:
+                    output_intensity += trunc_2d(psf_ij, N_ghost_p)
                 else:
-                    output_intensity[N_p//2 - (N_pix_overcomplete//2) : N_p//2 + (N_pix_overcomplete//2) + 1,\
-                    N_p//2 - (N_pix_overcomplete//2) : N_p//2 + (N_pix_overcomplete//2) + 1] += psf_ij
+                    output_intensity[N_ghost_p//2 - (N_pix_overcomplete//2) : N_ghost_p//2 + (N_pix_overcomplete//2) + 1,\
+                    N_ghost_p//2 - (N_pix_overcomplete//2) : N_ghost_p//2 + (N_pix_overcomplete//2) + 1] += psf_ij
             else:
-                o_i, o_j = N_p//2 + i*self.ratio_s_p, N_p//2 + j*self.ratio_s_p
+                o_i, o_j = N_ghost_p//2 + i*self.ratio_s_p, N_ghost_p//2 + j*self.ratio_s_p
                 output_intensity[o_i - N_pix//2 : o_i + N_pix//2 + 1,  o_j - N_pix//2 : o_j + N_pix//2 + 1] += psf_basis[p_i, p_j]
 
+        output_intensity = trunc_2d(output_intensity, N_p)
         source_field[N_s//2 - N_basis//2 : N_s//2 + N_basis//2 + 1, N_s//2 - N_basis//2 : N_s//2 + N_basis//2 + 1] = 0
         non_iwa_psf = psf['no_ss_psf']
         psf_uniform = bluestein_pad(non_iwa_psf, N_pix_overcomplete, N_pix_overcomplete)
