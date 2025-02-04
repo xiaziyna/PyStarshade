@@ -83,7 +83,7 @@ class StarshadeProp:
         self.N_t = int((self.r_lens * 2) // self.d_t)
         self.N_t += (1 - self.N_t%2)
         self.d_p = (self.d_p_mas) * self.f * mas_to_rad # physical pixel size
-
+        
     def mirr_symm_psf(self, psf_basis, N_basis, N_pix):
         """
         Mirror a quadrant of a symmetric psf object four ways.
