@@ -26,7 +26,6 @@ def data_file_path(file_name, *subfolders):
         The full path to the file.
     """
     package_path = pkg_resources.resource_filename('pystarshade', '')
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     os.environ['BASE_PATH'] = os.path.abspath(os.path.join(package_path, 'data'))
     base_path = os.environ.get('BASE_PATH')
     return os.path.join(base_path, *subfolders, file_name)
