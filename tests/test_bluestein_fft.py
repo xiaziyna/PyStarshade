@@ -8,7 +8,7 @@ import random
 import numpy as np
 import os
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d, N_in_2d
-from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, zoom_fft_quad_out_mod
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, zoom_fft_quad_out_mod, four_chunked_zoom_fft
 
 def gen_param():
     N_x = random.randrange(3, 200, 2)
