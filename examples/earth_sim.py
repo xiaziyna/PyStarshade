@@ -40,7 +40,7 @@ def ring_mean(image, center, radius, thickness=1.0):
     return image[ring_mask].mean(), ring_mask
 
 
-#fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclinati
+#fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclination
 fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits'
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -50,8 +50,9 @@ hdul = fits.open(file_path)
 dist_xo_ss = hdul[4].header['dist'] * pc_to_meter
 
 inclination = hdul[2].header['I-0']
-print (hdul[2].header['I-0'], hdul[2].header['NZODIS-0'], hdul[2].header['R-0'])
-local_zodi_mag_v_arcsec2 = 22.5
+print ('inclination: ', hdul[2].header['I-0'])
+print ('number of Zodis: ', hdul[2].header['NZODIS-0'])
+local_zodi_mag_v_arcsec2 = 22.5 #local zodi, can add this in
 
 t = 0 # timestep
 scene = Scene(file_path)
@@ -83,9 +84,11 @@ bit_arr = N_dust % 2
 extended_field[:, half_N - half_in_N : half_N + half_in_N + bit_arr,
        half_N - half_in_N : half_N + half_in_N + bit_arr] = bg_scene
 
-lam_ref = 0.55 * 1e-6
-ild = np.where(wl_range >= lam_ref)[0][0]-1
-print (wl_range[ild], ild)
+wl_str = 500
+
+lam_ref = wl_str*1e-9
+w_i = np.where(wl_range >= lam_ref)[0][0]
+wl = wl_range[w_i]
 
 n_planet = 0
 
@@ -94,18 +97,14 @@ for i in range(scene.nplanets):
         extended_field[:, planet_xy[i, 1]- N_dust_half + half_N , planet_xy[i, 0]- N_dust_half + half_N] += planet_spectra[i]
         n_planet +=1
 
-w_i = 154 # choose wavelength
-#w_i = 184
 source_field = extended_field[w_i]
 
-print (np.shape(source_field))
+
 print ( -2.5*np.log10((500**2)*source_field[int(star_xy[0]), int(star_xy[1])])+8.9)
 print (source_field[int(star_xy[0])-65, int(star_xy[1])])
 print ( - 2.5*np.log10((500**2)*source_field[int(star_xy[0]) - 50, int(star_xy[1])]) + 8.9)
 val, ring_mask = ring_mean(source_field, (int(star_xy[0]), int(star_xy[1])), 50, thickness=5.0)
-print (flux_to_mag(val), val*1.3)
-
-#source_field[ring_mask] = 1
+print (flux_to_mag(val))
 
 plt.figure()
 plt.title('ExoVista input scene', fontsize=14)
@@ -120,8 +119,6 @@ plt.show()
 
 #source_field = np.zeros((250, 250))
 #source_field[220, 125] = 1
-
-wl = wl_range[w_i]
 
 #plt.figure()
 #plt.plot(np.arange(150)*ds_au, flux_to_mag(source_field[N_s//2+1, N_s//2+1:N_s//2+151]))
@@ -150,7 +147,8 @@ hwo_starshade = StarshadeProp(drm = drm)
 #hwo_starshade.gen_pupil_field()
 hwo_starshade.N_wl = 1 # edit an internal variable so that only a single wavelength PSF basis is calculated
 #hwo_starshade.gen_psf_basis(pupil_type = pupil_type, pupil_symmetry = True)
-focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9, pupil_symmetry = False)
+
+focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), wl_str*1e-9, pupil_symmetry = False)
 #focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9, pupil_symmetry = True)
 #[1 + 500-250: 500+250, 1 + 500-250: 500+250,]
 
@@ -161,11 +159,8 @@ x_max, y_max = x_max[0], y_max[0]
 x, y = np.meshgrid(np.arange(N), np.arange(N))
 print (hwo_starshade.ang_res_pix[0], x_max, y_max)
 circ_mask = np.hypot(x-x_max, y-y_max) >= hwo_starshade.ang_res_pix[0]*2.4
-
-#focal_intensity*=circ_mask
 val, ring_mask = ring_mean(focal_intensity, (N//2, N//2), 30, thickness=1.0)
 print (flux_to_mag(val))
-#focal_intensity[ring_mask] = 1
 
 # Add in a median local zodi mag of 23.02 V mag∕arc sec2
 
@@ -183,6 +178,6 @@ plt.show()
 print (np.sum(focal_intensity))
 print ( - 2.5*np.log10((500**2)*focal_intensity[(N//2) - 50, N//2]) + 8.9)
 
-save_path = data_file_path('ss_0_'+drm+'_'+pupil_type+'.npz', 'out')
+save_path = data_file_path('ss_0_'+drm+'_'+pupil_type+'_'+wl_str+'.npz', 'out')
 print ('file saved at: ', save_path)
 np.savez_compressed(save_path, field = focal_intensity)

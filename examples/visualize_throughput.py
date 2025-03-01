@@ -16,8 +16,8 @@ fname_on = 'hwopupil_onaxis_259.npz'
 fname_off = 'hwopupil_offaxis_259.npz'
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-file_path_on = os.path.join(data_dir, 'pupil', fname)
-file_path_off = os.path.join(data_dir, 'pupil', fname)
+file_path_on = os.path.join(data_dir, 'pupils', fname_on)
+file_path_off = os.path.join(data_dir, 'pupils', fname_off)
 
 data = np.load(file_path_on)
 pupil_onaxis = data['pupil']
