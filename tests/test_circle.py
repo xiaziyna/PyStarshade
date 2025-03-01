@@ -6,10 +6,10 @@ are adapted/taken from DIFFRAQ (Harness) see solution_util.py of DIFFRAQ
 
 import numpy as np
 import pytest
-from from pystarshade.apodization.apodize import *
-from from pystarshade.diffraction.util import *
-from from pystarshade.diffraction.diffract import *
-from from pystarshade.diffraction.field import *
+from pystarshade.apodization.apodize import *
+from pystarshade.diffraction.util import *
+from pystarshade.diffraction.diffract import *
+from pystarshade.diffraction.field import *
 from scipy.ndimage import convolve
 from scipy.special import jn
 
