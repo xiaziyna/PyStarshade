@@ -47,7 +47,6 @@ ax1.set_ylim((0, 0.8))
 ax1.set_xlim((0, 7))
 
 
-#ax1.set_xlabel('source [mas]', size=18)
 ax1.set_xlabel(r'angular separation ($\lambda / D$)', size=18)
 ax1.set_ylabel('core throughput', size=18)
 
@@ -57,7 +56,7 @@ wl_i = len(wl_) - 1
 ax1.plot(np.arange(len(core_throughput_off[-1])) * d_mas / ((950e-9 / 6)/mas_to_rad), core_throughput_off[wl_i], linestyle='-',color='#3d8dc4', linewidth=2., label='off-axis pupil')
 ax1.plot(np.arange(len(core_throughput_on[-1])) * d_mas / ((950e-9 / 6)/mas_to_rad), core_throughput_on[wl_i], linestyle='-', color='#7d77b7', linewidth=2., label='on-axis pupil')
 ax1.axvline(83/((950e-9 / 6)/mas_to_rad), label ='exoEarth',linestyle='dashed', color = 'green')
-ax1.set_xticks([0,1,2,3,4], [0,1,2,3,4])  # Example x-ticks
+ax1.set_xticks([0,1,2,3,4], [0,1,2,3,4]) 
 ax1.set_ylim((0, 0.8))
 ax1.set_xlim((0, 4))
 
