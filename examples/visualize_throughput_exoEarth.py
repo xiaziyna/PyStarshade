@@ -20,6 +20,7 @@ through_fname_off = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_offax
 
 data_throughput_on = np.load(through_fname_on)
 wl = data_throughput_on['wl']
+print (wl)
 d_mas = data_throughput_on['d_pix_mas']
 
 N_wl, N, _ = np.shape(data_throughput_on['total_throughput'])
@@ -53,8 +54,8 @@ ax1.set_ylabel('core throughput', size=18)
 ax1 = plt.subplot(gs[0, 1])
 ax1.text(0.05, .76, '950 nm', fontsize=14)
 wl_i = len(wl_) - 1
-ax1.plot(np.arange(len(core_throughput_off[-1])) * d_mas / ((1000e-9 / 6)/mas_to_rad), core_throughput_off[wl_i], linestyle='-',color='#3d8dc4', linewidth=2., label='off-axis pupil')
-ax1.plot(np.arange(len(core_throughput_on[-1])) * d_mas / ((1000e-9 / 6)/mas_to_rad), core_throughput_on[wl_i], linestyle='-', color='#7d77b7', linewidth=2., label='on-axis pupil')
+ax1.plot(np.arange(len(core_throughput_off[-1])) * d_mas / ((950e-9 / 6)/mas_to_rad), core_throughput_off[wl_i], linestyle='-',color='#3d8dc4', linewidth=2., label='off-axis pupil')
+ax1.plot(np.arange(len(core_throughput_on[-1])) * d_mas / ((950e-9 / 6)/mas_to_rad), core_throughput_on[wl_i], linestyle='-', color='#7d77b7', linewidth=2., label='on-axis pupil')
 ax1.axvline(83/((950e-9 / 6)/mas_to_rad), label ='exoEarth',linestyle='dashed', color = 'green')
 ax1.set_xticks([0,1,2,3,4], [0,1,2,3,4])  # Example x-ticks
 ax1.set_ylim((0, 0.8))
