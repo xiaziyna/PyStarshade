@@ -16,22 +16,22 @@ Developed by Jamila Taaki (U Mich MIDAS postdoctoral fellow).
 
 
 Installation
---------
+------------
 
 You can install PyStarshade using pip:
 
 .. code-block:: bash
+
     pip install pystarshade
 
-
-
-To use pre-computed data in the examples, use [git lfs](https://git-lfs.com): 
+To use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`_:
 
 .. warning::
 
     Downloading the pre-computed data requires several gigabytes of disk space. Ensure you have sufficient storage available before proceeding.
 
 .. code-block:: bash
+
     git clone https://github.com/xiaziyna/PyStarshade.git PyStarshade
     cd PyStarshade
     git lfs pull
@@ -39,17 +39,16 @@ To use pre-computed data in the examples, use [git lfs](https://git-lfs.com):
 License and Citation
 --------------------
 
-`PyStarshade` is licensed under the MIT License. If you use this tool in your research, please cite:
+``PyStarshade`` is licensed under the MIT License. If you use this tool in your research, please cite:
 
-    Taaki, Kamalabadi, Kemball. "PyStarshade: simulating high-contrast imaging of exoplanets with starshades" 
-
+    Taaki, Kamalabadi, Kemball. "PyStarshade: simulating high-contrast imaging of exoplanets with starshades"
 
 Contact
 -------
 
-For questions or bug reports, contact Jamila Taaki at [tjamila@umich.edu] or open an issue on the `GitHub repository <https://github.com/xiaziyna/PyStarshade>`.
+For questions or bug reports, contact Jamila Taaki at tjamila@umich.edu or open an issue on the `GitHub repository <https://github.com/xiaziyna/PyStarshade>`_.
 
-Contributions are welcome! 
+Contributions are welcome!
 
 
 Contents
