@@ -74,6 +74,12 @@ Simulate imaging for a 'source_field' with a default 2 mas sampling.
 
 See examples folder for different simulation examples.
 
+## Contributing
+
+Feel free to reach out if you'd like to discuss contributing or go ahead and submit a pull request!
+Try to keep any pull requests limited in scope. 
+If there is demand for extra functionality, I am happy to help add these in.
+
 ## License
 
 [PyStarshade] is released under the [GNU General Public License v3.0](LICENSE).

@@ -19,10 +19,10 @@ data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data')
 file_path_on = os.path.join(data_dir, 'pupils', fname_on)
 file_path_off = os.path.join(data_dir, 'pupils', fname_off)
 
-data = np.load(file_path_on)
+data = np.load(file_path_on, allow_pickle=False)
 pupil_onaxis = data['pupil']
 
-data = np.load(file_path_off)
+data = np.load(file_path_off, allow_pickle=False)
 pupil_offaxis = data['pupil']
 
 fig, axes = plt.subplots(1, 2, figsize=(10, 5))  # 1 row, 2 columns
@@ -50,19 +50,17 @@ colors = [cmap(i / (len(wl_) + 4)) for i in range(len(wl_) + 4)]
 cmap2 = plt.get_cmap('Greens')
 colors2 = [cmap2(i / (len(wl_) + 4)) for i in range(len(wl_) + 4)]
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
 through_fname_on = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_onaxis_001m.npz')
 through_fname_off = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
 
-data_throughput_on = np.load(through_fname_on)
+data_throughput_on = np.load(through_fname_on, allow_pickle=False)
 wl = data_throughput_on['wl']
 
 N_wl, N, _ = np.shape(data_throughput_on['total_throughput'])
 total_throughput_on = data_throughput_on['total_throughput'][:, N//2, N//2:]
 core_throughput_on = data_throughput_on['core_throughput'][:, N//2, N//2:]
 
-data_throughput_off = np.load(through_fname_off)
+data_throughput_off = np.load(through_fname_off, allow_pickle=False)
 total_throughput_off = data_throughput_off['total_throughput'][:, N//2, N//2:]
 core_throughput_off = data_throughput_off['core_throughput'][:, N//2, N//2:]
 
