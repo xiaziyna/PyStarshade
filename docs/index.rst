@@ -37,20 +37,6 @@ Or to use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`
     git lfs pull
     pip install -e .
 
-License and Citation
---------------------
-
-``PyStarshade`` is licensed under the MIT License. If you use this tool in your research, please cite:
-
-    Taaki, Kamalabadi, Kemball. "PyStarshade: simulating high-contrast imaging of exoplanets with starshades"
-
-Contact
--------
-
-For questions or bug reports, contact Jamila Taaki at tjamila@umich.edu or open an issue on the `GitHub repository <https://github.com/xiaziyna/PyStarshade>`_.
-
-Contributions are welcome!
-
 
 Contents
 --------
@@ -65,4 +51,18 @@ API
 
 .. toctree::
     content/test
+
+License and Citation
+--------------------
+
+``PyStarshade`` is licensed under the GNU GPL V3. If you use this tool in your research, please cite:
+
+    Taaki, Kamalabadi, Kemball. PyStarshade: simulating high-contrast imaging of exoplanets with starshades
+
+Contact
+-------
+
+For questions or bug reports, contact Jamila Taaki at tjamila@umich.edu or open an issue on the `GitHub repository <https://github.com/xiaziyna/PyStarshade>`_.
+
+Contributions are welcome!
 
