@@ -47,8 +47,10 @@ PyStarshade is built upon a Fourier optics model that simulates the propagation 
    
    where :math:`P[\zeta, \eta]` is the telescope aperture function and :math:`f` is the focal length.
 
+----
+
 Starshade Concepts
-=================
+---------------------
 
 - **Habitable Worlds Observatory (HWO)**: Utilizes a 35 m diameter Starshade for UV observations or a 60 m diameter for broadband coverage, designed to achieve high-contrast imaging for exoEarth characterization [Shaklan2024]_.
 - **Starshade Rendezvous Probe**:A 26 m diameter Starshade designed to rendezvous with Romans 2.4 m telescope [StarshadeProbe2017]_ [S5Website]_.

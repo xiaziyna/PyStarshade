@@ -1,6 +1,7 @@
 import numpy as np
 import os
-import pkg_resources
+from importlib import resources
+
 
 #=== useful constants====
 pc_to_meter = 3.08567782e16
@@ -25,7 +26,8 @@ def data_file_path(file_name, *subfolders):
     str
         The full path to the file.
     """
-    package_path = pkg_resources.resource_filename('pystarshade', '')
+    package_path = resources.files('pystarshade')
+    data_path = os.path.abspath(os.path.join(str(package_path), 'data'))
     os.environ['BASE_PATH'] = os.path.abspath(os.path.join(package_path, 'data'))
     base_path = os.environ.get('BASE_PATH')
     return os.path.join(base_path, *subfolders, file_name)
