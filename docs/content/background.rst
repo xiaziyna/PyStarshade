@@ -32,7 +32,7 @@ PyStarshade is built upon a Fourier optics model that simulates the propagation 
       
       f_{P,\lambda}^0[x, y] = \frac{e^{\frac{i\pi}{\lambda z}(x^2 + y^2)}}{\lambda z} \mathcal{F}\left( s[\zeta, \eta] e^{\frac{i\pi}{\lambda z}(\zeta^2 + \eta^2)} \right) \left[ \frac{x}{\lambda z}, \frac{y}{\lambda z} \right]
    
-   where :math:`s[\zeta, \eta]` is the starshade mask, :math:`\lambda` is the wavelength, and :math:`z` is the distance between the starshade and telescope. A starshade will diffract light for sources within an angular separation of the axis of approximately :math:`2 * R_{ss} / z` - :math:`R_{ss}` is the starshade radius and :math:`z` is the starshade-telescope flight distance. 
+   where :math:`s[\zeta, \eta]` is the starshade mask, :math:`\lambda` is the wavelength, and :math:`z` is the distance between the starshade and telescope. A starshade will diffract light for sources within an angular separation of the axis of approximately :math:`2 * R_{ss} / z`  where :math:`R_{ss}` is the starshade radius and :math:`z` is the starshade-telescope flight distance. 
 
 2. **Telescope Aperture to Focal Plane (Fraunhofer Diffraction):**  
    The diffracted field at the aperture is then propagated through the telescope's optical system to the focal plane, where the point-spread function (PSF) is formed. The PSF :math:`\psi^\lambda` for a source at position :math:`\phi` is given by:
