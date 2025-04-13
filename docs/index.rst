@@ -24,7 +24,7 @@ You can install PyStarshade using pip:
 
     pip install pystarshade
 
-To use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`_:
+Or to use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`_:
 
 .. warning::
 
@@ -35,6 +35,7 @@ To use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`_:
     git clone https://github.com/xiaziyna/PyStarshade.git PyStarshade
     cd PyStarshade
     git lfs pull
+    pip install -e .
 
 License and Citation
 --------------------
