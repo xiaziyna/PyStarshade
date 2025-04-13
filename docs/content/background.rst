@@ -11,16 +11,12 @@ How Does a Starshade Work?
 
 The starshade creates a shadow by suppressing starlight through diffraction. Its petal-like design minimizes light scattering around the edges, producing a dark region where the telescope can observe. When aligned with a target star, the starshade reduces the star's light by a factor of :math:`10^{-10}` to :math:`10^{-11}` as demonstrated in subscale tests, enabling the detection of planets that are billions of times fainter. The starshade can maintain this contrast over a broad wavelength range, from ultraviolet (UV) to near-infrared (NIR). Thereby allowing for the detection and characterization of planetary atmospheres, including the search for biosignatures such as water vapor (H₂O), oxygen (O₂), carbon dioxide (CO₂), methane (CH₄), and ozone (O₃). Furthermore, starlight is supppressed prior to light entering the telescope aperture, a starshade maintains a high level of optical throughput (close to or around 100%). In PyStarshade you can simulate throughput for different apertures. 
 
-
-Figure: Starshade Concept
-~~~~~~~~~~~~~~~~~~~~~~~~
-
 .. image:: starshade.png
    :alt: Starshade Diagram
 
 *Caption:* A starshade blocks starlight, casting a shadow on the telescope, allowing planet light to be imaged.  
 
-For more on starshade science, see resources like `Mennesson et al. (2024) <https://doi.org/10.1117/1.JATIS.10.3.035004>`_ or `Shaklan et al. (2023) <https://doi.org/10.1117/12.2677793>`_.
+See [SSweb]_.
 
 ----
 
@@ -53,12 +49,13 @@ Starshade Concepts
 ---------------------
 
 - **Habitable Worlds Observatory (HWO)**: Utilizes a 35 m diameter Starshade for UV observations or a 60 m diameter for broadband coverage, designed to achieve high-contrast imaging for exoEarth characterization [Shaklan2024]_.
-- **Starshade Rendezvous Probe**:A 26 m diameter Starshade designed to rendezvous with Romans 2.4 m telescope [StarshadeProbe2017]_ [S5Website]_.
+- **Starshade Rendezvous Probe**:A 26 m diameter Starshade designed to rendezvous with Romans 2.4 m telescope [StarshadeProbe2017]_ .
 - **Earth-Orbiting Hybrids**: Employs a large 100 m diameter Starshade in elliptical orbits, designed to collaborate with ground-based Extremely Large Telescopes for enhanced observations [Peretz2021]_.
 - **Inflatable Starshade**: An innovative concept exploring inflatable structures for Starshade deployment, aimed at reducing launch mass and complexity [NIAC2025]_.
 
 .. [Shaklan2024] Shaklan S. et al. 2024, SPIE, 13092, 130925D
 .. [StarshadeProbe2017] Starshade Probe Report 2017, https://science.nasa.gov/wp-content/uploads/2023/04/Starshade2.pdf?emrc=c29363
+.. [SSweb] Project Starshade: https://projectstarshade.com
 .. [S5Website] S5 Website: https://exoplanets.nasa.gov/exep/technology/starshade/
 .. [Seager2015] Seager S. et al. 2015, SPIE, 9605, 96050W
 .. [Lisman2019] Lisman P.D. and Schwieterman E.W. 2019, BAAS, 51, 217
