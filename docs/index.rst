@@ -45,6 +45,7 @@ Contents
     content/background
     content/usage
     content/fft
+    content/solar_system.ipynb
 
 API
 --------
