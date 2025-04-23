@@ -7,7 +7,10 @@ from matplotlib import rc
 from matplotlib.colorbar import Colorbar 
 import os
 
-#visualize the throughput at two single wavelengths with an exo-Earth overlaid
+'''
+Visualizes throughput at two single wavelengths (500 nm & 950 nm):
+vs angular separation (λ∕D) for on/off-axis segemented HWO pupils and draws a dashed line marking where an Earth analog (1 AU at 12 pc) would lie. 
+'''
 
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})

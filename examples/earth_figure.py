@@ -8,8 +8,12 @@ rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 import os
 
+'''
+Requires running earth_sim.py first!
+Loads a solar-system scene FITS file (inclination 0° & 60°) and corresponding precomputed starshade diffraction outputs for the HWO off-axis pupil, then plots them side-by-side with a colorbar and saves the figure. 
+'''
 
-fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclinati
+#fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclinati
 fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits'
 drm = 'hwo'
 pupil_type = 'hwopupil_offaxis'
