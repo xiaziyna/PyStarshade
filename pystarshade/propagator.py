@@ -165,7 +165,7 @@ class StarshadeProp:
         if chunk:
             ss_mask_fname = self.ss_mask_fname_partial + '.dat'
         else:
-            ss_mask_fname = self.ss_mask_fname_partial + 'qu.npz'
+            ss_mask_fname = self.ss_mask_fname_partial + '_qu.npz'
 
         over_N_t = 2*int((self.suppress_region // self.d_t_mas) + 100)
         over_N_t += (1-over_N_t%2)
@@ -192,7 +192,7 @@ class StarshadeProp:
             self.pupil_mask = pupil_data['pupil']
         except FileNotFoundError:
             print(f"Generating a new pupil mask.")
-            make_pupil(self.N_t, pupil_type)
+            make_pupil(self.N_t, pupil_type, file_path)
             pupil_data = np.load(file_path)
             self.pupil_mask = pupil_data['pupil']
 

@@ -32,6 +32,7 @@ def data_file_path(file_name, *subfolders):
     base_path = os.environ.get('BASE_PATH')
     return os.path.join(base_path, *subfolders, file_name)
 
+
 def ang_res(wl, D):
     """
     Calculate the angular resolution of lens with diameter D in milliarcseconds.
@@ -49,6 +50,25 @@ def ang_res(wl, D):
         Angular resolution in milliarcseconds.
     """
     return (wl/D)/mas_to_rad
+
+def flux_to_mag(flux, pixel_size_mas=2):
+    """
+    Calculate the surface brightness in mag/arcsec^2 from flux per pixel.
+
+    Parameters
+    ----------
+    flux : float
+        Flux per pixel in Jansky (Jy/pixel).
+    pixel_size_mas : float
+        Pixel size in milliarcseconds (mas). Default is 2.0.
+
+    Returns
+    -------
+    float
+        Surface brightness in mag/arcsec^2.
+    """
+    pixels_per_arcsec2 = (1000 // pixel_size_mas)**2  # Pixels per arcsec^2
+    return -2.5 * np.log10(flux * pixels_per_arcsec2 / 3640.0)
 
 def fresnel_num(R, wl, dist_ss_t):
     """

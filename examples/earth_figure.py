@@ -1,5 +1,5 @@
 from pystarshade.data.scenes.Scene import *
-from pystarshade.diffraction.util import mas_to_rad, au_to_meter, pc_to_meter, data_file_path
+from pystarshade.diffraction.util import mas_to_rad, au_to_meter, pc_to_meter, flux_to_mag, data_file_path
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -8,9 +8,6 @@ rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 import os
 
-def flux_to_mag(flux):
-    # 2 mas pixels
-    return - 2.5*np.log10((500**2)*flux /  3640	)
 
 fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclinati
 fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits'
@@ -60,6 +57,5 @@ cbar.set_label(r'Intensity', fontsize=16)
 #cbar.set_label(r'Surface brightness [mag$\cdot$arcsec$^{-2}$]', fontsize=16)
 
 plt.tight_layout(rect=[0, 0, 0.88, 1])  # Adjust layout to accommodate colorbar
-#plt.show()
 save_path = os.path.join(script_dir, 'ss_hwo_offaxis_close.png')
 plt.savefig(save_path, dpi=400)
