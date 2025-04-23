@@ -1,3 +1,7 @@
+'''
+Loads saved on-axis and off-axis HWO core/total throughput, then (1) plots the pupil shapes and (2) overlays core vs total throughput curves vs source offset for multiple λ values.
+'''
+
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import Normalize
