@@ -18,13 +18,14 @@ Developed by Jamila Taaki (U Mich MIDAS postdoctoral fellow).
 Installation
 ------------
 
-You can install PyStarshade using pip:
+For a barebones install, use pip:
 
 .. code-block:: bash
 
     pip install pystarshade
 
-Or to use pre-computed data in the examples, use `git lfs <https://git-lfs.com>`_:
+If you want to use the examples, including starshade masks, telescope apertures and other pre-computed data, it is recommended you do NOT use pip. 
+Instead install the package from source, in editable mode and use `git lfs <https://git-lfs.com>`_:
 
 .. warning::
 
