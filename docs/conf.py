@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
                    'sphinx.ext.imgmath',
+    'nbsphinx',
 #    'sphinx.ext.mathjax',           # autodoc with maths
     'sphinx.ext.napoleon',           # For auto-doc configuration
 ]
@@ -45,7 +46,7 @@ highlight_language = 'python'
 
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 
 # -- Options for HTML output -------------------------------------------------
