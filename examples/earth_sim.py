@@ -10,7 +10,7 @@ from astropy.io import fits
 from . import download_exovista
 download_exovista.exovista_scenes_file()
 from pystarshade.data.scenes.Scene import *
-from pystarshade.diffraction.util import mas_to_rad, au_to_meter, pc_to_meter, data_file_path
+from pystarshade.diffraction.util import mas_to_rad, au_to_meter, pc_to_meter, flux_to_mag, data_file_path
 from pystarshade.propagator import StarshadeProp
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -18,10 +18,6 @@ from matplotlib import rc
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 import os
-
-def flux_to_mag(flux):
-    # 2 mas pixels
-    return - 2.5*np.log10((500**2)*flux /  3640	)
 
 def ring_mean(image, center, radius, thickness=1.0):
     cy, cx = center
@@ -48,7 +44,6 @@ data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data')
 file_path = os.path.join(data_dir, 'scenes', fname)
 hdul = fits.open(file_path)
 dist_xo_ss = hdul[4].header['dist'] * pc_to_meter
-
 inclination = hdul[2].header['I-0']
 print ('inclination: ', hdul[2].header['I-0'])
 print ('number of Zodis: ', hdul[2].header['NZODIS-0'])
@@ -146,7 +141,7 @@ pupil_type = 'hwopupil_onaxis'
 hwo_starshade = StarshadeProp(drm = drm)
 #hwo_starshade.gen_pupil_field()
 hwo_starshade.N_wl = 1 # edit an internal variable so that only a single wavelength PSF basis is calculated
-#hwo_starshade.gen_psf_basis(pupil_type = pupil_type, pupil_symmetry = True)
+#hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
 
 focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), wl_str*1e-9, pupil_symmetry = False)
 #focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9, pupil_symmetry = True)
@@ -173,7 +168,6 @@ plt.ylabel('y [mas]', fontsize=14)
 cbar = plt.colorbar()
 cbar.set_label(r'Surface brightness [mag$\cdot$arcsec$^{-2}$]', fontsize=14)
 plt.tight_layout()
-plt.show()
 
 print (np.sum(focal_intensity))
 print ( - 2.5*np.log10((500**2)*focal_intensity[(N//2) - 50, N//2]) + 8.9)

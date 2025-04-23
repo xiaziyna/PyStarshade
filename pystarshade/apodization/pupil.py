@@ -31,7 +31,7 @@ def call_aperture_function(aperture_name, *args, **kwargs):
     func = aperture_funcs[aperture_name]
     return func(*args, **kwargs)
 
-def make_pupil(N_t, pupil_type='circ'):
+def make_pupil(N_t, pupil_type, file_path):
     """
     Generate a pupil of a specified type, save it as a compressed file, and return its 2D array representation.
 
@@ -55,4 +55,4 @@ def make_pupil(N_t, pupil_type='circ'):
     pupil_grid = make_pupil_grid(N_t)
     pupil = evaluate_supersampled(call_aperture_function(pupil_type, normalized=True), pupil_grid, 8)
     pupil = np.reshape(pupil, (N_t, N_t))
-    np.savez_compressed('data/pupils/'+pupil_type+'_'+str(int(N_t))+'.npz', pupil=pupil)
+    np.savez_compressed(file_path, pupil=pupil)

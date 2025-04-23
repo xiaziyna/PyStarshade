@@ -79,7 +79,7 @@ def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001,
         field_incident_telescope_compl, dt = fresnel.nchunk_zoom_fresnel_single_fft(ss_mask_fname, N_t, N_chunk = 4)
     else:
         starshade_qu = np.load(ss_mask_fname)
-        starshade = qu_mask_to_full(starshade_qu)
+        starshade = qu_mask_to_full(starshade_qu['grey_mask'])
         field_incident_telescope_compl, dt = fresnel.zoom_fresnel_single_fft(starshade, field_after_ss, N_t)
 
     field_incident_telescope = field_free_prop - field_incident_telescope_compl
@@ -89,7 +89,7 @@ def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001,
 
 def chunk_source_field_to_pupil(source_field, wl, dist_xo_ss, dist_ss_t, ss_mask_fname, N_s=1, N_x = 6401, N_t = 1001, ds=0.1*au_to_meter, dx = 0.01, dt = 0.03):
     '''
-    !!!!!!!! I need checking, likely replace with chunky crazy, along wiht functions in fresnel and fft
+    Experimental chunked version.
     '''
     ps = PointSource(dx, N_x, wl, 0, 0, dist_xo_ss, 1)
     k_vals = ps.wave_numbers()
