@@ -1,10 +1,13 @@
 """
-Load a scene simulated with ExoVista and simulate imaging with starshade.
+Load a solar-system scene simulated with ExoVista and simulate imaging with starshade.
 Uses 'Scene.py' available in ExoVista directory on Github:
 github.com/alexrhowe/ExoVista
 
 Scenes generated with ExoVista are used here
 Each pixel is 2 mas spacing, with 1001x1001 scene
+
+This script does require the example exovista scenes, however they can be swapped out for a user-generated scene.
+Note: If running for the first time and a PSF is not already generated, it may take some time to run!
 """
 from astropy.io import fits
 from . import download_exovista
@@ -93,13 +96,7 @@ for i in range(scene.nplanets):
         n_planet +=1
 
 source_field = extended_field[w_i]
-
-
-print ( -2.5*np.log10((500**2)*source_field[int(star_xy[0]), int(star_xy[1])])+8.9)
-print (source_field[int(star_xy[0])-65, int(star_xy[1])])
-print ( - 2.5*np.log10((500**2)*source_field[int(star_xy[0]) - 50, int(star_xy[1])]) + 8.9)
 val, ring_mask = ring_mean(source_field, (int(star_xy[0]), int(star_xy[1])), 50, thickness=5.0)
-print (flux_to_mag(val))
 
 plt.figure()
 plt.title('ExoVista input scene', fontsize=14)
@@ -111,16 +108,6 @@ cbar = plt.colorbar()
 cbar.set_label('Contrast', fontsize=14)
 plt.tight_layout()
 plt.show()
-
-#source_field = np.zeros((250, 250))
-#source_field[220, 125] = 1
-
-#plt.figure()
-#plt.plot(np.arange(150)*ds_au, flux_to_mag(source_field[N_s//2+1, N_s//2+1:N_s//2+151]))
-#plt.ylabel('Surface brightness [mag/sq. arcsec.]')
-#plt.xlabel('Separation [au]')
-#plt.show()
-
 
 print ('Distance from exo-scene to starshade [pc]: ', dist_xo_ss/pc_to_meter)
 print ('Number of planets included in scene: ', n_planet)
@@ -157,7 +144,7 @@ circ_mask = np.hypot(x-x_max, y-y_max) >= hwo_starshade.ang_res_pix[0]*2.4
 val, ring_mask = ring_mean(focal_intensity, (N//2, N//2), 30, thickness=1.0)
 print (flux_to_mag(val))
 
-# Add in a median local zodi mag of 23.02 V mag∕arc sec2
+# Optional add in a median local zodi mag of 23.02 V mag∕arc sec2
 
 plt.figure()
 plt.title(r'inclination: %s$^{\circ}$' % (str(int(inclination))), fontsize=14)
@@ -169,8 +156,7 @@ cbar = plt.colorbar()
 cbar.set_label(r'Surface brightness [mag$\cdot$arcsec$^{-2}$]', fontsize=14)
 plt.tight_layout()
 
-print (np.sum(focal_intensity))
-print ( - 2.5*np.log10((500**2)*focal_intensity[(N//2) - 50, N//2]) + 8.9)
+print ('dust mag: ', - 2.5*np.log10((500**2)*focal_intensity[(N//2) - 50, N//2]) + 8.9)
 
 save_path = data_file_path('ss_0_'+drm+'_'+pupil_type+'_'+wl_str+'.npz', 'out')
 print ('file saved at: ', save_path)
