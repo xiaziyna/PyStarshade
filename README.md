@@ -23,13 +23,15 @@ example.
 
 ## Installation
 
-You can install PyStarshade using pip:
+For a barebones install, use pip:
 
 ```bash
 pip install pystarshade
 ```
 
-Or to use pre-computed data, use [git lfs](https://git-lfs.com): 
+If you want to use pre-generated data instead install the package from source, in editable mode and use [git lfs](https://git-lfs.com).
+This requires several GB of space:
+
 ```bash
 $ git clone https://github.com/xiaziyna/PyStarshade.git PyStarshade
 $ cd PyStarshade
