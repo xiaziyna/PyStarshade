@@ -14,7 +14,7 @@ Loads a solar-system scene FITS file (inclination 0° & 60°) and corresponding 
 '''
 
 #fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclinati
-fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits'
+fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits' #solar system at 0 deg
 drm = 'hwo'
 pupil_type = 'hwopupil_offaxis'
 #pupil_type = 'hwopupil_onaxis'
@@ -61,5 +61,4 @@ cbar.set_label(r'Intensity', fontsize=16)
 #cbar.set_label(r'Surface brightness [mag$\cdot$arcsec$^{-2}$]', fontsize=16)
 
 plt.tight_layout(rect=[0, 0, 0.88, 1])  # Adjust layout to accommodate colorbar
-save_path = os.path.join(script_dir, 'ss_hwo_offaxis_close.png')
-plt.savefig(save_path, dpi=400)
+plt.show()
