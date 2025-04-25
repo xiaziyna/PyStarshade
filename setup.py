@@ -10,7 +10,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "numpy",
-        "scipy"
+        "scipy",
+        "setuptools"  # Add setuptools as a dependency for all Python versions
     ],
     extras_require={
         "extra": [
@@ -28,8 +29,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.12",  # Add this to indicate 3.12 support
     ],
-    python_requires=">=3.6"
-
+    python_requires=">=3.6"  # Keep supporting 3.6 and above
 )
-
