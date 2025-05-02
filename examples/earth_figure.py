@@ -7,6 +7,7 @@ from matplotlib import rc
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 import os
+from pystarshade.config import OUTPUT_DIR, SCENES_DIR
 
 '''
 Requires running earth_sim.py first!
@@ -19,19 +20,17 @@ drm = 'hwo'
 pupil_type = 'hwopupil_offaxis'
 #pupil_type = 'hwopupil_onaxis'
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-file_path = os.path.join(data_dir, 'scenes', fname)
+file_path = os.path.join(SCENES_DIR, fname)
 hdul = fits.open(file_path)
 dist_xo_ss = hdul[4].header['dist'] * pc_to_meter
 inclination = hdul[2].header['I-0']
 print (hdul[2].header['I-0'], hdul[2].header['NZODIS-0'], hdul[2].header['R-0'])
 
-ss0_path = data_file_path('ss_0_'+drm+'_'+pupil_type+'.npz', 'out')
+ss0_path = os.path.join(OUTPUT_DIR, 'ss_0_'+drm+'_'+pupil_type+'.npz')
 ss0 = np.load(ss0_path)
 focal_intensity_0 = ss0['field']
 
-ss60_path = data_file_path('ss_60_'+drm+'_'+pupil_type+'.npz', 'out')
+ss60_path = os.path.join(OUTPUT_DIR, 'ss_60_'+drm+'_'+pupil_type+'.npz')
 ss60 = np.load(ss60_path)
 focal_intensity_60 = ss60['field']
 
