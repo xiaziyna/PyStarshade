@@ -21,6 +21,7 @@ from matplotlib import rc
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 import os
+from pystarshade.config import OUTPUT_DIR, SCENES_DIR
 
 def ring_mean(image, center, radius, thickness=1.0):
     cy, cx = center
@@ -41,10 +42,7 @@ def ring_mean(image, center, radius, thickness=1.0):
 
 #fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.60.fits' #solar system at 60 deg inclination
 fname = '999-HIP_-TYC_SUN-mv_4.83-L_1.00-d_10.00-Teff_5778.00.fits'
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-file_path = os.path.join(data_dir, 'scenes', fname)
+file_path = os.path.join(SCENES_DIR, fname)
 hdul = fits.open(file_path)
 dist_xo_ss = hdul[4].header['dist'] * pc_to_meter
 inclination = hdul[2].header['I-0']
@@ -158,6 +156,6 @@ plt.tight_layout()
 
 print ('dust mag: ', - 2.5*np.log10((500**2)*focal_intensity[(N//2) - 50, N//2]) + 8.9)
 
-save_path = data_file_path('ss_0_'+drm+'_'+pupil_type+'_'+wl_str+'.npz', 'out')
+save_path = os.path.join(OUTPUT_DIR, 'ss_0_'+drm+'_'+pupil_type+'_'+wl_str+'.npz')
 print ('file saved at: ', save_path)
 np.savez_compressed(save_path, field = focal_intensity)

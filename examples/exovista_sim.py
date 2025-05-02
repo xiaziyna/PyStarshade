@@ -17,14 +17,11 @@ from matplotlib.colors import LogNorm
 from matplotlib import rc
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
-
 import os
+from pystarshade.config import OUTPUT_DIR, SCENES_DIR
 
 fname = '1215-HIP_16537-TYC_-mv_3.72-L_0.35-d_3.20-Teff_5048.07.fits'
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-file_path = os.path.join(data_dir, 'scenes', fname)
+file_path = os.path.join(SCENES_DIR, fname)
 hdul = fits.open(file_path)
 dist_xo_ss = hdul[4].header['dist'] * pc_to_meter
 
@@ -122,12 +119,9 @@ plt.ylabel('y [mas]', fontsize=14)
 cbar = plt.colorbar()
 cbar.set_label('Contrast', fontsize=14)
 plt.tight_layout()
-save_path_img = os.path.abspath(os.path.join(script_dir, '..', 'docs','paper', 'exo_scene.png'))
-path = os.path.join(script_dir, 'exo_scene.png')
+save_path_img = os.path.abspath(os.path.join(OUTPUT_DIR, 'exo_scene.png'))
 plt.savefig(save_path_img, dpi=300)
 
-raise SystemExit
-
-save_path = data_file_path('exo_scene_'+drm+'_'+pupil_type+'.npz', 'out')
+save_path = os.path.abspath(OUTPUT_DIR, 'exo_scene_'+drm+'_'+pupil_type+'.npz')
 print ('file saved at: ', save_path)
 np.savez_compressed(save_path, field = focal_intensity)

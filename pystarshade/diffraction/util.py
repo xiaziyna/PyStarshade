@@ -2,7 +2,6 @@ import numpy as np
 import os
 from importlib import resources
 
-
 #=== useful constants====
 pc_to_meter = 3.08567782e16
 au_to_meter = 149597870700.
@@ -31,7 +30,6 @@ def data_file_path(file_name, *subfolders):
     os.environ['BASE_PATH'] = os.path.abspath(os.path.join(package_path, 'data'))
     base_path = os.environ.get('BASE_PATH')
     return os.path.join(base_path, *subfolders, file_name)
-
 
 def ang_res(wl, D):
     """

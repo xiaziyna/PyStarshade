@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.colorbar import Colorbar 
 import os
+from pystarshade.config import OUTPUT_DIR, SCENES_DIR, DATA_DIR
 
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
@@ -18,10 +19,9 @@ def get_nearest(val, arr):
 
 fname_on = 'hwopupil_onaxis_259.npz'
 fname_off = 'hwopupil_offaxis_259.npz'
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-file_path_on = os.path.join(data_dir, 'pupils', fname_on)
-file_path_off = os.path.join(data_dir, 'pupils', fname_off)
+
+file_path_on = os.path.join(DATA_DIR, 'pupils', fname_on)
+file_path_off = os.path.join(DATA_DIR, 'pupils', fname_off)
 
 data = np.load(file_path_on, allow_pickle=False)
 pupil_onaxis = data['pupil']
@@ -54,8 +54,8 @@ colors = [cmap(i / (len(wl_) + 4)) for i in range(len(wl_) + 4)]
 cmap2 = plt.get_cmap('Greens')
 colors2 = [cmap2(i / (len(wl_) + 4)) for i in range(len(wl_) + 4)]
 
-through_fname_on = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_onaxis_001m.npz')
-through_fname_off = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
+through_fname_on = os.path.join(DATA_DIR, 'psf', 'hwo_throughput_hwopupil_onaxis_001m.npz')
+through_fname_off = os.path.join(DATA_DIR, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
 
 data_throughput_on = np.load(through_fname_on, allow_pickle=False)
 wl = data_throughput_on['wl']

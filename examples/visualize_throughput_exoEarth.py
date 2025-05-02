@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.colorbar import Colorbar 
 import os
-
+from pystarshade.config import DATA_DIR
 '''
 Visualizes throughput at two single wavelengths (500 nm & 950 nm):
 vs angular separation (λ∕D) for on/off-axis segemented HWO pupils and draws a dashed line marking where an Earth analog (1 AU at 12 pc) would lie. 
@@ -15,11 +15,8 @@ vs angular separation (λ∕D) for on/off-axis segemented HWO pupils and draws a
 rc('text', usetex=True)
 rc('font',**{'family':'serif','serif':['Times']})
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(script_dir, '..', 'pystarshade', 'data'))
-
-through_fname_on = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_onaxis_001m.npz')
-through_fname_off = os.path.join(data_dir, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
+through_fname_on = os.path.join(DATA_DIR, 'psf', 'hwo_throughput_hwopupil_onaxis_001m.npz')
+through_fname_off = os.path.join(DATA_DIR, 'psf', 'hwo_throughput_hwopupil_offaxis_001m.npz')
 
 data_throughput_on = np.load(through_fname_on)
 wl = data_throughput_on['wl']
