@@ -41,9 +41,7 @@ pip install -e .
 
 ## Dependencies
 
-Scipy, Numpy,
-
-Optional: HCIPy, astropy
+Scipy, Numpy, HCIPy, astropy, setuptools
 
 ## Quickstart
 
