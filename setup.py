@@ -13,7 +13,8 @@ setup(
         "scipy",
         "hcipy",
         "astropy",
-        "setuptools"  # Add setuptools as a dependency for all Python versions
+        "setuptools",
+        "pytest"
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

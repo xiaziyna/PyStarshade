@@ -14,13 +14,13 @@ import multiprocessing as mp
 import ctypes
 import scipy.io
 
-#mat = scipy.io.loadmat('NI2.mat') # Wfirst mask, find this in the SISTERS codebase
+#mat = scipy.io.loadmat('starshade_edge_files/NI2.mat') # Wfirst mask, find this in the SISTERS codebase
 #r1 = mat['occulterDiameter'][0][0]/2      # upper apodization radius in meters
 #r0 = r1 - mat['petalLength'][0][0]
 #x_vals_ss  = mat['xVals'][0]
 #y_vals_ss  = mat['yVals'][0]
 
-(r0, r1, x_vals_ss, y_vals_ss) = pickle.load( open("starshade_edge_files/wfirst_locus.p", "rb" ))
+(r0, r1, x_vals_ss, y_vals_ss) = pickle.load( open("starshade_edge_files/HWO_locus.p", "rb" ))
 print ('Inner radius: ', r0, 'Outer radius: ', r1)
 x_vals_ss = x_vals_ss[::4]
 y_vals_ss = y_vals_ss[::4]
