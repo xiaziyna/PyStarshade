@@ -13,10 +13,10 @@ from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, 
 def gen_param():
     N_x = random.randrange(3, 200, 2)
     N_out = random.randrange(3, 200, 2)
-    N_X = random.randrange(max(N_x, N_out), 800, 2)
+    N_X = random.randrange(2*max(N_x, N_out) + 1, 800, 2)
     Z_pad = (N_X - 1) / N_x 
     while (Z_pad*N_x) + 1 != N_X: 
-        N_X = random.randrange(max(N_x, N_out), 800, 2)
+        N_X = random.randrange(2*max(N_x, N_out) + 1, 800, 2)
         Z_pad = (N_X - 1) / N_x 
     N_chirp = N_x + N_out - 1
     return N_x, N_X, N_out, Z_pad, N_chirp
@@ -39,6 +39,7 @@ def gen_data_1():
 def gen_data_2():
     x = sim_data_square(5, 5)
     return 5, 5, 5, 4/5, 9, x
+
 
 # Sample data for testing
 test_data = [
