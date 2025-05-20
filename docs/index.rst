@@ -20,7 +20,7 @@ Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
    :caption: Getting Started
 
    index                 Documentation home
-   content/installation  Installation & setup
+   content/install       Installation & setup
    content/usage         Quickstart & examples
    content/background    Introduction & background
 
