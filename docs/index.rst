@@ -22,9 +22,7 @@ License and Citation
     Taaki, Kamalabadi, Kemball. PyStarshade: simulating high-contrast imaging of exoplanets with starshades
 
 
-
 .. toctree::
-    :maxdepth: 2
     content/install 
     content/background
     content/usage
