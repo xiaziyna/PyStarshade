@@ -1,6 +1,3 @@
-Background
-==========
-
 What is a Starshade?
 --------------------
 
@@ -51,7 +48,6 @@ PyStarshade uses Bluesteins FFT to compute the optical propagation described abo
 
 Numerical diffraction calculations must use a very small numerical resolution :math:`d u` of the starshade :math:`s(u, v)` in order to accurately calculate starlight suppression. Using a standard FFT to perform these calculations is inefficient as very large zero-padding factors are needed to sample the field at the telescope aperture. The Bluestein FFT is a technique to calculate arbitrary spectral samples of a propagated field, indirectly using FFTs and therefore benefiting from their efficiency. For an :math:`N \cdot N` starshade mask, and an :math:`M \cdot M` telescope aperture, the Bluestein FFT approach achieves a complexity of :math:`O((N+M)^2 \log (M+N))`. This technique is utilized in multiple aspects of the optical train to efficiently propagate fields.
 
-----
 
 Starshade Concepts
 ---------------------
