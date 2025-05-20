@@ -23,24 +23,24 @@ License and Citation
 
 .. toctree::
     :maxdepth: 2
-    content/install       Installation Guide
-    content/background    Background and Theory
-    content/usage         Usage Instructions
+    content/install 
+    content/background
+    content/usage
 
 .. toctree::
    :maxdepth: 1
    :caption: Tutorials
 
-   content/solar_system  Simulating the Solar System (Jupyter Notebook)
+   content/solar_system   Simulating the solar system (Jupyter notebook)
 
 .. toctree::
    :maxdepth: 1
    :caption: API Reference
 
-   content/test          Core Classes and Functions Reference
+   content/test           Core classes & functions reference
 
 .. toctree::
    :maxdepth: 1
    :caption: Contributing
 
-   content/contribute    How to Report Issues, Request Features, or Submit Code
+   content/contribute     How to report issues, request features, or submit code
