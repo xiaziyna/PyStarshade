@@ -1,3 +1,6 @@
+Background
+==========
+
 What is a Starshade?
 --------------------
 
