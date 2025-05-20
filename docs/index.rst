@@ -14,12 +14,6 @@ Complex electric fields are propagated at three planes (starshade, telescope ape
 
 Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
 
-.. toctree::
-    content/background
-    content/usage
-    content/solar_system.ipynb
-    content/contribute
-
 License and Citation
 --------------------
 
@@ -27,3 +21,13 @@ License and Citation
 
     Taaki, Kamalabadi, Kemball. PyStarshade: simulating high-contrast imaging of exoplanets with starshades
 
+
+.. toctree::
+    :caption: Getting Started
+    index
+    content/install 
+    content/background
+    content/usage
+    content/solar_system.ipynb
+    content/contribute
+    content/test 
