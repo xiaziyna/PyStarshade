@@ -23,11 +23,26 @@ License and Citation
 
 
 .. toctree::
+    :maxdepth: 2
     content/install 
     content/background
     content/usage
-    content/solar_system.ipynb
-    content/contribute
-    content/test 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   content/solar_system   Simulating the solar system (Jupyter notebook)
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API Reference
+
+   content/test           Core classes & functions reference
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributing
+
+   content/contribute     How to report issues, request features, or submit code
 
