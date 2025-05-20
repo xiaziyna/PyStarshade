@@ -14,33 +14,11 @@ Complex electric fields are propagated at three planes (starshade, telescope ape
 
 Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
 
-
 .. toctree::
-   :caption: Getting Started
-
-   index                 Documentation home
-   content/install       Installation & setup
-   content/usage         Quickstart & examples
-   content/background    Introduction & background
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Tutorials
-
-   content/solar_system   Simulating the solar system (Jupyter notebook)
-
-.. toctree::
-   :maxdepth: 1
-   :caption: API Reference
-
-   content/test           Core classes & functions reference
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contributing
-
-   content/contribute     How to report issues, request features, or submit code
-
+    content/background
+    content/usage
+    content/solar_system.ipynb
+    content/contribute
 
 License and Citation
 --------------------
