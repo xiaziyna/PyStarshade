@@ -1,13 +1,10 @@
-Starshade Basics
-----------------
+Background
+==========
 
 What is a Starshade?
-~~~~~~~~~~~~~~~~~~~
+--------------------
 
 A **starshade** is a large, petal-shaped spacecraft designed to work in tandem with a space telescope for the direct imaging of exoplanets. Acting as an external occulter, it flies in precise formation with the telescope, positioned tens of thousands of kilometers away, to block the bright light from a star while allowing the faint light from orbiting planets to reach the telescope's aperture.
-
-How Does a Starshade Work?
-~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The starshade creates a shadow by suppressing starlight through diffraction. Its petal-like design minimizes light scattering around the edges, producing a dark region where the telescope can observe. When aligned with a target star, the starshade reduces the star's light by a factor of :math:`10^{-10}` to :math:`10^{-11}` as demonstrated in subscale tests, enabling the detection of planets that are billions of times fainter. The starshade can maintain this contrast over a broad wavelength range, from ultraviolet (UV) to near-infrared (NIR). Thereby allowing for the detection and characterization of planetary atmospheres, including the search for biosignatures such as water vapor (H₂O), oxygen (O₂), carbon dioxide (CO₂), methane (CH₄), and ozone (O₃). Furthermore, starlight is supppressed prior to light entering the telescope aperture, a starshade maintains a high level of optical throughput (close to or around 100%). In PyStarshade you can simulate throughput for different apertures. 
 
@@ -18,7 +15,6 @@ The starshade creates a shadow by suppressing starlight through diffraction. Its
 
 See [SSweb]_.
 
-----
 
 Optical Model Overview
 ---------------------
@@ -43,10 +39,9 @@ PyStarshade is built upon a Fourier optics model that simulates the propagation 
    
    where :math:`P[\zeta, \eta]` is the telescope aperture function and :math:`f` is the focal length.
 
-----
 
 Bluesteins FFT
----------------
+~~~~~~~~~~~~~~
 
 PyStarshade uses Bluesteins FFT to compute the optical propagation described above. When a starshade is aligned with a star, starlight is diffracted by the starshade :math:`s(\mathbf{x})` onto a telescope aperture. For a starshade mask :math:`s(u, v)` which is zero inside the mask and unity outside, at a wavelength :math:`\lambda` and starshade-telescope distance :math:`z`, the field at the telescope aperture is :math:`f_{\lambda}(x, y)` (Eq :eq:`bluestein`) and is related to the Fourier transform of the starshade mask multipled by a highly oscillatory chirp term.
 
