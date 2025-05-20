@@ -29,9 +29,9 @@ Table of Contents
    :caption: Getting Started
 
    PyStarshade Documentation Landing Page <https://pystarshade.readthedocs.io>
-   content/install       Installation Guide
-   content/background    Background and Theory
-   content/usage         Usage Instructions
+   content/install       
+   content/background   
+   content/usage        
 
 .. toctree::
    :maxdepth: 1
