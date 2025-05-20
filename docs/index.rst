@@ -14,8 +14,6 @@ Complex electric fields are propagated at three planes (starshade, telescope ape
 
 Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
 
-Contents
---------
 
 .. toctree::
    :maxdepth: 2

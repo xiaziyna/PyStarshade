@@ -71,7 +71,7 @@ field incident on a CCD of size (N_pix, N_pix) and pixel size dp.
 Data
 ----------
 
-The data directory is structured like so:
+The internal data directory is structured like so:
 
 .. code-block:: bash
 
@@ -80,12 +80,13 @@ The data directory is structured like so:
     ├── masks
     │   ├── starshade_edge_files
     │   └── starshade_masks
-    ├── out
     ├── psf
     ├── pupils
     └── scenes
 
 If you have new masks for the starshade, or telescope aperture masks, place them in the correct folders (starshade_masks and pupils respectively). 
+
+New data generated from examples is located at the top level: 'PyStarshade/out'.
 
 Location of Generated Files
 ^^^^^^^^^^^^^^^
