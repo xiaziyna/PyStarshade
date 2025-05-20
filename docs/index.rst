@@ -44,7 +44,7 @@ Table of Contents
    :maxdepth: 1
    :caption: API Reference
 
-   content/test           Core classes & functions reference
+    `API Reference for Core Classes and Functions <content/test.html>`_
 
 .. toctree::
    :maxdepth: 1
