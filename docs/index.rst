@@ -16,7 +16,6 @@ Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
 
 
 .. toctree::
-   :maxdepth: 2
    :caption: Getting Started
 
    index                 Documentation home
