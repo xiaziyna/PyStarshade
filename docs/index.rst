@@ -23,11 +23,11 @@ License and Citation
 
 
 .. toctree::
-    :caption: Getting Started
-    index
     content/install 
     content/background
     content/usage
     content/solar_system.ipynb
     content/contribute
     content/test 
+
+
