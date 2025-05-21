@@ -26,7 +26,6 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started
 
    PyStarshade Documentation Landing Page <https://pystarshade.readthedocs.io>
    content/install       
@@ -38,7 +37,7 @@ Table of Contents
    content/solar_system
 
 .. toctree::
-   :maxdepth: 
+   :maxdepth: 2
    :caption: Contributing
 
    content/contribute
