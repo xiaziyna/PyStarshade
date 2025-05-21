@@ -38,10 +38,10 @@ Table of Contents
    content/solar_system
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 
    :caption: Contributing
 
-   content/contribute    How to Report Issues, Request Features, or Submit Code
+   content/contribute
 
 `API Reference <content/test.html>`_
 
