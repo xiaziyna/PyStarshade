@@ -15,7 +15,7 @@ Complex electric fields are propagated at three planes (starshade, telescope ape
 Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).
 
 License and Citation
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 ``PyStarshade`` is an open-source tool for simulating high-contrast imaging of exoplanets using starshades. It is licensed under the GNU General Public License version 3 (GPLv3).
 
