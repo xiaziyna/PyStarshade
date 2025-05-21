@@ -1,6 +1,5 @@
-========================
 Contributing to PyStarshade
-========================
+===========================
 
 We welcome any help—bug fixes, feature proposals, usage questions.
 
