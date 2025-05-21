@@ -34,12 +34,11 @@ Table of Contents
 
 .. toctree::
    :maxdepth: 1
-   content/solar_system
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contributing
 
+   content/solar_system
    content/contribute
 
 `API Reference <content/test.html>`_
