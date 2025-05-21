@@ -1,7 +1,7 @@
-Contributing to PyStarshade
-===========================
+Contributing
+============
 
-We welcome any help—bug fixes, feature proposals, usage questions.
+We welcome any help—bug fixes, feature proposals, usage questions (xiaziyna at gmail dot com).
 
 Report Bugs & Problems
 ----------------------
@@ -43,5 +43,5 @@ Contribute Code
 Guidelines
 -----------
 
-- Keep requests limited in scope.
+- Keep requests limited in scope and explain why your change enhances the utility of the tool.
 
