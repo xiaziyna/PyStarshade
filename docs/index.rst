@@ -34,9 +34,7 @@ Table of Contents
    content/usage        
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Tutorials
-
+   :maxdepth: 1
    content/solar_system
 
 .. toctree::
