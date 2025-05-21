@@ -35,9 +35,6 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
-.. toctree::
-   :maxdepth: 2
-
    content/solar_system
    content/contribute
 
