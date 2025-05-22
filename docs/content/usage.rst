@@ -112,9 +112,18 @@ Generating a PSF Basis
 
 The simplest way to use PyStarshade is by using the precomputed pupil fields and the StarshadeProp class as described. The StarshadeProp class is designed to abstract away sampling calculations, as well as pre-compute data products and interface with them. Pystarshade utilizes a PSF basis to simulate imaging - however only a pre-computed PSF basis at a single wavelength is included.  
 
-Generating the diffracted pupil fields from scratch for different wavelengths can be quite compute intensive depending on the size of the starshade and may take several hours. However, this pupil field needs only be generated once and can be used to generate different PSF basis for different apertures. Diffracted fields at the telescope aperture live in the `data/fields`` directory. A set of pre-generated pupil fields for the HWO starshade drm are available with the git-lfs install. 
+.. warning::
 
-Computing the PSF basis itself may take several minutes or up to an hour, depending on the bandwidth, spectral sampling and source-field sampling. PyStarshade does not assume any azimuthal symmetry and will compute a fully unique PSF for each source pixel.  Once computed, the PSF basis can be used to simulate imaging for different scenes.
+    Generating the diffracted pupil fields from scratch for different wavelengths can be quite compute intensive depending on the size of the starshade and may take several hours. However, this pupil field needs only be generated once and can be used to generate different PSF basis for different apertures. 
+
+A set of pre-generated pupil fields for the HWO starshade drm are available with the git-lfs install. Diffracted fields at the telescope aperture live in the `data/fields`` directory. 
+
+
+.. warning::
+
+    Computing the PSF basis itself may take several minutes or up to an hour, depending on the bandwidth, spectral sampling and source-field sampling. 
+
+PyStarshade does not assume any azimuthal symmetry and will compute a fully unique PSF for each source pixel.  Once computed, the PSF basis can be used to simulate imaging for different scenes.
 
 Choices for sampling and resolution in the optical pipeline can be modified, however we have generally chosen defaults that opt for precision over speed and memory usage. 
 
