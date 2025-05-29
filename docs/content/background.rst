@@ -35,7 +35,7 @@ PyStarshade is built upon a Fourier optics model that simulates the propagation 
    
    .. math::
       
-      \psi^\lambda[\mathbf{x}] = \left| \frac{e^{\frac{i\pi}{\lambda f}(x^2 + y^2)}}{j \lambda f} \mathcal{F}\left( f_{P,\lambda}[\zeta, \eta] \cdot P[\zeta, \eta] \right) \left[ \frac{x}{\lambda f}, \frac{y}{\lambda f} \right] \right|^2
+      \psi^\lambda[x, y] = \left| \frac{e^{\frac{i\pi}{\lambda f}(x^2 + y^2)}}{j \lambda f} \mathcal{F}\left( f_{P,\lambda}[\zeta, \eta] \cdot P[\zeta, \eta] \right) \left[ \frac{x}{\lambda f}, \frac{y}{\lambda f} \right] \right|^2
    
    where :math:`P[\zeta, \eta]` is the telescope aperture function and :math:`f` is the focal length.
 
