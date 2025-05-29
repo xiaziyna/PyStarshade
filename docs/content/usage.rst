@@ -159,6 +159,9 @@ Here's a complete example of generating and using a PSF basis:
     starshade.gen_psf_basis(pupil_type=pupil_type)
 
     # 4. Use the generated PSF basis to simulate a scene
-    # Assuming you have a source field to propagate
+    # Load or create a toy model of a source field
+    source_field = np.zeros((251, 251), dtype=np.float32)
+    source_field[126, 126] = 1 #star
+    source_field[70, 126] = 1e-10 #toy planet
     wavelength = 500e-9  # 500 nm
-    focal_intensity = starshade.gen_scene(pupil_type, source_field.astype(np.float32), wavelength)
+    focal_intensity = starshade.gen_scene(pupil_type, source_field, wavelength)
