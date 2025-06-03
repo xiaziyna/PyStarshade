@@ -39,6 +39,6 @@ Table of Contents
    :maxdepth: 1
 
    content/solar_system
-   content/contribute
    content/test
+   content/contribute
 
