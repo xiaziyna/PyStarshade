@@ -10,6 +10,8 @@ PyStarshade documentation
 
 What is a starshade? A starshade is a shaped mask flown in formation with a telescope to block starlight and image faint exoplanets.
 
+PyStarshade is a flexible, open-source Python toolkit designed for high-contrast direct imaging simulations of exoplanets using starshades. It enables users to model the optical performance of starshade-based missions, such as the Habitable Worlds Observatory (HWO), by computing diffracted fields and point-spread functions (PSFs) for various starshade and telescope configurations. These computations are critical for assessing metrics like core throughput, contrast, and inner working angle (IWA), which inform mission design and exoplanet yield predictions.
+
 Complex electric fields are propagated at three planes (starshade, telescope aperture and focal plane) using Fresnel or Fraunhofer diffraction, computed with Bluesteins FFT. `PyStarshade` allows for simulating imaging for a discretized exoplanetary scene of flux, varying starshade mask and telescope aperture mask (interfacing with HCIPy to generate mission telescope apertures).
 
 Developed by Jamila Taaki (U Mich Schmidt postdoctoral fellow).

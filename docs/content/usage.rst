@@ -4,8 +4,18 @@ Usage
 Overview
 ----------
 
-PyStarshade will compute fields and PSF files for a given starshade configuration and store these on disk for simulating imaging of new scenes.
-To start pick a starshade configuration, some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission).
+PyStarshade will compute fields and PSF files for a given starshade configuration and store these on disk for simulating imaging of new scenes. In general PyStarshade is used to compute:
+
+- **Diffracted field at telescope** at the telescope aperture plane for a given starshade configuration. One diffracted field is computed per wavelength in the specified band, for an on-axis source.
+- **PSF basis** in the focal plane for a grid of source positions, enabling imaging simulations of exoplanetary scenes. The PSF basis is computed from the telescope field by masking regions with the chosen telescope aperture mask and propagating the field to the focal plane (described in Aime et al. 2024 and Taaki et al. 2024). 
+- **Imaging simulations** co-adding PSF's scaled by source flux of an astrophysical scene (input by the user).
+
+Note - the optical propagation tools can be applied generally for Fresnel/Fraunhofer diffractive simulations.
+
+Getting started
+~~~~~~~~~~~~~~~
+
+To start generating a PSF basis pick a starshade configuration, some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission).
 
 .. code-block:: python
 
@@ -98,9 +108,26 @@ Please see the examples folder for detailed examples!
 Input data
 ^^^^^^^^^^^^^^
 
-PyStarshade can take as input any pixelized source-field such as Haystacks model or an ExoVista model, or analytic descriptions of sources
+To perform these computations, PyStarshade requires the following inputs:
+
+- **Starshade configuration (Design Reference Mission, DRM)**: A dictionary specifying instrument parameters, including:
+
+  - Starshade mask parameters: radius (:math:`R_{ss}`, e.g., 30 m for HWO), number of petals (e.g., 24), and pixel sampling (:math:`\Delta s`, e.g., 1 mm to achieve :math:`10^{-10}` contrast).
+  - Telescope parameters: aperture diameter (:math:`D_P`, e.g., 6 m), focal length (:math:`f`, e.g., 10 m), and aperture mask (e.g., segmented on-axis or off-axis designs).
+  - Optical parameters: wavelength band (:math:`\lambda`, e.g., 500–1000 nm), flight distance between starshade and telescope (:math:`d_{s \rightarrow P}`, e.g., :math:`9.52 \times 10^7` m), and Fresnel number (:math:`f_{ss} = \frac{R_{ss}^2}{\lambda d_{s \rightarrow P}}`, e.g., 9.5–18.9).
+  - Sampling parameters: starshade mask sampling (:math:`\Delta s`), telescope aperture sampling (:math:`\Delta P`, e.g., 2 cm), and focal plane sampling (:math:`\Delta f`, e.g., 2 mas).
+- **Starshade mask file**: a binary starshade mask on a grid.
+- **Telescope aperture mask**: A binary or grayscale mask representing the telescope aperture (e.g., HWO’s segmented on-axis or off-axis designs). These can be user-defined or loaded from HCIPy.
+- **Exoplanet scene (optional for imaging)**: A flux distribution of the astrophysical scene. PyStarshade can take as input any pixelized source-field such as Haystacks model or an ExoVista model, or analytic descriptions of sources
 (so far a point source and Gaussian source). If you wish to perform propagation using analytic descriptions, please 
 use 'pystarshade.simulate_field.point_source_to_ccd'. 
+
+- **Computational settings**: Optional parameters to control numerical precision, such as:
+
+  - Chunking factor (:math:`N_{chunk}`) for memory-efficient Bluestein FFT (B-FFT) computations.
+  - Wavelength sampling (:math:`\Delta \lambda`, e.g., 50 nm steps).
+  - PSF basis grid size (e.g., 150 × 150 terms for HWO).
+
 
 Starshade Masks
 ^^^^^^^^^^^^^^^
