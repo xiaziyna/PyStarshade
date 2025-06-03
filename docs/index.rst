@@ -41,5 +41,5 @@ Table of Contents
    content/solar_system
    content/contribute
 
-`API Reference <content/test.html>`_
+    `API Reference <content/test.html>`_
 
