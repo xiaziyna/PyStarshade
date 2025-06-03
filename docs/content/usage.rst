@@ -6,14 +6,15 @@ Overview
 
 PyStarshade will compute fields and PSF files for a given starshade configuration and store these on disk for simulating imaging of new scenes. In general PyStarshade is used to compute:
 
-- **Diffracted field at telescope** at the telescope aperture plane for a given starshade configuration. One diffracted field is computed per wavelength in the specified band, for an on-axis source.
-- **PSF basis** in the focal plane for a grid of source positions, enabling imaging simulations of exoplanetary scenes. The PSF basis is computed from the telescope field by masking regions with the chosen telescope aperture mask and propagating the field to the focal plane (described in Aime et al. 2024 and Taaki et al. 2024). 
-- **Imaging simulations** co-adding PSF's scaled by source flux of an astrophysical scene (input by the user).
+- **Diffracted field at telescope**: A single diffracted field is computed per wavelength in the specified band, assuming an on-axis source.
+- **A PSF basis** in the focal plane for a grid of source positions, enabling imaging simulations of exoplanetary scenes. The PSF basis is computed from the telescope field by masking regions with the chosen telescope aperture mask and propagating the field to the focal plane (described in Aime et al. 2024 and Taaki et al. 2024). 
+- **Imaging simulations**: PSF's are scaled by source flux of an astrophysical scene (input by the user) and co-added.
 
 Note - the optical propagation tools can be applied generally for Fresnel/Fraunhofer diffractive simulations.
 
-Getting started
-~~~~~~~~~~~~~~~
+
+Configuring the starshade
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To start generating a PSF basis pick a starshade configuration, some options provided are ('wfirst', 'hwo', 'habex'). The starshade configuration is termed a drm (design reference mission).
 
@@ -192,3 +193,5 @@ Here's a complete example of generating and using a PSF basis:
     source_field[70, 126] = 1e-10 #toy planet
     wavelength = 500e-9  # 500 nm
     focal_intensity = starshade.gen_scene(pupil_type, source_field, wavelength)
+
+
