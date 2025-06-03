@@ -78,6 +78,7 @@ See examples folder for different simulation examples.
 Feel free to reach out if you'd like to discuss contributing or go ahead and submit a pull request!
 Try to keep any pull requests limited in scope. 
 If there is demand for extra functionality, I am happy to help add these in.
+See [here](https://pystarshade.readthedocs.io/en/latest/content/contribute.html) for further instructions.
 
 ## License
 
