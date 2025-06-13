@@ -289,12 +289,11 @@ class FresnelDouble(Fresnel):
             - df : float
                 Output grid sampling.
         """
-        field_copy = np.copy(field)
         k = 2 * np.pi / self.wavelength
-        Ny, Nx = field_copy.shape
+        Ny, Nx = field.shape
         df = self.max_freq / Nx
         freq_xy = grid_points(Nx, Ny, dx = df)
-        spectral_field =  np.fft.fft2(field_copy) * np.exp(1j * self.z * k)\
+        spectral_field =  np.fft.fft2(field) * np.exp(1j * self.z * k)\
          * np.exp(-1j * np.pi * self.wl_z * np.fft.fftshift(freq_xy[0]**2 + freq_xy[1]**2) ) 
         output_field = np.fft.ifft2(spectral_field)
 
@@ -392,10 +391,9 @@ class Fraunhofer:
             - df : float
                 Output grid sampling.
         """
-        field_copy = np.copy(field)
         k = 2 * np.pi / self.wavelength
-        Ny, Nx = field_copy.shape    
-        output_field = zoom_fft_2d(field_copy, self.N_in, N_out, N_X = self.N_X) * (self.d_x**2)
+        Ny, Nx = field.shape    
+        output_field = zoom_fft_2d(field, self.N_in, N_out, N_X = self.N_X) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df )
         out_fac = np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wl_z)

@@ -14,7 +14,8 @@ setup(
         "hcipy",
         "astropy",
         "setuptools",
-        "pytest"
+        "pytest",
+        "h5py"
     ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
