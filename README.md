@@ -57,15 +57,38 @@ The easiest way to interface with PyStarshade is via the StarshadeProp class. Ge
 Simulate imaging for a 'source_field' with a default 2 mas sampling.
 
 ```python
-    from pystarshade.propagator import StarshadeProp
+import numpy as np
+from pystarshade.propagator import StarshadeProp
+import matplotlib.pyplot as plt
 
-    drm = 'hwo'
-    hwo_starshade = StarshadeProp(drm = drm)
-    hwo_starshade.gen_pupil_field()
+# 1. Initialize the Starshade Propagator with HWO (Habitable Worlds Observatory) configuration
+starshade = StarshadeProp(drm='hwo')  # drm = design reference mission
 
-    pupil_type = 'hex'
-    hwo_starshade.gen_psf_basis(pupil_type = pupil_type)
-    focal_intensity = hwo_starshade.gen_scene(pupil_type, source_field.astype(np.float32), 500e-9)
+# 2. Generate the pupil field (this handles the Fresnel diffraction from starshade to telescope)
+starshade.gen_pupil_field()
+
+# 3. Generate PSF basis for a hexagonal pupil (this handles the Fraunhofer diffraction to focal plane)
+pupil_type = 'hex'
+starshade.gen_psf_basis(pupil_type=pupil_type)
+
+# 4. Create a simple point source (representing a star)
+# Using 2 mas (milliarcsecond) sampling as default
+nx = ny = 100  # image size
+source_field = np.zeros((nx, ny), dtype=np.float32)
+source_field[nx//2, ny//2] = 1.0  # place a point source in the center
+
+# 5. Generate the final image
+wavelength = 500e-9  # 500 nm
+focal_intensity = starshade.gen_scene(pupil_type, source_field, wavelength)
+
+# 6. Visualize the result
+plt.figure(figsize=(8, 8))
+plt.imshow(focal_intensity, norm=plt.LogNorm())
+plt.colorbar()
+plt.title('Simulated Starshade Image')
+plt.xlabel('Pixels')
+plt.ylabel('Pixels')
+plt.show()
 ```
 
 
