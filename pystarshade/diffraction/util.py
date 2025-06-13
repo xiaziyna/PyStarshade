@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from importlib import resources
+import h5py
 
 #=== useful constants====
 pc_to_meter = 3.08567782e16
@@ -257,3 +258,28 @@ def zero_pad(arr, N_in, ZP):
     zp_arr[half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr,
            half_zp_N - half_arr_N : half_zp_N + half_arr_N + bit_arr] = arr
     return zp_arr
+
+
+def h5_to_npz(src_h5: str, dst_npz: str | None = None) -> None:
+    """
+    Convert an arbitrary HDF5 file to a flat .npz archive and delete the source.
+
+    Warning
+    -------
+    * All datasets are loaded fully into memory.  If the .h5 is larger than
+      available RAM, this will crash.  Keep HDF5 for truly large files.
+    * HDF5 attributes are *not* copied—npz has no native attribute support.
+    """
+    if dst_npz is None:
+        dst_npz = os.path.splitext(src_h5)[0] + ".npz"
+
+    arrays = {}
+
+    with h5py.File(src_h5, "r") as f:
+        def _collect(name, obj):
+            if isinstance(obj, h5py.Dataset):
+                arrays[name.lstrip("/")] = obj[...]
+        f.visititems(_collect)
+
+    np.savez_compressed(dst_npz, **arrays)
+    os.remove(src_h5)

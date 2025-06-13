@@ -3,7 +3,8 @@ import glob
 import numpy as np
 from pystarshade.simulate_field import source_field_to_pupil, pupil_to_ccd
 from pystarshade.apodization.pupil import make_pupil
-from pystarshade.diffraction.util import flat_grid, bluestein_pad, trunc_2d, pad_2d, data_file_path
+from pystarshade.diffraction.util import flat_grid, bluestein_pad, trunc_2d, pad_2d, data_file_path, h5_to_npz
+import h5py
 
 class StarshadeProp:
     """
@@ -197,6 +198,91 @@ class StarshadeProp:
             self.pupil_mask = pupil_data['pupil']
 
     def gen_psf_basis(self, pupil_type, pupil_symmetry = False):
+        """
+        Generate the incoherent PSF basis for a particular pupil and starshade.
+
+        Contrast is measured in units of if no starshade were present, i.e., just FFT of the pupil_mask.
+        If the pupil is symmetric, only generate the positive quadrant of PSFs.
+
+        Parameters
+        ----------
+        pupil_type : str
+            The type of pupil aperture (e.g., 'circ', 'hex').
+        pupil_symmetry : bool, optional
+            Whether to use symmetry to reduce computation, defaults to False.
+        """
+        fname = data_file_path(f"{self.drm}_psf_{pupil_type}_{self.d_x_str}*.npz", 'psf')
+        if glob.glob(fname): return
+
+        print("PSF file does not exist. Generating: ")
+
+        self.gen_pupil(pupil_type)
+        N_basis = (2-pupil_symmetry)*(self.suppress_region // self.d_s_mas)
+        N_basis += 1 - N_basis%2
+        N_pix = int(( 20 * self.wl_range[-1] / (mas_to_rad*2*self.r_lens) ) // self.d_p_mas)
+        N_pix += 1 - N_pix%2
+        N_pix_overcomplete = int(( 160 * self.wl_range[-1] / (mas_to_rad*2*self.r_lens) ) // self.d_p_mas)
+        N_pix_overcomplete += 1-N_pix_overcomplete%2
+        x, y = np.meshgrid(np.arange(-(N_pix // 2), (N_pix // 2) + 1), np.arange(-(N_pix // 2), (N_pix // 2) + 1))
+        core_throughput = np.zeros((self.N_wl, N_basis, N_basis))
+        total_throughput = np.zeros((self.N_wl, N_basis, N_basis))
+
+        psf_points = flat_grid(N_basis, negative = 1 - pupil_symmetry)
+
+
+        for wl_i in range(self.N_wl):
+            data = np.load(data_file_path(self.drm+'_pupil'+'_'+self.d_x_str+'_'+str(int(self.wl_range[wl_i]*1e9))+'.npz', 'fields'))
+            wl = data['params'][0]
+            save_path_h5 = data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.h5','psf')
+            save_path_npz = data_file_path(self.drm+'_psf_'+pupil_type+'_'+self.d_x_str+'_'+str(int(wl * 1e9))+'.npz','psf')
+
+            pupil_field = data['field'] 
+            over_N_t = int(np.shape(pupil_field)[0])
+            pupil_field_no_ss = trunc_2d(data['freesp_field'], self.N_t)
+
+            focal_field_no_ss = pupil_to_ccd(wl, self.f, pupil_field_no_ss, self.pupil_mask, self.d_t, self.d_p, self.N_t, N_pix_overcomplete)
+            norm_contrast = np.max(np.abs(focal_field_no_ss)**2)
+            norm_factor = np.sum(np.abs(focal_field_no_ss)**2)
+            circ_mask = np.hypot(x, y) <= self.ang_res_pix[wl_i] * 0.7
+            with h5py.File(save_path_h5, 'w') as f:
+                psf_ds = f.create_dataset('psf_basis', shape=(N_basis, N_basis, N_pix, N_pix), dtype='float32', compression='lzf', chunks=(1, 1, N_pix, N_pix)) 
+                on_axis_ds = f.create_dataset('on_axis_psf', shape=(N_pix_overcomplete, N_pix_overcomplete), dtype='float64', compression='lzf')
+                no_ss_ds = f.create_dataset('no_ss_psf', shape=(N_pix_overcomplete, N_pix_overcomplete), dtype='float32',compression='lzf')
+                params_ds = f.create_dataset('params', shape = (7,), dtype='float32')
+                no_ss_ds[:] = np.abs(focal_field_no_ss)**2 / norm_factor
+                del focal_field_no_ss
+
+                for (i, j) in psf_points:
+                    if pupil_symmetry: p_i, p_j = i, j
+                    else: p_i, p_j = i + N_basis//2, j + N_basis//2
+                    if i == 0 and j == 0:
+                        on_axis_field = trunc_2d(pupil_field, self.N_t)
+                        focal_field = pupil_to_ccd(wl, self.f, on_axis_field, self.pupil_mask, self.d_t, self.d_p, self.N_t, N_pix_overcomplete)
+                        on_axis_psf = np.abs(focal_field)**2 
+                        psf_ = trunc_2d(on_axis_psf, N_pix)
+                        core_throughput[wl_i, p_i, p_j] = np.sum(circ_mask*psf_) / norm_factor
+                        total_throughput[wl_i, p_i, p_j] = np.sum(on_axis_psf) / norm_factor
+                        on_axis_ds[:] = on_axis_psf / norm_factor
+                        del on_axis_field, focal_field, on_axis_psf
+                    else:
+                        off_axis_field = pupil_field[(over_N_t//2) - (self.N_t//2) + i*self.ratio_s_t: (over_N_t//2) + (self.N_t//2) + 1 + i*self.ratio_s_t, \
+                                                    (over_N_t//2) - (self.N_t//2) + j*self.ratio_s_t: (over_N_t//2) + (self.N_t//2) + 1 + j*self.ratio_s_t ]
+                        focal_field = pupil_to_ccd(wl, self.f, off_axis_field, self.pupil_mask, self.d_t, self.d_p, self.N_t, N_pix)
+                        psf_ = np.abs(focal_field).astype(np.float32)**2 
+                        core_throughput[wl_i, p_i, p_j] = np.sum(circ_mask*psf_) / norm_factor
+                        total_throughput[wl_i, p_i, p_j] = np.sum(psf_) / norm_factor
+                        psf_ds[p_i, p_j, :, :] = psf_ / norm_factor
+
+                params = np.array([ wl, self.d_p_mas, norm_contrast, norm_factor, N_basis, N_pix, N_pix_overcomplete])
+                params_ds[:] = params
+                h5_to_npz(save_path_h5, save_path_npz)
+        
+        save_path_throughput = data_file_path(self.drm+'_throughput_'+pupil_type+'_'+self.d_x_str+'.npz','psf')
+        np.savez_compressed(save_path_throughput, core_throughput=core_throughput, total_throughput=total_throughput,\
+                            grid_points = psf_points, wl=self.wl_range, d_pix_mas = self.d_p_mas)
+
+
+    def gen_psf_basis_(self, pupil_type, pupil_symmetry = False):
         """
         Generate the incoherent PSF basis for a particular pupil and starshade.
 
