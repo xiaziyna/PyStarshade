@@ -229,7 +229,6 @@ class StarshadeProp:
 
         psf_points = flat_grid(N_basis, negative = 1 - pupil_symmetry)
 
-
         for wl_i in range(self.N_wl):
             data = np.load(data_file_path(self.drm+'_pupil'+'_'+self.d_x_str+'_'+str(int(self.wl_range[wl_i]*1e9))+'.npz', 'fields'))
             wl = data['params'][0]
