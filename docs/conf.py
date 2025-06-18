@@ -17,9 +17,9 @@ release = '1.0'
 # paths from conf.py
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 # Add the examples directory to the path
-sys.path.insert(0, os.path.abspath('../examples'))
+#sys.path.insert(0, os.path.abspath('../examples'))
 
 
 #import sys
