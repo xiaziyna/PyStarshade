@@ -18,6 +18,8 @@ release = '1.0'
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the examples directory to the path
+sys.path.insert(0, os.path.abspath('../../examples'))
 
 
 #import sys
@@ -31,6 +33,11 @@ extensions = [    'sphinx.ext.autodoc',	     # To generate autodocs
 #    'sphinx.ext.mathjax',           # autodoc with maths
     'sphinx.ext.napoleon',           # For auto-doc configuration
 ]
+
+# Configure nbsphinx to find notebooks elsewhere
+nbsphinx_custom_formats = {
+    '.ipynb': ['jupyter', 'notebook']
+}
 
 napoleon_google_docstring = False   # Turn off googledoc strings
 napoleon_numpy_docstring = True     # Turn on numpydoc strings

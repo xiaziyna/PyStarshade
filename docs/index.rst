@@ -40,7 +40,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
-   content/solar_system
+    ../examples/your_notebook
    content/test
    content/contribute
+
+
 

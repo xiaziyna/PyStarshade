@@ -73,7 +73,7 @@ class StarshadeProp:
         self.iwa = drm_params['iwa'][band_i]
         self.dist_ss_t = drm_params['dist_ss_t'][band_i]
 
-        self.wl_range = np.arange(wl_min, wl_max, self.d_wl, dtype=np.float128)*1e-9
+        self.wl_range = np.arange(wl_min, wl_max, self.d_wl, dtype=np.float64)*1e-9
         self.N_wl = int(len(self.wl_range))
 
         self.ang_res_mas = (self.wl_range /(2*self.r_lens))/mas_to_rad
