@@ -29,7 +29,7 @@ def get_cached_chirp_functions(N_x, N_out, N_X):
 
     b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
     b_outer = np.outer(b, b)
-    h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit_chirp)**2)
+    h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2), (N_out//2) + (N_x//2) + bit_chirp)**2)
     h = np.roll(h, (N_chirp//2) + 1)
     ft_h = np.fft.fft(h)
     return b_outer, ft_h
@@ -108,7 +108,7 @@ def get_cached_corr_out(phase_shift, N_out, N_X):
 
 def zoom_fft_2d_cached(x, N_x, N_out, Z_pad=None, N_X=None):
     """
-    Compute a zoomed 2D FFT using the Bluestein algorithm.
+    Compute a zoomed 2D FFT using the Bluestein algorithm WITH A CACHED OUTPUT FACTOR.
     The input x is centered. 
     
     Parameters
