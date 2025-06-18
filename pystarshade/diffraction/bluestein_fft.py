@@ -1,6 +1,146 @@
 import numpy as np
 import os
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d
+from functools import lru_cache
+
+@lru_cache(maxsize=32, typed=True)
+def get_cached_chirp_functions(N_x, N_out, N_X):
+    """
+    Retrieve cached chirp functions for the Bluestein zoom FFT (to be used with zoom_fft_2d_mod_cached).
+
+    Parameters
+    ----------
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the desired output signal.
+    N_X : int
+        Zero-padded length used for the internal FFT.
+
+    Returns
+    -------
+    b : np.ndarray
+        1D Bluestein chirp array of length N_chirp = N_x + N_out - 1.
+    ft_h : np.ndarray
+        FFT of the convolution kernel 'h' used in the Bluestein transform.
+    """
+    N_chirp = N_x + N_out - 1
+    bit_chirp = N_chirp % 2
+
+    b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
+    b_outer = np.outer(b, b)
+    h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit_chirp)**2)
+    h = np.roll(h, (N_chirp//2) + 1)
+    ft_h = np.fft.fft(h)
+    return b_outer, ft_h
+
+def zoom_fft_2d_mod_cached(x, N_x, N_out, Z_pad=None, N_X=None):
+    """
+    Compute a zoomed 2D FFT using the Bluestein algorithm WITH A CACHED CHIRP. 
+
+    MODIFIED VERSION: computes the Bluestein FFT equivalent to
+    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
+    where x_pad is x zero-padded to length N_X.
+    The input x is centered. 
+    
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the output signal.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
+    
+    Returns
+    -------
+    zoom_fft: np.ndarray
+        Zoomed FFT of the input signal (complex numpy array).
+    """
+    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
+        raise ValueError("You must provide exactly one of Z_pad or N_X.")
+
+    if Z_pad is not None: N_X = Z_pad*N_x + 1 #X before truncation
+
+    N_chirp = N_x + N_out - 1
+
+    bit_x = N_x % 2
+    bit_chirp = N_chirp % 2
+    bit_out = N_out % 2
+
+    trunc_x = bluestein_pad(x, N_x, N_out)
+
+    b_outer, ft_h = get_cached_chirp_functions(N_x, N_out, N_X)
+
+    zoom_fft = b_outer * (np.fft.ifft2( np.fft.fft2(b_outer * trunc_x) * np.outer(ft_h, ft_h) ) )
+    zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, 
+                        (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
+    return zoom_fft
+
+@lru_cache(maxsize=32, typed=True)
+def get_cached_corr_out(phase_shift, N_out, N_X):
+    """
+    Retrieve cached outer-product phase correction for zoom_fft_2d_cached.
+
+    Parameters
+    ----------
+    phase_shift : float
+        Fractional pixel shift to apply in Fourier domain.
+    N_out : int
+        Output size of the zoomed FFT.
+    N_X : int
+        Total zero-padded size of the FFT input.
+
+    Returns
+    -------
+    outer_prod_fac : np.ndarray
+        Complex 2D array of shape (N_out+1, N_out+1) representing the
+        outer product of the phase correction vector with itself.
+    """
+    out_fac = np.exp ( np.arange(-(N_out//2), (N_out//2) + 1) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
+    outer_prod_fac = np.outer(out_fac, out_fac)
+    return outer_prod_fac
+
+
+def zoom_fft_2d_cached(x, N_x, N_out, Z_pad=None, N_X=None):
+    """
+    Compute a zoomed 2D FFT using the Bluestein algorithm.
+    The input x is centered. 
+    
+    Parameters
+    ----------
+    x : np.ndarray
+        Centered input signal (complex numpy array).
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the output signal.
+    Z_pad : float, optional
+        Zero-padding factor.
+    N_X : int, optional
+        Zero-padded length of input signal (Z_pad * N_x + 1).
+
+    Returns
+    -------
+    out_fac: np.ndarray
+        Zoomed FFT of the input signal (complex numpy array).
+    """
+    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
+        raise ValueError("You must provide exactly one of Z_pad or N_X.")
+    if Z_pad is not None:
+        N_X = Z_pad*N_x + 1 #X before truncation
+        phase_shift = (N_x*Z_pad)//2 + 1 
+        uncorrected_output_field = zoom_fft_2d_mod_cached(x, N_x, N_out, Z_pad=Z_pad)
+    else:
+        phase_shift = float((N_X - 1) //2 + 1)
+        uncorrected_output_field = zoom_fft_2d_mod_cached(x, N_x, N_out, N_X=N_X)
+    out_fac = get_cached_corr_out(phase_shift, N_out, N_X)
+    return uncorrected_output_field*out_fac
+
 
 def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
     """

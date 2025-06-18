@@ -1,5 +1,5 @@
 import numpy as np
-from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod
+from pystarshade.diffraction.bluestein_fft import zoom_fft_2d_mod, zoom_fft_2d, chunk_in_chirp_zoom_fft_2d_mod, zoom_fft_2d_cached
 from pystarshade.diffraction.util import *
 
 class Fresnel:
@@ -393,7 +393,7 @@ class Fraunhofer:
         """
         k = 2 * np.pi / self.wavelength
         Ny, Nx = field.shape    
-        output_field = zoom_fft_2d(field, self.N_in, N_out, N_X = self.N_X) * (self.d_x**2)
+        output_field = zoom_fft_2d_cached(field, self.N_in, N_out, N_X = self.N_X) * (self.d_x**2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df )
         out_fac = np.exp ( ( 1j * k / (2 * self.z) ) * (out_xy[0]**2 + out_xy[1]**2) ) / (1j * self.wl_z)
