@@ -18,7 +18,7 @@ release = '1.0'
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples')))
+#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples')))
 
 
 # Add the examples directory to the path
