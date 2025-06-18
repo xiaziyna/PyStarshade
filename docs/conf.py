@@ -48,8 +48,6 @@ imgmath_image_format = 'svg'
 highlight_language = 'python'
 
 nbsphinx_allow_errors = True
-.. nbinclude:: ../../examples/solar_system.ipynb
-
 
 #imgmath_latex_preamble = r"""
 #\usepackage{amsmath}

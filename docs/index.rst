@@ -25,6 +25,8 @@ If you use ``PyStarshade`` in your research, please include the following citati
 
     Taaki, Kamalabadi, Kemball. *PyStarshade: Simulating High-Contrast Imaging of Exoplanets with Starshades*.
 
+.. nbinclude:: ../../examples/solar_system.ipynb
+
 
 Table of Contents
 -----------------
@@ -40,8 +42,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
+   content/solar_system_example
    content/test
    content/contribute
-    ../examples/solar_system
+
 
 
