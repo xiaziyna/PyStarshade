@@ -18,6 +18,8 @@ release = '1.0'
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../examples')))
+
 # Add the examples directory to the path
 #sys.path.insert(0, os.path.abspath('../examples'))
 
@@ -44,6 +46,9 @@ napoleon_numpy_docstring = True     # Turn on numpydoc strings
 napoleon_use_ivar = True 	     # For maths symbology
 imgmath_image_format = 'svg'
 highlight_language = 'python'
+
+nbsphinx_allow_errors = True
+.. nbinclude:: ../../examples/solar_system.ipynb
 
 
 #imgmath_latex_preamble = r"""

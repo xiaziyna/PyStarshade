@@ -33,16 +33,15 @@ Table of Contents
    :maxdepth: 2
 
    PyStarshade Documentation Landing Page <https://pystarshade.readthedocs.io>
-   docs/content/install       
-   docs/content/background   
-   docs/content/usage        
+   content/install       
+   content/background   
+   content/usage        
 
 .. toctree::
    :maxdepth: 1
 
-   examples/solar_system
-   docs/content/test
-   docs/content/contribute
-
+   content/test
+   content/contribute
+    ../examples/solar_system
 
 
