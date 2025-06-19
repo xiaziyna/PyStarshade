@@ -1,4 +1,8 @@
 Solar System Example
 ====================
 
-.. nbinclude:: ../../examples/solar_system.ipynb
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples:
+
+   ../examples/solar_system
