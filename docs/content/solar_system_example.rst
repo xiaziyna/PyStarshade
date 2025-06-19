@@ -5,4 +5,4 @@ Solar System Example
    :maxdepth: 2
    :caption: Examples:
 
-   examples/solar_system
+   ../examples/solar_system

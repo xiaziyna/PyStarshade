@@ -6,3 +6,5 @@ ipykernel
 scipy
 hcipy
 h5py
+matplotlib
+astropy
