@@ -53,6 +53,6 @@ The Starshade Imaging Simulation Toolkit for Exoplanet Reconnaissance (`SISTER`)
 
 # Acknowledgements
 
-This project is supported by Schmidt Sciences, LLC. We acknowledge the use of the following software libraries in our work: NumPy [@numpy], SciPy [@scipy], Astropy [@astropy], setuptools [@setuptools], h5py [@h5py], pytest [@pytest], HCIPy [@hcipy]. 
+This project is supported by Schmidt Sciences, LLC. We acknowledge the use of the following software libraries in our work: NumPy [@numpy], SciPy [@scipy], Astropy [@astropy], setuptools [@setuptools], h5py [@h5py], pytest [@pytest] and HCIPy [@hcipy]. 
 
 # References
