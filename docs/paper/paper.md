@@ -1,5 +1,5 @@
 ---
-title: 'PyStarshade: simulating high-contrast imaging of exoplanets with starshades'
+title: 'PyStarshade: Simulating High-Contrast Imaging of Exoplanets with Starshades'
 tags:
   - Python
   - astronomy
@@ -44,7 +44,7 @@ Several starshade concepts have been proposed but not yet adopted. These include
 
 ![A starshade imaging simulation shown at a wavelength of 500 nm with a synthetic exoplanetary input scene (generated with ExoVista): three exoplanets are directly visible, while two more sit inside the starshade suppression zone. The scene assumes a 60 m HWO starshade paired with a 6 m segmented telescope; the planets in the scene have planet-to-star flux ratios between $10^{-8}$ and $10^{-10}$. \label{fig:example}](exo_scene.png){ width=50% }
 
-Fourier optics simulations of starshades and telescope apertures require fine spatial pixel scales to accurately model diffraction without aliasing errors across multiple stages of propagation. Traditional fast Fourier transforms (FFTs) require large zero-padding factors to accomplish this, increasing computational cost. `PyStarshade` implements the Bluestein FFT [@bluestein] (related to the chirp Z-transform) to compute optical fields at arbitrary spatial scales without zero-padding, thereby achieving greater efficiency than the FFTs or discrete Fourier transforms (DFTs). `PyStarshade` implements the Bluestein FFT using `Numpy` [@numpy] FFTs and arrays.
+Fourier optics simulations of starshades and telescope apertures require fine spatial pixel scales to accurately model diffraction without aliasing errors across multiple stages of propagation. Traditional fast Fourier transforms (FFTs) require large zero-padding factors to accomplish this, increasing computational cost. `PyStarshade` implements the Bluestein FFT [@bluestein] (related to the chirp Z-transform) to compute optical fields at arbitrary spatial scales without zero-padding, thereby achieving greater efficiency than the FFTs or discrete Fourier transforms (DFTs). `PyStarshade` implements the Bluestein FFT using `NumPy`[@numpy] FFTs and array operations.
 
 Furthermore, `PyStarshade` implements a novel technique to chunk Bluestein FFT calculations, which mitigates memory bottlenecks. A set of unit tests is provided to validate the Fourier diffraction tools. `PyStarshade` precomputes fields, point spread functions, and throughput grids for different stages of the optical propagation chain. This allows flexibility in modifying instrument parameters or telescope aperture masks. `PyStarshade` optionally interfaces with HCIPy [@hcipy] to generate telescope apertures and the resulting imaging.
 
@@ -53,6 +53,6 @@ The Starshade Imaging Simulation Toolkit for Exoplanet Reconnaissance (`SISTER`)
 
 # Acknowledgements
 
-This project is supported by Schmidt Sciences, LLC.
+This project is supported by Schmidt Sciences, LLC. We acknowledge the use of the following software libraries in our work: NumPy [@numpy], SciPy [@scipy], Astropy [@astropy], setuptools [@setuptools], h5py [@h5py], pytest [@pytest], HCIPy [@hcipy]. 
 
 # References
