@@ -14,7 +14,7 @@
 }
 
 @article{scipy,
-  title={{SciPy} 1.0: Fundamental algorithms for scientific computing in Python},
+  title={{SciPy} 1.0: Fundamental algorithms for scientific computing in {Python}},
   author={Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E and Haberland, Matt and Reddy, Tyler and Cournapeau, David and Burovski, Evgeni and Peterson, Pearu and Weckesser, Warren and Bright, Jonathan and others},
   journal={Nature Methods},
   volume={17},
@@ -26,7 +26,7 @@
 }
 
 @article{astropy,
-  title={Astropy: A community Python package for astronomy},
+  title={Astropy: A community {Python} package for astronomy},
   author={Astropy Collaboration and Robitaille, Thomas P. and Tollerud, Erik J. and Greenfield, Perry and Droettboom, Michael and Bray, Erik and Aldcroft, Tom and Davis, Matt and Ginsburg, Adam and Price-Whelan, Adrian M. and others},
   journal={Astronomy \& Astrophysics},
   volume={558},
@@ -43,20 +43,20 @@
 }
 
 @misc{pytest,
-  title={pytest: simple powerful testing with Python},
-  author={Krekel, Holger and others},
-  year={2024},
-  note={\url{https://docs.pytest.org}}
+  author       = {Holger Krekel and Bruno Oliveira and Ronny Pfannschmidt and Floris Bruynooghe and Brianna Laugher and Florian Bruhin},
+  title        = {pytest x.y},
+  year         = {2004},
+  howpublished = {\url{https://github.com/pytest-dev/pytest}},
+  note         = {Version x.y. Contributors include Holger Krekel, Bruno Oliveira, Ronny Pfannschmidt, Floris Bruynooghe, Brianna Laugher, Florian Bruhin, and others.}
 }
 
-@misc{h5py,
-  title={{h5py}: HDF5 for Python},
-  author={Collette, Andrew and contributors},
-  year={2024},
-  note={\url{https://www.h5py.org}}
+@Book{h5py,
+    keywords = {python, hdf5},
+        year = {2013},
+   publisher = {O'Reilly},
+       title = {Python and HDF5},
+      author = {Andrew Collette}
 }
-
-
 
 @INCOLLECTION{direct,
        author = {{Traub}, W.~A. and {Oppenheimer}, B.~R.},
@@ -87,7 +87,7 @@ URL = {https://doi.org/10.1117/1.JATIS.7.2.021207}
 
 @article{special,
 author = {Jonathan W. Arenberg and Anthony D. Harness and Rebecca M. Jensen-Clem},
-title = {{Special Section on Starshades: Overview and a Dialogue}},
+title = {Special Section on Starshades: Overview and a Dialogue},
 volume = {7},
 journal = {Journal of Astronomical Telescopes, Instruments, and Systems},
 number = {2},
@@ -128,8 +128,8 @@ abstract = {This tutorial is an introduction to High-Contrast Imaging, a techniq
 
 @ARTICLE{bluestein,
   author={Bluestein, L.},
-  journal={IEEE Transactions on Audio and Electroacoustics}, 
-  title={A linear filtering approach to the computation of discrete Fourier transform}, 
+  journal={IEEE Transactions on Audio and Electroacoustics},
+  title={A linear filtering approach to the computation of discrete {Fourier} transform},
   year={1970},
   volume={18},
   number={4},
@@ -171,7 +171,7 @@ URL = {https://doi.org/10.1117/1.JATIS.10.3.035004}
 
 @inproceedings{hwo_ss,
 author = {Stuart Shaklan and Dylan McKeithen and Doug Lisman and Philip Dumont},
-title = {{A starshade for NASA’s habitable worlds observatory concept: exoplanet characterization in the UV}},
+title = {{A starshade for NASA’s Habitable Worlds Observatory concept: exoplanet characterization in the UV}},
 volume = {12680},
 booktitle = {Techniques and Instrumentation for Detection of Exoplanets XI},
 editor = {Garreth J. Ruane},
@@ -245,7 +245,7 @@ URL = {https://doi.org/10.1117/1.JATIS.7.2.021211}
 
 @INPROCEEDINGS{hcipy,
        author = {{Por}, Emiel H. and {Haffert}, Sebastiaan Y. and {Radhakrishnan}, Vikram M. and {Doelman}, David S. and {van Kooten}, Maaike and {Bos}, Steven P.},
-        title = "{High Contrast Imaging for Python (HCIPy): an open-source adaptive optics and coronagraph simulator}",
+        title = {{High Contrast Imaging for Python (HCIPy)}: an open-source adaptive optics and coronagraph simulator},
     booktitle = {Adaptive Optics Systems VI},
          year = 2018,
        editor = {{Close}, Laird M. and {Schreiber}, Laura and {Schmidt}, Dirk},
@@ -316,19 +316,27 @@ abstract = {Studies of future space- and ground-based exoplanet surveys often re
   note     = {Zenodo archive, version 1.0.0}
 }
 
-@software{exosims,
-  author   = {Savransky, Dmitry and Delacroix, Christian and Garrett, Daniel},
-  title    = {EXOSIMS: Exoplanet Open-Source Imaging Mission Simulator},
-  version  = {1.0},
-  year     = {2019},
-  doi      = {10.5281/zenodo.3376663},
-  url      = {https://github.com/dsavransky/EXOSIMS},
-  note     = {Zenodo archive}
+@ARTICLE{exosims,
+       author = {{Savransky}, Dmitry and {Garrett}, Daniel},
+        title = "{WFIRST-AFTA coronagraph science yield modeling with EXOSIMS}",
+      journal = {Journal of Astronomical Telescopes, Instruments, and Systems},
+     keywords = {Astrophysics - Instrumentation and Methods for Astrophysics},
+         year = 2016,
+        month = jan,
+       volume = {2},
+          eid = {011006},
+        pages = {011006},
+          doi = {10.1117/1.JATIS.2.1.011006},
+archivePrefix = {arXiv},
+       eprint = {1511.02869},
+ primaryClass = {astro-ph.IM},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2016JATIS...2a1006S},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
 @unpublished{taaki_hwo_sim_2025,
   author = {Taaki, Jamila S. and Kamalabadi, Farzad and Kemball, Athol J. and Corrales, Lia and Hero, Alfred O.},
-  title  = {Efficient Exoplanet Imaging Simulations of the Habitable Worlds Observatory},
+  title  = {Efficient Exoplanet Imaging Simulations of the {Habitable Worlds Observatory}},
   year   = {2025},
   note   = {in preparation},
 }
