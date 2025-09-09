@@ -1,8 +1,7 @@
 import numpy as np
-from pystarshade.apodization.apodize import *
-from pystarshade.diffraction.util import *
-from pystarshade.diffraction.field import *
-from pystarshade.diffraction.diffract import *
+from pystarshade.apodization.apodize import grey_pupil_func, eval_hypergauss, qu_mask_to_full
+from pystarshade.diffraction.field import SourceField, PointSource
+from pystarshade.diffraction.diffract import Fraunhofer, bluestein_pad, FresnelSingle, pc_to_meter, au_to_meter, N_in_2d
 
 def pupil_to_ccd(wl, focal_length_lens, pupil_field, pupil_mask, dt, dp,  N_t, N_pix):
     """

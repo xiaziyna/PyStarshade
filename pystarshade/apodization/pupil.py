@@ -1,4 +1,7 @@
-from hcipy import *
+from hcipy.aperture import make_circular_aperture, make_elt_aperture, make_gmt_aperture, make_tmt_aperture, make_hale_aperture, \
+    make_luvoir_a_aperture, make_luvoir_b_aperture, make_magellan_aperture, make_vlt_aperture, make_hicat_aperture, \
+    make_habex_aperture, make_hst_aperture, make_jwst_aperture, make_keck_aperture, make_hexagonal_segmented_aperture
+from hcipy.field import make_pupil_grid, evaluate_supersampled
 import numpy as np
 
 # From HCIPy tutorial
