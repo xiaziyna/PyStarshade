@@ -8,3 +8,68 @@ Obtain NI2.mat in SISTERS project (http://sister.caltech.edu/)
 Filename convention:
 'grey_wfirst_16_mask_005m.npz' - grey (anti-aliased) sampling dx = 0.005m
 'grey_drm_petalnumber_mask_dx.npz'
+
+#-----------------------------------------
+Update:
+
+If you have a locii file, use thew new rasterized script 'rasterize_loci_grey.py' to generate the starshade mask (this is much faster).
+
+## Rasterize loci to a high-accuracy grey mask (tilted starshade)
+
+This folder contains scripts to generate high-accuracy grey masks from loci stored in HDF5 and to validate numerical convergence.
+
+### Files
+- `rasterize_loci_grey.py`: Fast, high-accuracy rasterizer (tile-based, OpenCV fill + supersampling). Produces quarter-plane grey masks.
+- `convergence_check.py`: Runs multiple supersamples and reports errors versus the highest supersample.
+- `mpi_loci.py`: hwo_mpi-style multiprocessing approach that reads HDF5 loci (reference/legacy-compatible path).
+
+## HOEE starshade parameters
+- `loci` (HDF5): `/home/jtaaki2/mask/hoee_locus_48.h5`
+- `rmax` (m): `49.5`
+- `dx` (m): typically `0.0015` (or `0.001` for finer)
+- `dy` (m): default equals `dx`
+- `angle` (rad): e.g., `0.4`; the rasterizer applies foreshortening with `y <- y * cos(angle)`
+- `supersample` (int): `8` (use `16` or higher for stricter edge accuracy)
+- `tile` (base pixels): `256`
+- `max-proc` (int): `30` (upper bound for multiprocessing on this system)
+
+## Quick start (rasterize)
+Generates a quarter grey mask NPZ and a PNG preview using the HOEE parameters.
+
+```bash
+python3 /home/jtaaki2/test_pystarshade/new_code/tilted_starshade/rasterize_loci_grey.py \
+  --loci /home/jtaaki2/mask/hoee_locus_48.h5 \
+  --dx 0.0015 --rmax 49.5 \
+  --angle 0.4 \
+  --tile 256 --supersample 8 --max-proc 30 \
+  --out-dir /home/jtaaki2/mask/out --prefix hoee_raster
+```
+
+Outputs:
+- `/home/jtaaki2/mask/out/hoee_raster_grey_qu.npz` (contains `grey_mask`, `dx`, `dy`, `angle`, `cos_angle`, `r0`, `r1`)
+- `/home/jtaaki2/mask/out/hoee_raster_grey_qu.png` (preview)
+
+Notes:
+- Increase `--supersample` to improve subpixel coverage accuracy; runtime/memory scale roughly with `supersample^2` on boundary tiles.
+- Progress is printed periodically as tiles complete.
+
+## Optional: Convergence check
+Runs the rasterizer at multiple supersamples and reports MAE/RMSE/MAX error versus the highest supersample.
+
+```bash
+python3 /home/jtaaki2/test_pystarshade/new_code/tilted_starshade/convergence_check.py
+```
+
+Defaults (can be edited inside the script):
+- loci: `/home/jtaaki2/mask/hoee_locus_48.h5`
+- dx/rmax: `0.0015`, `49.5`
+- angles: `0.0,0.4`
+- supersamples: `4,8,16`
+- out-dir: `/home/jtaaki2/mask/out` (masks saved when enabled)
+
+## Dependencies
+- Python packages: numpy, h5py, matplotlib, opencv-python-headless (for rasterizer), scipy (for legacy path)
+- Install OpenCV (headless):
+```bash
+python3 -m pip install --upgrade pip opencv-python-headless
+```
