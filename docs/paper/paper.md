@@ -26,6 +26,9 @@ affiliations:
 
 date: 4 December 2024
 bibliography: paper.bib
+
+aas-doi: 10.3847/1538-3881/ae22f1
+aas-journal: Astronomical Journal
 ---
 
 # Summary
