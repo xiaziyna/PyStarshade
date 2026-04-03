@@ -149,7 +149,7 @@ class StarshadeProp:
     def calc_d_s_mas(self, d_s, dist_xo_ss):
         return (d_s / dist_xo_ss) / mas_to_rad
 
-    def gen_pupil_field(self, chunk = 1):
+    def gen_pupil_field(self, chunk = 1, use_gpu=None):
         """
         Generate the field at the pupil for the chosen starshade.
 
@@ -157,6 +157,8 @@ class StarshadeProp:
         ----------
         chunk : int, optional
             Whether to use chunked parallel processing (if so, must use a memmap file).
+        use_gpu : bool or None, optional
+            If None (default), auto-detect GPU. If True, require GPU. If False, force CPU.
         """
 
         fname = data_file_path(f"{self.drm}_pupil_{self.d_x_str}*.npz", 'fields')
@@ -173,7 +175,7 @@ class StarshadeProp:
         for wl_i in self.wl_range:
             save_path = data_file_path(self.drm+'_pupil_'+self.d_x_str+'_'+str(int(wl_i * 1e9))+'.npz', 'fields')
             field_incident_telescope, field_free_prop, params = source_field_to_pupil(ss_mask_fname, wl_i,\
-            self.dist_ss_t, N_x = self.N_x, N_t = over_N_t, dx = self.d_x, dt = self.d_t, chunk=chunk)
+            self.dist_ss_t, N_x = self.N_x, N_t = over_N_t, dx = self.d_x, dt = self.d_t, chunk=chunk, use_gpu=use_gpu)
             np.savez_compressed(save_path, field=field_incident_telescope, freesp_field=field_free_prop, params=params)
 
     def gen_pupil(self, pupil_type):
