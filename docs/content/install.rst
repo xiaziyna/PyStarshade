@@ -21,15 +21,17 @@ Instead install the package from source, in editable mode and use `git lfs <http
     git lfs pull
     pip install -e .
 
-
-GPU Acceleration
-^^^^^^^^^^^^^^^^
-
-For GPU-accelerated Fresnel propagation (requires an NVIDIA GPU with CUDA):
+To include GPU-accelerated propagation (requires NVIDIA GPU with CUDA), add the gpu extra to either install method:
 
 .. code-block:: bash
 
     pip install pystarshade[gpu]
+
+or from source:
+
+.. code-block:: bash
+
+    pip install -e ".[gpu]"
 
 This installs PyTorch as an additional dependency. If CUDA is available, ``gen_pupil_field()`` will automatically use the GPU.
 
