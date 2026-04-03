@@ -59,7 +59,14 @@ The easiest way to interface with PyStarshade is via the StarshadeProp class.
 
 After running this code, a field incident on the telescope aperture will be stored on disk (and can be propagated with various different telescope apertures). There are optional parameters to change the samplings at the pupil, or wavelength sampling.
 
-Note: there is an important setting called 'chunk', if this is invoked a chunked FFT will be used to compute the fields using a memory mapped starshade mask. This avoids hitting RAM bottlenecks, but you will need to have enough disk memory for the memmap starshade mask of :math:`\left( \frac{diameter_{ss}}{dx} \right)^2` floats. By default, this chunked FFT will process the starshade mask of size (N * N) in chunks of size (N/N_chunk * N/N_chunk). To modify the N_chunk parameter change it inside 'pystarshade.simulate_field.source_field_to_pupil', by default N_chunk is set to 4.
+Note: there is an important setting called 'chunk', if this is invoked a chunked FFT will be used to compute the fields using a memory mapped starshade mask. This avoids hitting RAM bottlenecks, but you will need to have enough disk memory for the memmap starshade mask of :math:`\left( \frac{diameter_{ss}}{dx} \right)^2` floats. By default, this chunked FFT will process the starshade mask of size (N * N) in chunks of size (N/N_chunk * N/N_chunk).
+
+If a CUDA-capable GPU and PyTorch are available (``pip install pystarshade[gpu]``), the chunked FFT will automatically run on the GPU. This can also be controlled explicitly:
+
+.. code-block:: python
+
+    hwo_starshade.gen_pupil_field(use_gpu=True)   # force GPU
+    hwo_starshade.gen_pupil_field(use_gpu=False)  # force CPU
 
 
 Data
@@ -138,7 +145,7 @@ Using Chunked FFT for Large Masks
 
 **Important:** By default when ``chunk=1`` when calling ``gen_pupil_field(chunk = 1)``, the mask will be propagated in chunks. To use this, the generated starshade mask must be a memmap ``.dat`` filetype. You can generate a memmap file by running the ``make_memmap`` script inside the ``masks`` directory on one of the existing masks. We do not include masks generated in this format as they occupy a large disk space. Set ``chunk=0`` to use an npz file instead - beware you may run out of memory. 
 
-Chunked FFT processing avoids RAM limitations when working with very large masks. The computation processes the starshade mask of size (N × N) in chunks of size (N//N_chunk × N//N_chunk). By default, N_chunk is set to 4 in ``pystarshade.simulate_field.source_field_to_pupil``. If this chunking factor is not sufficient and a RAM bottleneck is still met, it can be increased (recommend setting N_chunk to a power of 2). 
+Chunked FFT processing avoids RAM limitations when working with very large masks. The computation processes the starshade mask of size (N × N) in chunks of size (N//N_chunk × N//N_chunk). By default, N_chunk is set to 8. If this chunking factor is not sufficient and a RAM bottleneck is still met, it can be increased.
 
 
 Full PSF Generation Workflow
