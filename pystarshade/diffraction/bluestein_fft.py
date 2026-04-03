@@ -1,12 +1,94 @@
 import numpy as np
 import os
+import scipy.fft
 from pystarshade.diffraction.util import bluestein_pad, trunc_2d
 from functools import lru_cache
+import logging
 
-@lru_cache(maxsize=32, typed=True)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Chirp cache (v2 optimisation: dict-based, pre-allocated buffers)
+# ---------------------------------------------------------------------------
+_chirp_cache = {}
+
+
+def _build_chirp_cache(N_x, N_out, N_X):
+    """
+    Build or retrieve a cached set of Bluestein chirp arrays.
+
+    Precomputes the 2D outer products of the chirp vectors and a
+    reusable zero-padded buffer, avoiding repeated allocation.
+
+    Parameters
+    ----------
+    N_x : int
+        Length of the input signal.
+    N_out : int
+        Length of the desired output signal.
+    N_X : float
+        Phantom zero-padded length for the internal FFT.
+
+    Returns
+    -------
+    cache : dict
+        Keys: 'bb', 'hh' (2D chirp outer products), 'trunc_buf'
+        (pre-allocated buffer), 'N_chirp', 'N_x', 'N_out', 'N_X'.
+    """
+    key = (N_x, N_out, N_X)
+    if key in _chirp_cache:
+        return _chirp_cache[key]
+
+    N_chirp = N_x + N_out - 1
+    bit_chirp = N_chirp % 2
+
+    b = np.exp(-np.pi * (1.0 / N_X) * 1j
+               * np.arange(-(N_chirp // 2), (N_chirp // 2) + bit_chirp) ** 2)
+    h = np.exp(np.pi * (1.0 / N_X) * 1j
+               * np.arange(-(N_out // 2) - (N_x // 2),
+                           (N_out // 2) + (N_x // 2) + bit_chirp) ** 2)
+    h = np.roll(h, (N_chirp // 2) + 1)
+    ft_h = scipy.fft.fft(h, workers=-1)
+
+    bb = np.outer(b, b)
+    hh = np.outer(ft_h, ft_h)
+    trunc_buf = np.zeros((N_chirp, N_chirp), dtype=np.complex128)
+
+    cache = {'bb': bb, 'hh': hh, 'trunc_buf': trunc_buf,
+             'N_chirp': N_chirp, 'N_x': N_x, 'N_out': N_out, 'N_X': N_X}
+    _chirp_cache[key] = cache
+    return cache
+
+
+def _bluestein_pad_into(buf, arr, N_in, N_out):
+    """
+    Copy *arr* into the centre of a pre-allocated zero buffer (in-place).
+
+    Parameters
+    ----------
+    buf : np.ndarray
+        Pre-allocated buffer of shape (N_chirp, N_chirp).
+    arr : np.ndarray
+        Input array.
+    N_in : int
+        Number of non-zero input samples.
+    N_out : int
+        Number of output samples.
+    """
+    buf[:] = 0
+    half_zp = (N_in + N_out - 1) // 2
+    half_arr = arr.shape[0] // 2
+    bit_arr = arr.shape[0] % 2
+    s = slice(half_zp - N_in // 2, half_zp + N_in // 2 + bit_arr)
+    sa = slice(half_arr - N_in // 2, half_arr + N_in // 2 + bit_arr)
+    buf[s, s] = arr[sa, sa]
+
 def get_cached_chirp_functions(N_x, N_out, N_X):
     """
-    Retrieve cached chirp functions for the Bluestein zoom FFT (to be used with zoom_fft_2d_mod_cached).
+    Retrieve cached chirp functions for the Bluestein zoom FFT.
+
+    Now delegates to ``_build_chirp_cache`` (v2 optimisation) and returns
+    the (bb, ft_h) pair for backward compatibility.
 
     Parameters
     ----------
@@ -19,30 +101,30 @@ def get_cached_chirp_functions(N_x, N_out, N_X):
 
     Returns
     -------
-    b : np.ndarray
-        1D Bluestein chirp array of length N_chirp = N_x + N_out - 1.
+    b_outer : np.ndarray
+        2D outer product of the Bluestein chirp vector.
     ft_h : np.ndarray
-        FFT of the convolution kernel 'h' used in the Bluestein transform.
+        1D FFT of the convolution kernel 'h'.
     """
-    N_chirp = N_x + N_out - 1
+    cache = _build_chirp_cache(N_x, N_out, N_X)
+    # Return (bb, ft_h_1d) for backward compat with zoom_fft_2d_mod_cached
+    N_chirp = cache['N_chirp']
     bit_chirp = N_chirp % 2
-
-    b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
-    b_outer = np.outer(b, b)
-    h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2), (N_out//2) + (N_x//2) + bit_chirp)**2)
-    h = np.roll(h, (N_chirp//2) + 1)
-    ft_h = np.fft.fft(h)
-    return b_outer, ft_h
+    b = np.exp(-np.pi * (1.0 / N_X) * 1j
+               * np.arange(-(N_chirp // 2), (N_chirp // 2) + bit_chirp) ** 2)
+    h = np.exp(np.pi * (1.0 / N_X) * 1j
+               * np.arange(-(N_out // 2) - (N_x // 2),
+                           (N_out // 2) + (N_x // 2) + bit_chirp) ** 2)
+    h = np.roll(h, (N_chirp // 2) + 1)
+    ft_h = scipy.fft.fft(h, workers=-1)
+    return cache['bb'], ft_h
 
 def zoom_fft_2d_mod_cached(x, N_x, N_out, Z_pad=None, N_X=None):
     """
-    Compute a zoomed 2D FFT using the Bluestein algorithm WITH A CACHED CHIRP. 
+    Compute a zoomed 2D FFT using the Bluestein algorithm WITH A CACHED CHIRP.
 
-    MODIFIED VERSION: computes the Bluestein FFT equivalent to
-    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
-    where x_pad is x zero-padded to length N_X.
-    The input x is centered. 
-    
+    Now delegates to ``zoom_fft_2d_mod`` which always uses the v2 cache.
+
     Parameters
     ----------
     x : np.ndarray
@@ -55,31 +137,13 @@ def zoom_fft_2d_mod_cached(x, N_x, N_out, Z_pad=None, N_X=None):
         Zero-padding factor.
     N_X : int, optional
         Zero-padded length of input signal (Z_pad * N_x + 1).
-    
+
     Returns
     -------
     zoom_fft: np.ndarray
         Zoomed FFT of the input signal (complex numpy array).
     """
-    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
-        raise ValueError("You must provide exactly one of Z_pad or N_X.")
-
-    if Z_pad is not None: N_X = Z_pad*N_x + 1 #X before truncation
-
-    N_chirp = N_x + N_out - 1
-
-    bit_x = N_x % 2
-    bit_chirp = N_chirp % 2
-    bit_out = N_out % 2
-
-    trunc_x = bluestein_pad(x, N_x, N_out)
-
-    b_outer, ft_h = get_cached_chirp_functions(N_x, N_out, N_X)
-
-    zoom_fft = b_outer * (np.fft.ifft2( np.fft.fft2(b_outer * trunc_x) * np.outer(ft_h, ft_h) ) )
-    zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, 
-                        (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
-    return zoom_fft
+    return zoom_fft_2d_mod(x, N_x, N_out, Z_pad=Z_pad, N_X=N_X)
 
 @lru_cache(maxsize=32, typed=True)
 def get_cached_corr_out(phase_shift, N_out, N_X):
@@ -108,9 +172,10 @@ def get_cached_corr_out(phase_shift, N_out, N_X):
 
 def zoom_fft_2d_cached(x, N_x, N_out, Z_pad=None, N_X=None):
     """
-    Compute a zoomed 2D FFT using the Bluestein algorithm WITH A CACHED OUTPUT FACTOR.
-    The input x is centered. 
-    
+    Compute a zoomed 2D FFT using the Bluestein algorithm with cached chirps.
+
+    Now delegates to ``zoom_fft_2d`` which always uses the v2 cache.
+
     Parameters
     ----------
     x : np.ndarray
@@ -126,31 +191,24 @@ def zoom_fft_2d_cached(x, N_x, N_out, Z_pad=None, N_X=None):
 
     Returns
     -------
-    out_fac: np.ndarray
+    np.ndarray
         Zoomed FFT of the input signal (complex numpy array).
     """
-    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
-        raise ValueError("You must provide exactly one of Z_pad or N_X.")
-    if Z_pad is not None:
-        N_X = Z_pad*N_x + 1 #X before truncation
-        phase_shift = (N_x*Z_pad)//2 + 1 
-        uncorrected_output_field = zoom_fft_2d_mod_cached(x, N_x, N_out, Z_pad=Z_pad)
-    else:
-        phase_shift = float((N_X - 1) //2 + 1)
-        uncorrected_output_field = zoom_fft_2d_mod_cached(x, N_x, N_out, N_X=N_X)
-    out_fac = get_cached_corr_out(phase_shift, N_out, N_X)
-    return uncorrected_output_field*out_fac
+    return zoom_fft_2d(x, N_x, N_out, Z_pad=Z_pad, N_X=N_X)
 
 
-def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
+def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None, _cache=None):
     """
-    Compute a zoomed 2D FFT using the Bluestein algorithm. 
+    Compute a zoomed 2D FFT using the Bluestein algorithm.
 
     MODIFIED VERSION: computes the Bluestein FFT equivalent to
-    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, N_X/2 - N_out/2: N_X/2 + N_out/2]
+    fftshift(fft2(ifftshift(x_pad))) [N_X/2 - N_out/2: N_X/2 + N_out/2, ...]
     where x_pad is x zero-padded to length N_X.
-    The input x is centered. 
-    
+    The input x is centered.
+
+    v2 optimisations: pre-allocated buffer reuse, in-place multiplies,
+    multithreaded scipy FFTs, dict-based chirp cache.
+
     Parameters
     ----------
     x : np.ndarray
@@ -163,40 +221,44 @@ def zoom_fft_2d_mod(x, N_x, N_out, Z_pad=None, N_X=None):
         Zero-padding factor.
     N_X : int, optional
         Zero-padded length of input signal (Z_pad * N_x + 1).
-    
+    _cache : dict, optional
+        Pre-built chirp cache from ``_build_chirp_cache``.
+
     Returns
     -------
     zoom_fft: np.ndarray
         Zoomed FFT of the input signal (complex numpy array).
     """
-    if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
-        raise ValueError("You must provide exactly one of Z_pad or N_X.")
+    if _cache is None:
+        if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
+            raise ValueError("You must provide exactly one of Z_pad or N_X.")
+        if Z_pad is not None:
+            N_X = Z_pad * N_x + 1
+        _cache = _build_chirp_cache(N_x, N_out, N_X)
 
-    if Z_pad is not None: N_X = Z_pad*N_x + 1 #X before truncation
-
-    N_chirp = N_x + N_out - 1
-
-    bit_x = N_x % 2
-    bit_chirp = N_chirp % 2
+    bb = _cache['bb']
+    hh = _cache['hh']
+    trunc_buf = _cache['trunc_buf']
+    N_chirp = _cache['N_chirp']
     bit_out = N_out % 2
 
-    trunc_x = bluestein_pad(x, N_x, N_out)
-    
-    b = np.exp(-1*np.pi*(1/(N_X))*1j*np.arange(- (N_chirp//2), (N_chirp//2) + bit_chirp)**2)
-    h = np.exp(   np.pi*(1/(N_X))*1j*np.arange(- (N_out//2) - (N_x//2) , (N_out//2) + (N_x//2) + bit_chirp)**2)
-    h = np.roll(h, (N_chirp//2) + 1)
-    ft_h = np.fft.fft(h)
+    _bluestein_pad_into(trunc_buf, x, N_x, N_out)
 
-    zoom_fft = np.outer(b, b) * (np.fft.ifft2( np.fft.fft2(np.outer(b, b) * trunc_x) * np.outer(ft_h, ft_h) ) )
-    zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, 
-                        (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
-    return zoom_fft
+    np.multiply(bb, trunc_buf, out=trunc_buf)
+    tmp = scipy.fft.fft2(trunc_buf, workers=-1)
+    np.multiply(tmp, hh, out=tmp)
+    tmp = scipy.fft.ifft2(tmp, workers=-1)
+    np.multiply(bb, tmp, out=tmp)
+
+    s = slice((N_chirp // 2) - (N_out // 2),
+              (N_chirp // 2) + (N_out // 2) + bit_out)
+    return tmp[s, s].copy()
 
 def zoom_fft_2d(x, N_x, N_out, Z_pad=None, N_X=None):
     """
-    Compute a zoomed 2D FFT using the Bluestein algorithm.
-    The input x is centered. 
-    
+    Compute a zoomed 2D FFT using the Bluestein algorithm with phase correction.
+    The input x is centered.
+
     Parameters
     ----------
     x : np.ndarray
@@ -212,20 +274,21 @@ def zoom_fft_2d(x, N_x, N_out, Z_pad=None, N_X=None):
 
     Returns
     -------
-    out_fac: np.ndarray
+    np.ndarray
         Zoomed FFT of the input signal (complex numpy array).
     """
     if (Z_pad is None and N_X is None) or (Z_pad is not None and N_X is not None):
         raise ValueError("You must provide exactly one of Z_pad or N_X.")
     if Z_pad is not None:
-        N_X = Z_pad*N_x + 1 #X before truncation
-        phase_shift = (N_x*Z_pad)//2 + 1 
-        uncorrected_output_field = zoom_fft_2d_mod(x, N_x, N_out, Z_pad=Z_pad)
+        N_X = Z_pad * N_x + 1
+        phase_shift = (N_x * Z_pad) // 2 + 1
     else:
-        phase_shift = float((N_X - 1) //2 + 1)
-        uncorrected_output_field = zoom_fft_2d_mod(x, N_x, N_out, N_X=N_X)
-    out_fac = np.exp ( np.arange(-(N_out//2), (N_out//2) + 1) * (1j * 2 * np.pi * phase_shift * (1 / (N_X)) ) )
-    return uncorrected_output_field*np.outer(out_fac, out_fac)
+        phase_shift = float((N_X - 1) // 2 + 1)
+
+    uncorrected = zoom_fft_2d_mod(x, N_x, N_out, N_X=N_X)
+    out_fac = np.exp(np.arange(-(N_out // 2), (N_out // 2) + 1)
+                     * (1j * 2 * np.pi * phase_shift / N_X))
+    return uncorrected * np.outer(out_fac, out_fac)
 
 def four_chunked_zoom_fft_mod(x_file, N_x, N_out, N_X):
     """
@@ -377,10 +440,10 @@ def zoom_fft_quad_out_mod(x, N_x, N_out, N_X, chunk=0):
 
     h1 = np.roll(h1, (N_chirp//2) + 1)
     h2 = np.roll(h2, (N_chirp//2) + 1)
-    ft_h1 = np.fft.fft(h1)
-    ft_h2 = np.fft.fft(h2)
+    ft_h1 = scipy.fft.fft(h1)
+    ft_h2 = scipy.fft.fft(h2)
 
-    zoom_fft =  (np.fft.ifft2( np.fft.fft2(np.outer(b, b) * trunc_x) * np.outer(ft_h1, ft_h2) ) )
+    zoom_fft =  (scipy.fft.ifft2( scipy.fft.fft2(np.outer(b, b) * trunc_x) * np.outer(ft_h1, ft_h2) ) )
     zoom_fft = zoom_fft[(N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out, 
                         (N_chirp//2) - (N_out//2) : (N_chirp//2) + (N_out//2) + bit_out]
     zoom_fft *= np.outer(c1, c2)
@@ -520,10 +583,10 @@ def chunk_out_zoom_fft_2d_mod(x, N_x, N_out_x, N_out_y, start_chunk_x, start_chu
 
     h1 = np.roll(h1, (N_chirp_x//2) + bit_chirp_x)
     h2 = np.roll(h2, (N_chirp_y//2) + bit_chirp_y)
-    ft_h1 = np.fft.fft(h1)
-    ft_h2 = np.fft.fft(h2)
+    ft_h1 = scipy.fft.fft(h1)
+    ft_h2 = scipy.fft.fft(h2)
 
-    zoom_fft =  (np.fft.ifft2( np.fft.fft2(np.outer(b1, b2) * trunc_x) * np.outer(ft_h1, ft_h2) ) )
+    zoom_fft =  (scipy.fft.ifft2( scipy.fft.fft2(np.outer(b1, b2) * trunc_x) * np.outer(ft_h1, ft_h2) ) )
     zoom_fft = zoom_fft[(N_chirp_x//2) - (N_out_x//2) : (N_chirp_x//2) + (N_out_x//2) + bit_out_x, 
                         (N_chirp_y//2) - (N_out_y//2) : (N_chirp_y//2) + (N_out_y//2) + bit_out_y]
     zoom_fft *= np.outer(c1, c2)
@@ -622,25 +685,22 @@ def chunk_in_zoom_fft_2d_mod(x_file, N_x, N_out, N_X, N_chunk=4):
             zoom_fft_out +=  ft_x * np.outer(out_fac_1, out_fac_2)
     return zoom_fft_out
 
-def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk = 4):
+def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk=4):
     """
-    Compute a 2D FFT using the Bluestein algorithm over x_file for different wl_z. 
-    Experimental chunked version - computed in chunks of the input (x_file).
+    Compute a chirp-modulated 2D zoom FFT in chunks of the input.
 
     This version is useful for Fresnel diffraction, when you need to multiply
     your input x_file by a chirp which depends on lambda*z, before computing the
-    zoom FFT. This function is useful when you need to do this over different
-    lambda*z (wl_z).
+    zoom FFT.
 
-    Define x_file as: 
-    arr = np.memmap('x.dat', dtype=np.complex128,mode='w+',shape=(N_x, N_x))
-    arr[:] = x
-    arr.flush()
+    v2 optimisations: chirp cache built once and reused for all same-size
+    chunks, pre-allocated buffer, multithreaded scipy FFTs, in-place multiplies,
+    explicit memory cleanup per chunk.
 
     Parameters
     ----------
     x_file : str
-        Path to the input signal as a memmap object.
+        Path to the input signal as a memmap file (float32).
     wl_z : float
         Wavelength times distance (lambda * z).
     d_x : float
@@ -649,9 +709,9 @@ def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk =
         Size in one dimension of x_file.
     N_out : int
         Number of output points of FFT needed.
-    N_X : int
+    N_X : float
         Phantom zero-padded length of input x_file for desired output sampling
-        (see the fresnel class to calculate this).
+        (see the FresnelSingle class to calculate this).
     N_chunk : int, optional
         Number of chunks along one axis (default is 4).
 
@@ -660,32 +720,66 @@ def chunk_in_chirp_zoom_fft_2d_mod(x_file, wl_z, d_x, N_x, N_out, N_X, N_chunk =
     zoom_fft_out : np.ndarray
         The 2D FFT over the chosen output region (np.complex128).
     """
-    x_vals = np.linspace(-(N_x//2), (N_x//2), N_x)
-    chunk = (N_x//N_chunk) + 1 - ((N_x//N_chunk)%2)
+    x_vals = np.linspace(-(N_x // 2), (N_x // 2), N_x)
+    chunk_sz = (N_x // N_chunk) + 1 - ((N_x // N_chunk) % 2)
+
     zoom_fft_out = np.zeros((N_out, N_out), dtype=np.complex128)
     x_trunc = np.memmap(x_file, dtype=np.float32, mode='r', shape=(N_x, N_x))
+
+    cache = _build_chirp_cache(chunk_sz, N_out, N_X)
+    last_cache = None
+
     for i in range(N_chunk):
         for j in range(N_chunk):
-            sec_N_x = sec_N_y = chunk
-            if i == N_chunk-1:
-                sec_N_x = N_x - i*sec_N_x
-                sec_N_x += 1 - (sec_N_x%2)
-            if j == N_chunk-1:
-                sec_N_y = N_x - j*sec_N_y
-                sec_N_y += 1 - (sec_N_y%2)
-            print (i, j)
-            x = x_trunc[i*chunk : min(i*chunk + sec_N_x, N_x), j*chunk : min(j*chunk + sec_N_y, N_x)]
-            index_x = np.arange(i*chunk, min(i*chunk + sec_N_x, N_x))
-            index_y = np.arange(j*chunk, min(j*chunk + sec_N_y, N_x))
+            sec_N_x = sec_N_y = chunk_sz
+            if i == N_chunk - 1:
+                sec_N_x = N_x - i * chunk_sz
+                sec_N_x += 1 - (sec_N_x % 2)
+            if j == N_chunk - 1:
+                sec_N_y = N_x - j * chunk_sz
+                sec_N_y += 1 - (sec_N_y % 2)
+
+            logger.debug("chunk (%d, %d)", i, j)
+
+            x = x_trunc[i * chunk_sz: min(i * chunk_sz + sec_N_x, N_x),
+                         j * chunk_sz: min(j * chunk_sz + sec_N_y, N_x)]
+
+            index_x = np.arange(i * chunk_sz, min(i * chunk_sz + sec_N_x, N_x))
+            index_y = np.arange(j * chunk_sz, min(j * chunk_sz + sec_N_y, N_x))
             xx = x_vals[index_x][:, np.newaxis] * d_x
             yy = x_vals[index_y][np.newaxis, :] * d_x
+
             if sec_N_x != sec_N_y:
                 sec_N_x = sec_N_y = max(sec_N_x, sec_N_y)
-            x = np.pad(x.astype(np.complex128) * np.exp(1j * (np.pi /wl_z) * (xx**2 + yy**2)), [(0, sec_N_x-np.shape(x)[0]), (0, sec_N_y-np.shape(x)[1])], mode='constant')
-            ph1 = - x_vals[i*chunk + (sec_N_x//2)]
-            ph2 = - x_vals[j*chunk + (sec_N_y//2)]
-            out_fac_1 = np.exp ( np.arange(-(N_out//2), (N_out//2) + N_out%2) * (1j * 2 * np.pi * ph1 * (1 / (N_X)) ) )
-            out_fac_2 = np.exp ( np.arange(-(N_out//2), (N_out//2) + N_out%2) * (1j * 2 * np.pi * ph2 * (1 / (N_X)) ) )
-            ft_x = zoom_fft_2d_mod(x, sec_N_x, N_out, N_X = N_X)
-            zoom_fft_out +=  ft_x * np.outer(out_fac_1, out_fac_2)
+
+            chirped = x.astype(np.complex128) * np.exp(
+                1j * (np.pi / wl_z) * (xx ** 2 + yy ** 2))
+            x_padded = np.pad(chirped,
+                              [(0, sec_N_x - chirped.shape[0]),
+                               (0, sec_N_y - chirped.shape[1])],
+                              mode='constant')
+            del chirped
+
+            use_cache = cache if sec_N_x == chunk_sz else None
+            if use_cache is None:
+                if last_cache is not None and last_cache['N_x'] == sec_N_x:
+                    use_cache = last_cache
+                else:
+                    last_cache = _build_chirp_cache(sec_N_x, N_out, N_X)
+                    use_cache = last_cache
+
+            ft_x = zoom_fft_2d_mod(x_padded, sec_N_x, N_out, N_X=N_X,
+                                   _cache=use_cache)
+            del x_padded
+
+            ph1 = -x_vals[i * chunk_sz + (sec_N_x // 2)]
+            ph2 = -x_vals[j * chunk_sz + (sec_N_y // 2)]
+            out_fac_1 = np.exp(np.arange(-(N_out // 2), (N_out // 2) + N_out % 2)
+                               * (1j * 2 * np.pi * ph1 / N_X))
+            out_fac_2 = np.exp(np.arange(-(N_out // 2), (N_out // 2) + N_out % 2)
+                               * (1j * 2 * np.pi * ph2 / N_X))
+
+            zoom_fft_out += ft_x * np.outer(out_fac_1, out_fac_2)
+            del ft_x
+
     return zoom_fft_out

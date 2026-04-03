@@ -28,7 +28,7 @@ def pupil_to_ccd(wl, focal_length_lens, pupil_field, pupil_mask, dt, dp,  N_t, N
     out_field_ss, dp = fraunhofer.zoom_fraunhofer(field_aperture_ss, N_pix)
     return out_field_ss
 
-def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001, dx = 0.01, dt = 0.03, chunk = 1):
+def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001, dx = 0.01, dt = 0.03, chunk = 1, use_gpu=None):
     """
     Propagate starshade mask to the pupil using chunking of the input mask for generating an incoherent PSF basis.
 
@@ -52,6 +52,8 @@ def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001,
         Telescope sampling, must be less than `(1 / dx) * wl * dist_ss_t`.
     chunk : bool
         If True, use memory chunked FFT. If using chunk, a memmap file must be passed.
+    use_gpu : bool or None, optional
+        If None (default), auto-detect GPU. If True, require GPU. If False, force CPU.
 
     Returns
     -------
@@ -73,9 +75,9 @@ def source_field_to_pupil(ss_mask_fname, wl, dist_ss_t,  N_x = 6401, N_t = 1001,
     field_free_prop = source_prop.farfield(dt, N_t, dist_ss_t)
 
     field_incident_telescope_compl = np.zeros((N_t, N_t), dtype=np.complex128)
-    fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl)
+    fresnel = FresnelSingle(dx, dt, N_x, dist_ss_t, wl, use_gpu=use_gpu)
     if chunk:
-        field_incident_telescope_compl, dt = fresnel.nchunk_zoom_fresnel_single_fft(ss_mask_fname, N_t, N_chunk = 4)
+        field_incident_telescope_compl, dt = fresnel.nchunk_zoom_fresnel_single_fft(ss_mask_fname, N_t)
     else:
         starshade_qu = np.load(ss_mask_fname)
         starshade = qu_mask_to_full(starshade_qu['grey_mask'])

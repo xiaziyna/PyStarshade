@@ -59,11 +59,44 @@ class FresnelSingle(Fresnel):
     -------------
     Fresnel
     """
-    def __init__(self, d_x, d_f, N_in, z, wavelength):
+    def __init__(self, d_x, d_f, N_in, z, wavelength, use_gpu=None):
         super().__init__(d_x, N_in, z, wavelength)
         self.d_f = d_f
         self.ZP = self.calc_zero_padding()
         self.N_X = self.calc_phantom_length()
+        self._use_gpu = self._resolve_gpu(use_gpu)
+
+    @staticmethod
+    def _resolve_gpu(use_gpu):
+        """
+        Determine whether to use GPU acceleration.
+
+        Parameters
+        ----------
+        use_gpu : bool or None
+            If None, auto-detect CUDA availability.
+            If True, require CUDA (raises RuntimeError if unavailable).
+            If False, use CPU.
+
+        Returns
+        -------
+        bool
+            Whether GPU acceleration will be used.
+        """
+        if use_gpu is False:
+            return False
+        try:
+            from pystarshade.diffraction.bluestein_fft_gpu import _CUDA_AVAILABLE
+        except ImportError:
+            if use_gpu is True:
+                raise RuntimeError(
+                    "use_gpu=True but PyTorch is not installed. "
+                    "Install with: pip install pystarshade[gpu]")
+            return False
+        if use_gpu is True and not _CUDA_AVAILABLE:
+            raise RuntimeError(
+                "use_gpu=True but no CUDA device is available.")
+        return _CUDA_AVAILABLE
 
     def calc_phantom_length(self):
         """
@@ -123,12 +156,15 @@ class FresnelSingle(Fresnel):
         quad_out_fac = np.exp(1j * self.k * self.z) * np.exp(1j * self.k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z) 
         return quad_out_fac * output_field, df
 
-    def nchunk_zoom_fresnel_single_fft(self, x_file, N_out, N_chunk = 4):
+    def nchunk_zoom_fresnel_single_fft(self, x_file, N_out, N_chunk=None):
         """
         Single FFT Fresnel diffraction calculated using an N_chunk*N_chunk -way chunked
         Bluestein FFT (caps peak memory usage). Use me if the mask is big!
 
-        Define x_file as: 
+        If ``use_gpu`` was set (or auto-detected) at construction time,
+        this method uses the GPU-accelerated Bluestein FFT.
+
+        Define x_file as:
         arr = np.memmap('x.dat', dtype=np.complex128,mode='w+',shape=(N_x, N_x))
         arr[:] = x
         arr.flush()
@@ -140,7 +176,7 @@ class FresnelSingle(Fresnel):
         N_out : int
             Number of output samples.
         N_chunk : int, optional
-            Number of chunks. Default is 4.
+            Number of chunks along each axis. Default is 8.
 
         Returns
         -------
@@ -148,7 +184,18 @@ class FresnelSingle(Fresnel):
             - np.ndarray: Propagated output field.
             - float: Output grid sampling.
         """
-        field = chunk_in_chirp_zoom_fft_2d_mod(x_file, self.wl_z, self.d_x, self.N_in, N_out, self.N_X, N_chunk = 4) * (self.d_x**2)
+        if N_chunk is None:
+            N_chunk = 8
+        if self._use_gpu:
+            from pystarshade.diffraction.bluestein_fft_gpu import (
+                chunk_in_chirp_zoom_fft_2d_mod_gpu)
+            field = chunk_in_chirp_zoom_fft_2d_mod_gpu(
+                x_file, self.wl_z, self.d_x, self.N_in, N_out, self.N_X,
+                N_chunk=N_chunk) * (self.d_x ** 2)
+        else:
+            field = chunk_in_chirp_zoom_fft_2d_mod(
+                x_file, self.wl_z, self.d_x, self.N_in, N_out, self.N_X,
+                N_chunk=N_chunk) * (self.d_x ** 2)
         df = self.max_freq*self.wl_z / self.N_X
         out_xy = grid_points(N_out, N_out, dx = df)
         quad_out_fac = np.exp(1j * self.k * self.z) * np.exp(1j * self.k / (2 * self.z) * (out_xy[0]**2 + out_xy[1]**2)) / ( 1j * self.wl_z)

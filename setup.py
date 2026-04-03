@@ -17,6 +17,9 @@ setup(
         "pytest",
         "h5py"
     ],
+    extras_require={
+        "gpu": ["torch"],
+    },
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
