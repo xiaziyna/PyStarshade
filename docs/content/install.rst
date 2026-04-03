@@ -21,13 +21,7 @@ Instead install the package from source, in editable mode and use `git lfs <http
     git lfs pull
     pip install -e .
 
-To include GPU-accelerated propagation (requires NVIDIA GPU with CUDA), add the gpu extra to either install method:
-
-.. code-block:: bash
-
-    pip install pystarshade[gpu]
-
-or from source:
+For GPU-accelerated propagation (requires NVIDIA GPU with CUDA):
 
 .. code-block:: bash
 
